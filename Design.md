@@ -1,6 +1,6 @@
 # 测试生成 Agent 技术设计
 
-> 当前进度：A1、A2、A3 已完成。当前提供配置检查 CLI、DeepSeek HTTP 客户端及可复现的 A3 验证入口；真实最小 API 请求、手写样例 pytest 和覆盖率 JSON 已验证。尚未实现测试生成、通用执行工具或 Agent 反馈循环；本文其余任务接口、状态和输出目录仍是后续实现约定。手写样例测试不是模型生成结果。
+> 当前进度：A1、A2、A3、B1 已完成。当前提供配置检查 CLI、DeepSeek HTTP 客户端、A3 验证入口及模块间的数据契约；真实最小 API 请求、手写样例 pytest 和覆盖率 JSON 已验证。尚未实现测试生成、通用执行工具或 Agent 反馈循环；本文其余任务接口、状态和输出目录仍是后续实现约定。手写样例测试不是模型生成结果。
 
 ## 1. 范围与验收（A1）
 
@@ -268,8 +268,119 @@ AgentDev/
 
 Agent 自身测试扩充至 **33 项并全部通过**，新检查覆盖最小请求、实际用量读取、认证/余额/限流失败、空/截断/错误响应和子进程环境隔离；这些自动测试使用 MockTransport，不发送 API 请求。真实 API 验收来自本节单独记录的服务响应。
 
-阶段 A 的范围、环境和真实 API/工具验证已完成。B1 数据结构、B2 LLM 生成适配、B3 Prompt 以及后续 Agent 流程仍未实现；本次没有勾选后续业务功能。
+阶段 A 的范围、环境和真实 API/工具验证已完成。B1 的后续验收记录见第 4 节；B2 LLM 生成适配、B3 Prompt 以及后续 Agent 流程仍未实现。
 
-## 4. 后续设计章节
+## 4. 模块间数据结构（B1）
+
+### 4.1 核心数据契约
+
+实现位置：`src/testgen_agent/models.py`，沿用已验证的 pydantic 2.13.5，不增加依赖。下表中的生产/消费关系是后续模块必须遵守的接口，当前完成的是类型、结构校验和序列化。
+
+| 核心结构 | 主要字段 | 生产方 → 消费方 |
+|---|---|---|
+| `SourceInfo` | `source_path`、`source_code`、`encoding`、`functions`、`imports`、`branches`；函数信息含名称、签名、docstring 和起止行 | C1 源码工具 → Prompt / 控制器 |
+| `TestPlan` | `target_functions`、`oracle_mode`、`scenarios`；场景含 ID、目标函数、类别、参数、预期行为及依据 | B2/B3 模型输出 → 生成校验 / 反馈上下文 |
+| `GeneratedTests` | `plan`、`code`、`mappings`、`assumptions`、`questions` | B2 适配层校验后的模型内容 → C2 候选写入 / 控制器 |
+| `ExecutionResult` | `kind`、`exit_code`、收集/执行/各结局计数、stdout/stderr、超时、日志截断及耗时 | D1 执行工具 → 控制器 / 报告 |
+| `CoverageResult` | `target_file`、可用状态、覆盖/总语句及分支、缺失行/弧、采集错误；百分比由计数计算 | D2 覆盖工具 → 控制器 / 报告 |
+| `AgentState` | 原始 `request`、源码和行为说明、依据模式、当前轮次、历史候选、最佳可用轮次、下一步动作、停止原因、问题、调用数和用量 | 宿主控制器维护 → 下一轮上下文 / 报告 |
+| `FinalReport` | `schema_version`、任务状态、停止原因、输入、所有轮次、选定轮次、最终测试/轨迹路径、未解决问题、调用数及用量；`metrics` 从选定轮次读取 | 宿主控制器 → G2 Markdown/JSON 报告 |
+
+契约的数据流如下；实际生成、执行和决策流程仍由后续阶段实现：
+
+```mermaid
+flowchart LR
+    I[TaskInput] --> S[SourceInfo]
+    S --> G[TestPlan / GeneratedTests]
+    G --> T[ExecutionResult / CoverageResult]
+    G --> R[CandidateRound]
+    T --> R
+    R --> A[AgentState]
+    A --> F[FinalReport]
+```
+
+辅助类型将含义明确的记录独立建模：`FunctionInfo`、`ImportInfo`、`SourceBranch`、`ScenarioInput`、`ExpectedBasis`、`TestScenario`、`TestCaseMapping`、`BranchArc`、`CandidateRound`、`Issue`、`TokenUsage`、`ReportMetrics`。`TaskInput` 保留输入和运行预算，`ModelInfo.from_config()` 只提取服务商、模型、地址及请求超时，不包含 Key。
+
+### 4.2 模型内容与工具实测结果分离
+
+模型生成内容统一按 `GeneratedTests` 校验。它的根字段只有计划、代码、对应关系、假设和疑问；不接受执行结果、覆盖率、实际通过数、最终状态、调用次数或输出路径。嵌套对象也禁止额外字段，不能通过场景参数对象夹带指标字段。
+
+场景参数以 JSON 可表达的值记录：`args` 为位置参数序列，`kwargs` 为参数名到值的映射。正常、边界、异常、分支场景使用固定类别；预期依据必须标记为说明规格、docstring 或当前实现假设，并给出具体说明。特征测试模式的场景只能标记当前实现假设。
+
+计划目标、场景 ID 和测试函数对应关系需要一致：目标和场景 ID 唯一，场景函数属于计划目标，映射中的 ID 恰好覆盖计划场景，一个测试函数可以通过参数化对应多个场景。映射名须为 `test_` 开头的 Python 标识符。源码元数据的目标函数限定 1–5 个，名称不重复，行号在源码范围内。
+
+全部预期无法确定时，允许返回 `code = null`、空映射和非空 `questions`，保留疑问而不编造测试。返回代码时必须有非空计划及完整映射。测试代码的 AST、导入、有效断言及映射函数是否真实存在仍在 C2 校验。
+
+字段分离不能证明数据实际来自一次工具调用。B2 只解析模型的 `GeneratedTests`；D 阶段必须从真实工具返回值构造 `ExecutionResult` / `CoverageResult`，宿主负责其来源与对应轮次。
+
+### 4.3 执行结果的口径和约束
+
+计数使用非负严格整数，不将字符串、布尔值或小数转换成计数。未观测到的计数为 `null`，超时或进程未启动时不能默认填写“通过 0 条”来假装已取得统计。
+
+`kind` 分别表示 `passed`、`assertion_failed`、`execution_error`、`collection_error`、`internal_error`、`usage_error`、`interrupted`、`no_tests`、`timeout`、`launch_error`。普通 pytest 结果与对应退出码保持一致；超时类型和 `timed_out` 标志必须相符，进程未启动时退出码为 `null`，且不允许报告非零测试项计数。
+
+- `collected`：收集到的不同测试项数，参数化实例分别计数。
+- `executed`：实际进入 call 阶段的不同测试项数，由工具独立观测；setup 失败和纯跳过不计入，call 阶段发生的 xfail 可计入。
+- `passed`、`failed`、`errors`、`skipped`、`xfailed`、`xpassed`：结束运行时的互斥最终结局。setup/teardown 错误优先记为 errors，其他诊断保留在日志；不能将一个测试的 call 通过与 teardown 错误重复计为两个结局。
+- 对 `passed` / `assertion_failed` / `execution_error` 的完整执行，所有计数必须已知，结局合计等于收集数。收集错误等非完整执行允许计数未知；其 errors 可表示收集错误，不套用测试项合计约束。
+
+`runnable` 和 `all_passed` 是只读派生字段。可运行要求无超时/框架错误、确实执行非空普通测试；断言失败仍可运行。仅 skip/xfail/xpass 的候选不能成为可用结果；混合跳过、xfail 或 xpass 的候选不能达到全部通过验收。全通过还要求非空测试、所有收集项实际通过、无失败/错误/绕过。
+
+### 4.4 覆盖率与未知指标
+
+`CoverageResult.status = available` 时，语句和分支计数必须已知，已覆盖数量不能超过总数量，缺失位置不得重复，缺失数量须与总数减覆盖数一致。缺失行号是源码位置，不能错误地以“语句数”为行号上限。`BranchArc` 使用有符号行号，保留工具可能给出的负数退出弧，拒绝 0 行号。
+
+采集不可用时使用 `status = unavailable` 和错误原因，计数均为 `null`，不填猜测值或伪造缺失位置。行/分支百分比是只读计算字段；分母为 0 时返回 `null`。`meets_target` 按 A1 的 90% 行、80% 分支策略计算；无分支时不应用分支阈值，行分母为 0 时不能达到目标。
+
+覆盖数据可属于断言失败的候选，因此单独记录在同一轮快照中；报告同时保留执行失败信息。实际目标文件过滤、新数据隔离及采集错误处理由 D2 完成。
+
+### 4.5 历史快照与状态引用
+
+`AgentState.history` 是 `CandidateRound` 的有序元组，轮次从 1 连续编号，长度不超过输入预算；`current_round` 与历史长度一致，初始状态为 0。可以先保存待处理的轮次快照，再以经校验的新快照补入生成、执行和覆盖结果。尚未执行时使用 `execution = null`，未采集时使用 `coverage = null`。
+
+执行结果必须关联已生成、未被候选校验判定无效的代码；覆盖记录需要同轮执行记录。生成计划的函数须来自已分析源码，依据模式不得改变原始任务模式。最佳可用轮次必须引用真实历史中的可运行候选，不自动选择或重新排序候选。
+
+`Issue` 保存问题类别、摘要、证据及可选的轮次/场景引用；提供引用时检查其存在性。后续候选无效时，历史保留其校验错误，可以继续指向上一轮可用候选；规格失败的执行和疑似缺陷证据也保留在快照中。停止原因已设置时，下一步动作只能为 `finish` 或 `request_review`。
+
+模型禁止直接属性赋值，历史及结构化列表使用元组；`updated(**changes)` 会重新校验修改后的完整对象。JSON 参数内部的 dict/list 仍可变，后续 E 阶段归档应保存独立快照，不能依赖浅层冻结实现深层不可变。不要以绕过校验的 `model_construct()` 或 `model_copy(update=...)` 更新任务状态。
+
+### 4.6 最终报告与序列化
+
+`FinalReport` 使用版本标识 `1.0`，要求选定轮次和最终文件路径同时存在或同时为空。选定轮次必须可用；报告的指标从该轮执行/覆盖记录读取，调用次数来自宿主，Token 用量未知时使用 `null`，已知组件合计须一致。
+
+状态自洽校验包括：
+
+- `completed`：选定候选全部通过、覆盖达到目标、提供轨迹路径、没有未解决问题/疑问，停止原因为覆盖目标达成。
+- `partial`：存在可用最终候选，且没有需要人工复核的行为问题；可保留失败的后续候选及运行限制。
+- `needs_review`：保留疑似源码缺陷/规格歧义问题，或选定候选的未解决疑问；在规格冲突导致尚未执行时，也可以没有最终候选。
+- `failed`：没有历史可用候选，也没有需要优先人工复核的证据；最终测试路径为空。
+
+这些校验保证字段和值的关系一致。实际失败归因、状态选择、候选排序和停止决策仍由 E 阶段控制器执行；文件是否真实落盘由工具和报告模块验证，数据模型本身不读写输出文件。
+
+所有核心结构支持 JSON Schema：`model_json_schema(mode="validation")` 用于输入校验，`mode="serialization"` 描述含只读派生指标的输出。模型生成边界使用 `GeneratedTests` 的输入 Schema。
+
+```python
+# 从模型响应解析生成内容（实际 API 适配在 B2 实现）
+generated = GeneratedTests.model_validate_json(response_text)
+# 保存可重新校验的原始字段快照，不重复存储派生指标
+snapshot = state.canonical_json()
+restored = AgentState.model_validate_json(snapshot)
+# 输出报告时包含从同一份结果计算的只读 metrics / 百分比
+report_data = report.model_dump(mode="json")
+```
+
+`canonical_json()` 采用 `round_trip=True` 排除派生字段，路径转换为字符串、元组转换为 JSON 数组并保留中文；恢复时重新执行结构校验。普通报告输出包含派生字段，这些字段不作为输入接收，避免写入与计数不一致的百分比。实现遵循 [Pydantic 序列化](https://docs.pydantic.dev/latest/concepts/serialization/) 和 [模型校验](https://docs.pydantic.dev/latest/concepts/validators/) 接口，已针对本地锁定版本验证。
+
+### 4.7 B1 验收记录
+
+2026-09-26 完成七个核心模型、辅助记录、动作/停止原因/状态枚举及公共模型配置快照。新增 **60 项数据契约测试**，加上原有 33 项，总计 **93 项全部通过**；以 `-W error` 执行，无警告，`pip check` 通过。
+
+验收覆盖：七类 JSON Schema 和原始字段序列化往返、中文保留、非法/额外字段、生成结果与工具指标隔离、场景映射、严格计数、执行失败及绕过、零分母与覆盖不可用、历史预算和引用、退回旧候选、规格失败需复核、最终状态及指标一致性。测试中的任务和缺陷证据均为合成数据，不宣称已执行 Agent 端到端任务。
+
+另外将已有 A3 的真实 JUnit XML、覆盖率 JSON 和服务用量读入对应数据模型，核对三条测试通过、2/2 行覆盖、无分支和 13 tokens；新契约与已保存工具证据一致，验证未发送 API 请求。A3 原始产物及本地 `.env` 未修改。
+
+B1 仅固定并验证模块间的数据结构；B2/B3、C/D/E 和正式报告输出仍按任务清单继续实施。
+
+## 5. 后续设计章节
 
 模块架构、数据结构、Prompt、工具接口、重试预算、反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。

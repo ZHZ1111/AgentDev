@@ -25,7 +25,7 @@ def _is_placeholder(value: str) -> bool:
 
 
 class AppConfig(BaseModel):
-    """A2 settings; task input/result schemas will be defined in B1."""
+    """A2 settings; task input/result contracts are defined in models.py."""
 
     model_config = ConfigDict(
         frozen=True, extra="forbid", validate_default=True, hide_input_in_errors=True,

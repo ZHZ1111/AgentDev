@@ -2,7 +2,7 @@
 
 课程项目：为小型 Python 纯函数生成并执行 pytest 测试，根据失败及覆盖率反馈进行有限迭代。LLM 服务商选用 DeepSeek。
 
-当前完成 A1/A2/A3：输入输出及状态设计、三个源码/行为说明样例、工程骨架、配置检查、真实 DeepSeek 最小请求和手写 pytest/coverage 环境验证。**尚未实现测试生成或反馈循环。** 设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
+当前完成 A1/A2/A3/B1：输入输出及状态设计、三个源码/行为说明样例、工程骨架、配置检查、真实 DeepSeek 最小请求、手写 pytest/coverage 环境验证，以及模块间的数据模型。**尚未实现测试生成或反馈循环。** 设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
 
 ## 安装（Windows PowerShell）
 
@@ -54,7 +54,9 @@ DeepSeek 官方示例使用服务地址 `https://api.deepseek.com`、Bearer 认�
 
 缺少 Key、未替换占位符、非法 URL、非整数或超出范围的轮次/超时都会报配置错误；错误提示不包含被拒绝的配置值。不要通过命令行传入明文 Key。`.env`、虚拟环境、缓存及 `outputs/` 已加入忽略规则。
 
-当前没有 `--source` / `--spec` 运行接口；任务清单中的端到端命令仍是后续设计，不是已实现命令。`models`、`prompts`、`agent`、`reporting` 和源码/执行工具模块是明确标记阶段的骨架。
+当前没有 `--source` / `--spec` 运行接口；任务清单中的端到端命令仍是后续设计，不是已实现命令。`models.py` 已实现 B1 数据契约；`prompts`、`agent`、`reporting` 和源码/执行工具模块仍是注明阶段的骨架。
+
+`models.py` 提供 `SourceInfo`、`TestPlan`、`GeneratedTests`、`ExecutionResult`、`CoverageResult`、`AgentState`、`FinalReport` 及辅助类型。生成内容与工具实测结果分开；百分比和报告指标由计数及选定候选计算，未知值使用 `null`。接口、状态引用和序列化约定见 Design 第 4 节。当前共 93 项自身测试通过，其中 B1 新增 60 项；自动测试不发送真实 API 请求。
 
 ## A3 环境验证
 
