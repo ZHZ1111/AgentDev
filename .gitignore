@@ -1,0 +1,29 @@
+# Secrets (keep the distributable placeholder example)
+.env
+.env.*
+!.env.example
+
+# Local Python environments and packaging
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Test caches and coverage intermediates
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage.json
+coverage.xml
+htmlcov/
+
+# Per-run artifacts and temporary workspaces
+outputs/
+.work/
+tmp/
+*.log

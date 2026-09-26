@@ -1,6 +1,6 @@
 # 测试生成 Agent 技术设计
 
-> 当前进度：A1「固定输入输出和成功条件」已完成。本文中的接口、状态和输出目录是后续实现必须遵守的设计约定；目前尚未实现 Agent、CLI、LLM 调用或覆盖率采集。样例验证使用人工核验的预期值，不是模型生成结果。
+> 当前进度：A1、A2、A3 已完成。当前提供配置检查 CLI、DeepSeek HTTP 客户端及可复现的 A3 验证入口；真实最小 API 请求、手写样例 pytest 和覆盖率 JSON 已验证。尚未实现测试生成、通用执行工具或 Agent 反馈循环；本文其余任务接口、状态和输出目录仍是后续实现约定。手写样例测试不是模型生成结果。
 
 ## 1. 范围与验收（A1）
 
@@ -26,7 +26,7 @@
 | `source_path` | 必填 | 已存在、可读的单个 `.py` 文件；按 Python 源码编码声明读取，必须通过语法检查并包含支持的目标函数。初版大小上限 64 KiB，超限报输入错误。 |
 | `spec_path` | 可选，默认无 | 已存在、可读的 UTF-8 文本或 Markdown 文件，初版大小上限 64 KiB；说明输入域、返回值、边界及异常。显式提供但不存在或不可读时应报错，不能静默忽略。 |
 | `output_dir` | 可选，默认 `outputs/` | 宿主程序在目录下创建唯一 `run_id` 子目录；不存在则创建，已有运行不覆盖。无法创建时报告输出错误。 |
-| `model_config` | 必填，后续由配置层读取 | 包含服务商 `provider`、实际可用的模型标识 `model`、服务地址 `base_url`（服务商可有默认值）、API Key 的环境变量名 `api_key_env`、请求超时 `request_timeout_seconds`（默认 60 秒）。服务商和模型不设未经验证的默认值；密钥不写入源码、报告或轨迹。配置来源及实际模型在 A2/A3 确定。 |
+| `model_config` | 必填，由配置层读取 | 包含服务商 `provider`、实际可用的模型标识 `model`、服务地址 `base_url`、API Key 的环境变量名 `api_key_env`、请求超时 `request_timeout_seconds`（默认 60 秒）。A2 按用户选择固定当前支持服务商为 DeepSeek，服务地址默认 `https://api.deepseek.com`；模型无默认值，须在 A3 验证实际权限。密钥不写入源码、报告或轨迹。配置来源见第 2 节。 |
 | `max_rounds` | 可选，默认 `3` | 整数，范围 `1..3`，含首轮；`1` 表示一次性生成并执行。0、负数或超过 3 都报输入错误，不静默修正。 |
 | `execution_timeout_seconds` | 可选，默认 `30` | 整数，范围 `1..300` 秒；限制单轮测试子进程运行时间，区别于模型请求超时。到期终止该次执行并记录超时。 |
 
@@ -122,8 +122,154 @@
 - 已准备三个源码文件和三个 UTF-8 行为说明，覆盖正常计算、多分支校验和明确规格缺陷。
 - 2026-09-26 使用本地 Python 3.13.9 做三个源码文件的语法/导入检查及 32 项行为核验（含整数子类、异常类型和已知缺陷确认）：正常计算与校验符合规格；折扣的 100 边界确实得到 100，违反预期 90。该偏差为有意保留的课程样例。核验前后源码 SHA-256 一致，未产生缓存或修改源码。
 
-本记录不替代 A3 的真实 API、pytest 和 coverage 验收；工程依赖及锁定版本仍待 A2/A3。
+本记录不替代 A3 的真实 API、样例 pytest 和 coverage 验收；A2 的工程环境和依赖验收见第 2 节。
 
-## 2. 后续设计章节
+## 2. 工程骨架与 DeepSeek 配置（A2）
+
+### 2.1 环境及依赖
+
+2026-09-26 在 Windows x64 上创建独立 `.venv`，使用 CPython **3.13.9**（虚拟环境内 pip 25.2）。项目元数据限定 `>=3.13,<3.14`，当前未宣称其他 Python 版本或平台已验证。
+
+| 依赖 | 已安装并验证的版本 | 职责 |
+|---|---|---|
+| httpx | 0.28.1 | DeepSeek API 的同步 HTTP 请求；离线测试使用 MockTransport |
+| pydantic | 2.13.5 | 配置类型、范围和必填项校验；后续用于模型响应结构校验 |
+| python-dotenv | 1.2.3 | 读取指定 UTF-8 `.env` 文件 |
+| pytest | 9.1.1 | Agent 自身测试及后续生成测试的执行框架 |
+| coverage | 7.16.1 | 后续目标文件行/分支覆盖率采集 |
+| setuptools / wheel | 84.0.0 / 0.48.0 | 构建及 editable 安装 |
+
+`pyproject.toml` 固定直接与构建依赖，`requirements.lock` 固定本次安装的 **21 个直接、传递和构建依赖**；不包含本地项目或 pip。安装顺序为先安装锁文件，再以 `--no-index --no-build-isolation --no-deps -e .` 安装本地工程，防止构建阶段另行解析依赖。锁文件是已验证环境的版本快照，未做跨平台或包哈希锁定；具体复现命令见 README。
+
+pytest 默认只收集 `tests/`，防止把被测样例或未来生成测试混入 Agent 自身验证。`pyproject.toml` 中的 coverage 设置针对 Agent 自身；D 阶段的执行工具必须另行限定本次 `subject.py`，不能沿用 Agent 的统计范围。
+
+### 2.2 已建立模块与入口
+
+```text
+AgentDev/
+├── pyproject.toml / requirements.lock
+├── .gitignore / .env.example
+├── README.md / Design.md / TASK_CHECKLIST.md
+├── src/testgen_agent/
+│   ├── __init__.py / __main__.py
+│   ├── cli.py / config.py / llm_client.py
+│   ├── models.py / prompts.py / agent.py / reporting.py
+│   └── tools/
+│       ├── __init__.py
+│       ├── source_reader.py / code_analyzer.py / test_runner.py
+├── tests/test_config.py
+├── examples/                  # A1 的三个样例及说明
+└── evaluation/                # 后续评测目录
+```
+
+- `python -m testgen_agent` 和安装后的 `testgen-agent` 使用同一个 CLI 入口；当前实现 `--help`、`--version`、`--check-config` 及配置覆盖参数。
+- `config.py` 完成配置读取、校验与脱敏摘要，`llm_client.py` 提供配置驱动的 HTTP 客户端工厂；客户端创建不会发送请求。
+- `models`、`prompts`、`agent`、`reporting` 及源码/执行工具模块当前只有注明对应阶段的骨架，不包含模拟成功的业务实现。
+- `outputs/` 和临时工作目录由后续实际运行时创建，并由 `.gitignore` 排除；设计内容统一写入本文件，没有创建 `docs/scope.md`。
+
+### 2.3 配置来源与约束
+
+优先级：**命令行覆盖 > 进程环境变量 > 选定 `.env` 文件 > 默认值**。不搜索父目录，不通过 dotenv 修改 `os.environ`，不展开 `${...}`。支持 UTF-8 及 UTF-8 BOM；显式指定不存在的文件时报配置错误，默认 `.env` 不存在时仍可使用环境变量。
+
+| 配置项 | 环境变量 | 默认值 / 校验 |
+|---|---|---|
+| provider | `LLM_PROVIDER` | `deepseek`；当前拒绝其他服务商 |
+| model | `LLM_MODEL` | 无默认值；必须填写非占位符模型标识 |
+| base_url | `LLM_BASE_URL` | `https://api.deepseek.com`；有效 HTTP(S) 地址，不含用户名、密码、查询或片段 |
+| api_key_env | `LLM_API_KEY_ENV` | `DEEPSEEK_API_KEY`；必须为合法环境变量名 |
+| api_key | 上一行指定的变量 | 无默认值；缺失、空值、占位符或含空白的 Key 均拒绝 |
+| request_timeout_seconds | `LLM_REQUEST_TIMEOUT_SECONDS` | 60；1..600 的整数 |
+| max_rounds | `AGENT_MAX_ROUNDS` | 3；1..3 的整数 |
+| execution_timeout_seconds | `TEST_EXECUTION_TIMEOUT_SECONDS` | 30；1..300 的整数 |
+
+命令行可覆盖除 Key 明文外的上述设置；Key 只能来自文件或环境变量。Key 使用 `SecretStr`，从对象 repr 和序列化输出排除；公开摘要仅额外返回 `api_key_configured` 标志。配置错误按字段给提示，不输出原始被拒绝值。
+
+配置检查返回 0 表示本地校验通过；参数或配置错误返回 2。此状态只反映配置，不等同于 A1 的任务 `completed`。缺少运行模式时 CLI 提示使用 `--check-config` 或 `--help`；当前不提供源码输入或生成运行命令。Windows 非终端输出统一采用 UTF-8，以便重定向后正确读取中文。
+
+### 2.4 DeepSeek 接入约定
+
+按用户选择使用 DeepSeek 原生 HTTP 调用，不引入 Agent 框架。官方接口为 Bearer 认证的 `POST /chat/completions`，请求体包含模型及消息；本地客户端使用 httpx，后续由独立适配层组织请求及解析响应。[DeepSeek 首次调用说明](https://api-docs.deepseek.com/zh-cn/)、[Chat Completions 接口](https://api-docs.deepseek.com/api/create-chat-completion/)
+
+客户端从配置读取地址、密钥和超时，以相对路径 `chat/completions` 发起调用，保留可配置的 `/v1` 前缀，不跟随重定向；HTTPX 默认不自动重试。A2 不实现真实生成方法、退避策略或响应修复，这些预算和错误处理在 B2 中实现。
+
+`request_timeout_seconds` 当前设置 HTTPX 的连接、读、写及连接池等待超时，不表示整个响应的总墙钟时限；`execution_timeout_seconds` 将在 D 阶段用于测试子进程的总执行时限，两者不混用。
+
+模型名没有默认值，`.env.example` 中仅提供模型和密钥占位符，使用者必须替换。官方文档列出的模型只是选择参考，不能替代账号真实权限验证；最终模型标识、测试日期、延迟和用量在 A3 记录。A2 不保存真实 Key，不发送付费 API 请求。
+
+### 2.5 A2 验收记录
+
+- `.venv` 已创建；项目 editable 安装成功，两个入口的帮助/版本可用。
+- 直接及传递依赖已安装，21 项版本锁文件在当前环境解析通过，`pip check` 返回 `No broken requirements found`。
+- 24 项自身测试通过，覆盖文件/环境/命令行优先级、占位符与必填项、轮次/超时边界、敏感信息隐藏、UTF-8 重定向输出，以及离线 HTTP 客户端的路径、认证和超时设置。
+- `.gitignore` 排除 `.env`、虚拟环境、缓存、打包目录、运行目录及覆盖率中间文件；`.env.example` 保留为可分发配置示例。
+- 真正的模型访问、手写样例 pytest 和 coverage JSON 验证仍属于 A3，没有提前勾选。
+
+## 3. 真实 LLM 与测试环境验证（A3）
+
+### 3.1 验证方式与可复现入口
+
+新增 `python -m testgen_agent.smoke` 作为阶段 A3 的环境验证入口，与未来的测试生成 Agent 分开。其源码位于 `src/testgen_agent/smoke.py`；手写测试位于 `validation/handwritten/test_calculation.py`，不参与 `tests/` 的 Agent 自身测试收集。
+
+完整验证从当前 `.env` / 环境变量读取配置，也可通过 `--model` 覆盖模型；仅本地验证时使用 `--skip-llm`，不需要密钥。每次运行创建唯一 `outputs/a3/<run_id>/`，保存源码副本、手写测试副本、pytest JUnit XML、coverage JSON、工具输出和 `validation.json`。
+
+```powershell
+.\.venv\Scripts\python.exe -m testgen_agent.smoke
+# 仅验证本地工具，不发送 API 请求
+.\.venv\Scripts\python.exe -m testgen_agent.smoke --skip-llm
+```
+
+完整模式只发送 **1 次**非流式 Chat Completions 请求，不自动重试；提示为 `Reply with exactly OK and nothing else.`，关闭 thinking，`max_tokens=16`。本次验收条件为 HTTP 200、内容为 `OK`、结束原因 `stop`，且响应耗时不超过 30 秒。这是一条最小连通性请求，不上传项目源码，也不验证模型生成测试的质量。
+
+本地工具验证将 `examples/calculation.py` 复制为 `subject.py`，将手写测试复制为 `test_subject.py`。使用当前虚拟环境解释器运行 `coverage run --branch -m pytest` 并导出 JSON；显式传入独立的 pytest/coverage 配置和目标文件过滤，防止继承工程的 Agent 覆盖范围。测试子进程只接收必要 OS 环境变量，不接收 LLM Key，且限制测试执行及覆盖导出单次超时（默认 30 秒）。
+
+`--skip-llm` 成功时退出码为 0，但结果中 `llm.status = skipped`、`a3_passed = false`，不能据此宣称 A3 全部完成。完整模式必须两项验证均通过才返回 0；任一失败返回 1。输入参数无效返回 2。配置/API 错误不记录认证头、密钥、任意响应正文或异常原文。
+
+### 3.2 DeepSeek 实测记录
+
+测试日期：**2026-09-26 19:39（Asia/Shanghai）**，对应 UTC `2026-09-26T11:39:08.944869+00:00` 的运行开始时间。此前以本地 Key 查询 `GET /models`，HTTP 200，实际返回 `deepseek-flash` 和 `deepseek-v4-pro`；选用前者进行真实请求，成功后将本地忽略文件 `.env` 的模型占位符替换为 `deepseek-flash`，原 Key 未改动。
+
+| 项目 | 实测结果 |
+|---|---|
+| 服务商 / 地址 | DeepSeek / `https://api.deepseek.com` |
+| 请求模型 / 响应模型 | `deepseek-flash` / `deepseek-flash` |
+| 请求方式 | `POST /chat/completions`，非流式，关闭 thinking |
+| 请求次数 | Chat 请求 1 次；另有一次成功的模型列表查询 |
+| HTTP 状态 / 输出 | 200 / `OK` |
+| 结束原因 | `stop` |
+| 响应耗时 | 1.267 秒（含连接和响应读取） |
+| 实际用量 | prompt 12、completion 1、total 13 tokens |
+| 缓存用量 | hit 0、miss 12 tokens |
+
+用量直接取自服务返回值，未估算费用。本次耗时低于 30 秒的验证阈值，只代表这一次最小请求，不能证明较长测试生成请求也有相同延迟。Key、认证请求头和完整请求/响应未保存到可提交证据中。
+
+### 3.3 手写 pytest 与 coverage 实测记录
+
+手写三条测试：普通购买 `12 * 3 == 36`；零价格/零数量（含二者都为零）；大整数 `1000000 * 1000000 == 1000000000000`。均以 A1 的行为说明为依据，未使用 LLM 返回固定测试伪装成生成结果。
+
+| 项目 | 实测结果 |
+|---|---|
+| Python / pytest / coverage | 3.13.9 / 9.1.1 / 7.16.1 |
+| pytest / coverage JSON 导出退出码 | 0 / 0 |
+| 测试数 / 通过数 | 3 / 3 |
+| 失败 / 错误 / 跳过 | 0 / 0 / 0 |
+| 覆盖范围 | 仅 `subject.py`；不包含测试或 Agent |
+| 行覆盖 | 2 / 2，100%；执行行 4 和 9，缺失行为空 |
+| 分支覆盖 | 总分支 0，不适用；规范化结果使用 `null`，不写为 100% |
+| 原始源码 | 核验前后 SHA-256 一致，未修改 |
+
+原始 coverage JSON 对无分支情形可能给出百分比 100；验收摘要依据分母为 0 显示不适用。该样例只确认导入、执行及目标文件统计可用，不替代 D 阶段的失败、超时和多分支统计验证。
+
+### 3.4 保存的验收证据与进度
+
+- [evaluation/a3_validation.json](evaluation/a3_validation.json)：两项真实验证的结构化结果，含日期、模型、耗时、用量、版本及源码摘要；`a3_passed = true`。
+- [evaluation/a3_coverage.json](evaluation/a3_coverage.json)：该次工具导出的原始目标覆盖 JSON。
+- [evaluation/a3_pytest.xml](evaluation/a3_pytest.xml)：该次 pytest 的 JUnit XML。
+- 本地完整产物目录：`outputs/a3/20260926T113908Z-0315ebb0/`，由 Git 忽略；上述精选证据保留在可提交目录。
+
+Agent 自身测试扩充至 **33 项并全部通过**，新检查覆盖最小请求、实际用量读取、认证/余额/限流失败、空/截断/错误响应和子进程环境隔离；这些自动测试使用 MockTransport，不发送 API 请求。真实 API 验收来自本节单独记录的服务响应。
+
+阶段 A 的范围、环境和真实 API/工具验证已完成。B1 数据结构、B2 LLM 生成适配、B3 Prompt 以及后续 Agent 流程仍未实现；本次没有勾选后续业务功能。
+
+## 4. 后续设计章节
 
 模块架构、数据结构、Prompt、工具接口、重试预算、反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。

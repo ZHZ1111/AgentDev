@@ -1,0 +1,84 @@
+# 测试生成 Agent
+
+课程项目：为小型 Python 纯函数生成并执行 pytest 测试，根据失败及覆盖率反馈进行有限迭代。LLM 服务商选用 DeepSeek。
+
+当前完成 A1/A2/A3：输入输出及状态设计、三个源码/行为说明样例、工程骨架、配置检查、真实 DeepSeek 最小请求和手写 pytest/coverage 环境验证。**尚未实现测试生成或反馈循环。** 设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
+
+## 安装（Windows PowerShell）
+
+已验证环境：Windows x64、Python 3.13.9；项目暂限定 Python 3.13 系列。虚拟环境不随源码提交，首次安装需要访问 Python 包索引。
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.lock
+.\.venv\Scripts\python.exe -m pip install --no-index --no-build-isolation --no-deps -e .
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe -m testgen_agent --help
+```
+
+直接使用虚拟环境解释器，无需激活环境或修改 PowerShell 执行策略。`requirements.lock` 固定了本次环境的直接、传递和构建依赖；`pyproject.toml` 声明项目及入口。锁文件基于 Windows / Python 3.13 验证，暂未验证其他平台。
+
+## 配置 DeepSeek
+
+```powershell
+Copy-Item .env.example .env
+```
+
+编辑本地 `.env`，将 `LLM_MODEL` 替换为账号实际可用模型，将 `DEEPSEEK_API_KEY` 替换为自己的 Key。本项目已在 2026-09-26 实际验证 `deepseek-flash`，使用者仍需具备自己账号的权限。复制命令只用于首次配置，不要覆盖已有 `.env`。示例中的模型和 Key 占位符会被配置校验拒绝。
+
+DeepSeek 官方示例使用服务地址 `https://api.deepseek.com`、Bearer 认证及 `POST /chat/completions`；模型标识以账号权限及当时官方文档为准。目前官方示例列出 `deepseek-flash` 和 `deepseek-v4-pro`，项目不自动选择模型，也不把本地校验当作模型权限验证。[首次调用 API](https://api-docs.deepseek.com/zh-cn/)、[Chat Completions](https://api-docs.deepseek.com/api/create-chat-completion/)
+
+| 环境变量 | 默认 / 约束 |
+|---|---|
+| `LLM_PROVIDER` | `deepseek`；当前仅支持此服务商 |
+| `LLM_MODEL` | 必填，无默认值，不接受占位符 |
+| `LLM_BASE_URL` | `https://api.deepseek.com`；支持保留 `/v1` 路径前缀 |
+| `LLM_API_KEY_ENV` | `DEEPSEEK_API_KEY`；指定存放 Key 的环境变量名 |
+| `DEEPSEEK_API_KEY` | 必填，无默认值；使用其他变量名时设置 `LLM_API_KEY_ENV` |
+| `LLM_REQUEST_TIMEOUT_SECONDS` | `60`；1..600 秒，单次模型请求超时 |
+| `AGENT_MAX_ROUNDS` | `3`；1..3，含首轮候选 |
+| `TEST_EXECUTION_TIMEOUT_SECONDS` | `30`；1..300 秒，单轮测试执行超时 |
+
+读取优先级为：命令行覆盖参数 > 进程环境变量 > 指定 `.env` 文件 > 默认值。默认只读取启动目录的 `.env`，不向父目录搜索；`--env-file` 可显式选择其他文件，不存在时立即报错。支持 UTF-8（含 BOM）；不展开 `${...}`，也不修改进程环境变量。
+
+## 当前可运行命令
+
+```powershell
+.\.venv\Scripts\python.exe -m testgen_agent --check-config
+.\.venv\Scripts\python.exe -m testgen_agent --check-config --max-rounds 1 --timeout 20
+.\.venv\Scripts\testgen-agent.exe --version
+.\.venv\Scripts\python.exe -m pytest
+```
+
+`--check-config` 只做本地校验，输出非敏感配置以及 `api_key_configured` 标记，不发送请求，也不生成测试或运行报告。退出码 0 表示本地校验成功；2 表示参数或配置无效。该命令不检查网络、余额或模型权限；实际连通性可通过下述 A3 入口验证。
+
+缺少 Key、未替换占位符、非法 URL、非整数或超出范围的轮次/超时都会报配置错误；错误提示不包含被拒绝的配置值。不要通过命令行传入明文 Key。`.env`、虚拟环境、缓存及 `outputs/` 已加入忽略规则。
+
+当前没有 `--source` / `--spec` 运行接口；任务清单中的端到端命令仍是后续设计，不是已实现命令。`models`、`prompts`、`agent`、`reporting` 和源码/执行工具模块是明确标记阶段的骨架。
+
+## A3 环境验证
+
+```powershell
+# 使用自己的配置发送一次真实 DeepSeek 最小请求，并执行手写样例
+.\.venv\Scripts\python.exe -m testgen_agent.smoke
+# 只运行本地手写样例及覆盖率采集，不调用 API
+.\.venv\Scripts\python.exe -m testgen_agent.smoke --skip-llm
+```
+
+从工程目录运行（按上面的 editable 安装方式）。可用 `--model` 覆盖模型、`--env-file` 选择配置、`--output` 选择产物根目录、`--timeout` 控制本地工具单次超时。完整模式的最小请求关闭 thinking，最多 16 个输出 tokens，不自动重试；可能产生 API 费用。
+
+每次创建唯一 `outputs/a3/<run_id>/`，保存手写测试与源码副本、pytest XML、coverage JSON、工具日志和 `validation.json`。该入口只验证环境，测试不是模型生成的。测试子进程不接收 API Key，原始源码不修改。
+
+2026-09-26 实测：`deepseek-flash` 返回 HTTP 200 和 `OK`，耗时 1.267 秒、13 tokens；三条手写测试全部通过，目标源码行覆盖 2/2，无分支。保存的证据为 [验证摘要](evaluation/a3_validation.json)、[覆盖率 JSON](evaluation/a3_coverage.json)、[pytest XML](evaluation/a3_pytest.xml)。
+
+完整验证两项都通过时 `a3_passed = true`、退出码 0；验证失败返回 1，参数错误返回 2。`--skip-llm` 本地通过时也返回 0，但 `a3_passed = false`，不能据此宣称真实 API 可用。网络失败、余额/权限错误或限流时保留失败摘要，不自动重试，不记录密钥或任意 API 响应正文。
+
+## 样例和后续输出
+
+- `examples/calculation.py` / `.md`：正常计算。
+- `examples/validation.py` / `.md`：多分支校验及明确异常类型。
+- `examples/discount.py` / `.md`：有意保留满 100 打折的边界缺陷。
+
+后续任务将在 `outputs/<run_id>/` 保存测试、双格式报告、轨迹及每轮快照；具体状态和验收约定见 Design。当前配置检查不会生成这些文件。
+
+测试执行只面向本地可信课程样例；后续真实 DeepSeek 请求可能产生费用。仓库不包含真实 Key，使用者自行配置。
