@@ -1,6 +1,6 @@
 # 测试生成 Agent 技术设计
 
-> 当前进度：A1、A2、A3、B1 已完成。当前提供配置检查 CLI、DeepSeek HTTP 客户端、A3 验证入口及模块间的数据契约；真实最小 API 请求、手写样例 pytest 和覆盖率 JSON 已验证。尚未实现测试生成、通用执行工具或 Agent 反馈循环；本文其余任务接口、状态和输出目录仍是后续实现约定。手写样例测试不是模型生成结果。
+> 当前进度：A1、A2、A3、B1、B2 已完成。当前提供配置检查 CLI、DeepSeek 结构化生成适配层、环境验证入口及模块间的数据契约；真实结构化生成、手写样例 pytest 和覆盖率 JSON 已验证。完整生成 Prompt、通用执行工具和 Agent 反馈循环尚未实现；本文其余任务接口、状态和输出目录仍是后续实现约定。A3 的手写测试不是模型生成结果。
 
 ## 1. 范围与验收（A1）
 
@@ -268,7 +268,7 @@ AgentDev/
 
 Agent 自身测试扩充至 **33 项并全部通过**，新检查覆盖最小请求、实际用量读取、认证/余额/限流失败、空/截断/错误响应和子进程环境隔离；这些自动测试使用 MockTransport，不发送 API 请求。真实 API 验收来自本节单独记录的服务响应。
 
-阶段 A 的范围、环境和真实 API/工具验证已完成。B1 的后续验收记录见第 4 节；B2 LLM 生成适配、B3 Prompt 以及后续 Agent 流程仍未实现。
+阶段 A 的范围、环境和真实 API/工具验证已完成。B1、B2 的后续验收记录分别见第 4、5 节；B3 Prompt 以及后续 Agent 流程仍未实现。
 
 ## 4. 模块间数据结构（B1）
 
@@ -379,8 +379,70 @@ report_data = report.model_dump(mode="json")
 
 另外将已有 A3 的真实 JUnit XML、覆盖率 JSON 和服务用量读入对应数据模型，核对三条测试通过、2/2 行覆盖、无分支和 13 tokens；新契约与已保存工具证据一致，验证未发送 API 请求。A3 原始产物及本地 `.env` 未修改。
 
-B1 仅固定并验证模块间的数据结构；B2/B3、C/D/E 和正式报告输出仍按任务清单继续实施。
+B1 仅固定并验证模块间的数据结构；B2 的实现与验收见第 5 节，B3、C/D/E 和正式报告输出仍按任务清单继续实施。
 
-## 5. 后续设计章节
+## 5. DeepSeek LLM 适配层（B2）
+
+### 5.1 统一接口与职责边界
+
+实现位置为 `src/testgen_agent/llm_client.py`。业务入口是 `DeepSeekClient.generate_tests(context)`；也提供同名模块函数，便于不复用客户端对象的调用方使用。输入 `GenerationContext` 只包含 `system_instruction` 与 `user_prompt`，输出 `LLMGenerationResult` 包含经本地校验的 `GeneratedTests`、请求/响应模型、尝试次数、格式修复次数、总耗时、每次成功响应记录和累计 token 用量。
+
+B2 不决定完整测试策略。B3/E 负责生成或反馈 Prompt 的实际内容，适配层负责：
+
+- 从 `AppConfig` 读取服务地址、模型、Key 和请求超时；创建不含 SDK 自动重试的 HTTPX 客户端。
+- 自动在 system 消息后附加 `GeneratedTests.model_json_schema(mode="validation")`，并明确要求只输出一个 JSON 对象。
+- 通过 DeepSeek `POST /chat/completions` 非流式请求，关闭 thinking，启用 `response_format = {"type": "json_object"}`。
+- 从响应取得内容、模型、ID、结束原因和实际用量；使用 `GeneratedTests.model_validate_json()` 做本地结构及跨字段校验。
+- 只返回校验通过的生成内容；不在适配层写测试文件、执行 pytest 或构造工具实测值。
+
+默认 `max_tokens=4096`，构造时允许 `1..32768`。DeepSeek 官方 JSON Output 要求 Prompt 同时明确要求 JSON，本实现同时使用 `response_format` 和 Schema 指令；接口定义及结束原因参见 [Chat Completions 官方文档](https://api-docs.deepseek.com/api/create-chat-completion/)。
+
+### 5.2 超时、重试和修复预算
+
+HTTPX 客户端的 connect/read/write/pool 超时统一取 `LLM_REQUEST_TIMEOUT_SECONDS`，不启用传输层自动重试。业务层默认预算如下：
+
+| 预算 | 默认值 | 规则 |
+|---|---:|---|
+| 瞬时故障重试 | 2 次 | 只处理网络/超时、HTTP 408/409/429 和 5xx |
+| 格式修复 | 1 次 | 只处理 HTTP 200 且有内容、但未通过 `GeneratedTests` 校验的输出 |
+| HTTP 总尝试 | 最多 4 次 | `1 + 2 + 1`；瞬时重试和格式修复共享此硬上限 |
+| 退避 | 0.25、0.5 秒起，最多 2 秒 | 指数退避；有效 `Retry-After` 优先，但同样截断到 2 秒 |
+
+格式修复把此前输出作为 assistant 数据（最多 20,000 字符），追加一条只要求修正完整 JSON 的 user 消息，Schema 仍由原 system 消息提供。第二次仍不合法时返回 `invalid_generated_output`，不继续循环。若前序请求已经消耗总预算，修复或瞬时重试随即停止。
+
+HTTP 400、401、402、403、404 分别归类为无效请求、认证、余额、权限和不存在错误，立即结束；429 和短暂网络/服务错误在预算内重试。HTTP 200 但外层响应无法解析、内容为空或 `finish_reason` 不是 `stop` 时归为 `invalid_response`，不把截断响应提交给格式修复。错误提供中文操作提示、分类、是否可重试、尝试次数和可选状态码，不包含响应正文、请求头、Key 或底层异常原文。
+
+本项目未使用会自行重试的 OpenAI SDK；重试只在 `DeepSeekClient` 一层发生。这样可以从 `attempts` 直接审计实际 HTTP 尝试上限。
+
+### 5.3 用量与安全记录
+
+每个成功 HTTP 响应可产生一条 `LLMCallRecord`，记录用途（`generation` 或 `format_repair`）、响应 ID、响应模型、结束原因和服务返回的 `TokenUsage`。格式不合格但外层响应有效的请求也计入用量。所有调用都提供完整且自洽的 prompt/completion/total 时才计算累计用量；字段缺失或服务数字矛盾时将该条及累计用量标为 `null`，不猜测。
+
+`safe_config` 只公开服务商、模型、地址、超时、输出及重试预算。`LLMError.safe_details()` 只公开受控错误字段。适配层没有日志调用，不保存认证头或响应正文；调用方若要保存生成结果，需要明确使用 `LLMGenerationResult`。Key 只在创建请求头时从 `SecretStr` 读取，不进入任何 Pydantic 输出结构。
+
+源码、规格和此前工具日志会作为 Prompt 数据发送给 DeepSeek，这是产品功能所需；B3 将进一步明确数据边界和提示注入规则。B2 的真实验收仅使用固定的最小计算函数和行为文本，没有上传仓库文件或个人信息。
+
+### 5.4 离线测试与真实验收
+
+新增 `tests/test_llm_client.py`，18 项测试全部使用 `httpx.MockTransport`，不会访问网络或产生费用。覆盖：JSON 模式及 Schema 注入、成功解析和用量、一次格式修复、修复失败、429/5xx/网络/超时重试、`Retry-After` 截断、永久错误快速失败、空/损坏/截断响应、未知用量、总预算、配置脱敏和策略参数边界。
+
+2026-09-26 20:46（Asia/Shanghai）通过 `python -m testgen_agent.b2_smoke` 使用本地已验证配置进行一次真实请求。该入口使用固定的轻量验证 Prompt，经正式 `DeepSeekClient` 调用并保存脱敏结果；它验证适配层，不替代 B3 的正式 Prompt。
+
+| 项目 | 实测结果 |
+|---|---|
+| 服务商 / 模型 | DeepSeek / `deepseek-flash` |
+| HTTP / 结束原因 | 200 / `stop` |
+| 尝试 / 格式修复 | 1 / 0 |
+| 响应模型 | `deepseek-flash` |
+| 适配层耗时 | 1.573 秒 |
+| 实际用量 | prompt 883、completion 242、total 1125 tokens |
+| 结构结果 | 1 个 `calculate_total` 正常场景、非空 pytest 代码、完整场景映射 |
+| 工具指标隔离 | `GeneratedTests` 中没有 execution、coverage、passed 或 line_percent 字段 |
+
+真实输出一次通过 JSON 与 `GeneratedTests` 校验。可提交证据为 [evaluation/b2_validation.json](evaluation/b2_validation.json)；完整运行目录 `outputs/b2/20260926T124628Z-9d9dc471/` 由 Git 忽略。证据含生成测试代码、响应 ID 和用量，但不含 Key、认证头、原始请求或任意错误正文。
+
+B2 完成后，累计 **111 项自身测试全部通过**（`-W error`），`pip check` 通过。真实请求之外的异常和修复路径均由离线可控响应验证；没有为了覆盖异常路径额外消耗 API 调用。
+
+## 6. 后续设计章节
 
 模块架构、数据结构、Prompt、工具接口、重试预算、反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。

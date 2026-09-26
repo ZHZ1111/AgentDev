@@ -1,4 +1,4 @@
-"""A2 CLI: inspect configuration locally; generation is not implemented yet."""
+"""Project CLI: inspect the local configuration without sending API requests."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from .config import ConfigError, load_config
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="testgen-agent",
-        description="测试生成 Agent（A2）：当前提供本地配置检查，尚未实现测试生成。",
+        description="测试生成 Agent：此入口用于本地配置检查；B2 生成验证使用独立 smoke 入口。",
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument("--check-config", action="store_true", help="校验并显示脱敏配置；不发送 API 请求")
@@ -40,7 +40,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     if not args.check_config:
-        parser.error("当前阶段请使用 --check-config 或 --help；测试生成将在后续阶段实现。")
+        parser.error("此入口请使用 --check-config 或 --help；B2 生成验证请运行 python -m testgen_agent.b2_smoke。")
     overrides = {
         field: getattr(args, field)
         for field in (

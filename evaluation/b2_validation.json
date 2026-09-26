@@ -1,0 +1,87 @@
+{
+  "stage": "B2",
+  "run_id": "20260926T124628Z-9d9dc471",
+  "tested_at_utc": "2026-09-26T12:46:28.436476+00:00",
+  "python": "3.13.9",
+  "status": "passed",
+  "adapter_config": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "request_timeout_seconds": 60,
+    "max_tokens": 2048,
+    "max_transient_retries": 2,
+    "max_format_repairs": 1,
+    "max_http_attempts": 4
+  },
+  "result": {
+    "generated": {
+      "plan": {
+        "target_functions": [
+          "calculate_total"
+        ],
+        "oracle_mode": "specification",
+        "scenarios": [
+          {
+            "scenario_id": "normal_12_3",
+            "target_function": "calculate_total",
+            "category": "normal",
+            "inputs": {
+              "args": [
+                12,
+                3
+              ],
+              "kwargs": {}
+            },
+            "expected_behavior": "returns 36",
+            "expected_basis": {
+              "kind": "specification",
+              "detail": "calculate_total(12, 3) returns 12 * 3 = 36"
+            }
+          }
+        ]
+      },
+      "code": "import pytest\nfrom subject import calculate_total\n\n\ndef test_calculate_total_normal():\n    assert calculate_total(12, 3) == 36\n",
+      "mappings": [
+        {
+          "test_function": "test_calculate_total_normal",
+          "scenario_ids": [
+            "normal_12_3"
+          ]
+        }
+      ],
+      "assumptions": [],
+      "questions": []
+    },
+    "provider": "deepseek",
+    "requested_model": "deepseek-flash",
+    "response_model": "deepseek-flash",
+    "attempts": 1,
+    "format_repairs": 0,
+    "latency_seconds": 1.573,
+    "calls": [
+      {
+        "purpose": "generation",
+        "response_id": "67d4ed5b-2f42-4c43-ad3c-85f6976c2bc7",
+        "response_model": "deepseek-flash",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 883,
+          "completion_tokens": 242,
+          "total_tokens": 1125
+        }
+      }
+    ],
+    "total_usage": {
+      "prompt_tokens": 883,
+      "completion_tokens": 242,
+      "total_tokens": 1125
+    }
+  },
+  "checks": {
+    "schema_validated": true,
+    "generated_code_nonempty": true,
+    "scenario_count": 1,
+    "tool_metrics_absent_from_generation": true
+  }
+}

@@ -2,7 +2,7 @@
 
 课程项目：为小型 Python 纯函数生成并执行 pytest 测试，根据失败及覆盖率反馈进行有限迭代。LLM 服务商选用 DeepSeek。
 
-当前完成 A1/A2/A3/B1：输入输出及状态设计、三个源码/行为说明样例、工程骨架、配置检查、真实 DeepSeek 最小请求、手写 pytest/coverage 环境验证，以及模块间的数据模型。**尚未实现测试生成或反馈循环。** 设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
+当前完成 A1/A2/A3/B1/B2：输入输出及状态设计、三个源码/行为说明样例、工程骨架、配置检查、DeepSeek 结构化生成适配、手写 pytest/coverage 环境验证，以及模块间的数据模型。**完整生成 Prompt、源码分析、测试执行和反馈循环尚未实现。** 设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
 
 ## 安装（Windows PowerShell）
 
@@ -54,9 +54,20 @@ DeepSeek 官方示例使用服务地址 `https://api.deepseek.com`、Bearer 认�
 
 缺少 Key、未替换占位符、非法 URL、非整数或超出范围的轮次/超时都会报配置错误；错误提示不包含被拒绝的配置值。不要通过命令行传入明文 Key。`.env`、虚拟环境、缓存及 `outputs/` 已加入忽略规则。
 
-当前没有 `--source` / `--spec` 运行接口；任务清单中的端到端命令仍是后续设计，不是已实现命令。`models.py` 已实现 B1 数据契约；`prompts`、`agent`、`reporting` 和源码/执行工具模块仍是注明阶段的骨架。
+当前没有 `--source` / `--spec` 运行接口；任务清单中的端到端命令仍是后续设计，不是已实现命令。`models.py` 已实现 B1 数据契约，`llm_client.py` 已实现 B2 DeepSeek 适配层；`prompts`、`agent`、`reporting` 和源码/执行工具模块仍是注明阶段的骨架。
 
-`models.py` 提供 `SourceInfo`、`TestPlan`、`GeneratedTests`、`ExecutionResult`、`CoverageResult`、`AgentState`、`FinalReport` 及辅助类型。生成内容与工具实测结果分开；百分比和报告指标由计数及选定候选计算，未知值使用 `null`。接口、状态引用和序列化约定见 Design 第 4 节。当前共 93 项自身测试通过，其中 B1 新增 60 项；自动测试不发送真实 API 请求。
+`models.py` 提供 `SourceInfo`、`TestPlan`、`GeneratedTests`、`ExecutionResult`、`CoverageResult`、`AgentState`、`FinalReport` 及辅助类型。生成内容与工具实测结果分开；百分比和报告指标由计数及选定候选计算，未知值使用 `null`。接口、状态引用和序列化约定见 Design 第 4 节。
+
+`llm_client.py` 提供 `DeepSeekClient.generate_tests(context)`：自动附加生成结果 Schema，使用 DeepSeek JSON Output，再用本地 Pydantic 严格校验。默认对瞬时故障最多重试 2 次，对格式错误最多修复 1 次，总 HTTP 请求不超过 4 次；400/401/402/403/404 立即失败。错误和公开配置不包含 Key、认证头或响应正文。B2 设计与实测见 Design 第 5 节。
+
+```powershell
+# 发送一次真实的固定 B2 结构化生成验证；可能产生 API 费用
+.\.venv\Scripts\python.exe -m testgen_agent.b2_smoke
+```
+
+每次结果保存到 `outputs/b2/<run_id>/validation.json`。2026-09-26 实测 `deepseek-flash` 一次返回合法结构，耗时 1.573 秒、1125 tokens，无格式修复；精选证据为 [B2 验证结果](evaluation/b2_validation.json)。此命令使用固定轻量验证 Prompt，不等同于后续 B3 的正式 Prompt 或端到端 Agent。
+
+当前共 111 项自身测试通过，其中 B1 新增 60 项、B2 新增 18 项；自动测试不发送真实 API 请求。
 
 ## A3 环境验证
 
