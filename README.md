@@ -2,9 +2,9 @@
 
 课程项目：为单个 Python 文件中的 1–5 个顶层同步纯函数生成并执行 pytest 测试集。设计目标是由 Agent 自动分析函数关系，决定单元测试和协作测试策略，再根据失败及覆盖率反馈进行有限迭代。LLM 服务商选用 DeepSeek。
 
-当前完成 A1/A2/A3/B1/B2，以及 B1 关系契约扩展和 B3 `b3-v2` 生成/反馈 Prompt 的离线验证：包括输入输出及状态设计、四组源码/行为说明样例、工程骨架、配置检查、DeepSeek 结构化生成适配、手写 pytest/coverage 环境验证、兼容旧产物的数据模型和正式 Prompt 构建。B3 真实请求尚待明确授权发送公开关联样例数据；AST 自动关系分析、测试执行和反馈循环尚未实现。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
+当前完成 A1/A2/A3/B1/B2/C1，以及 B1 关系契约扩展和 B3 `b3-v2` 生成/反馈 Prompt 的离线验证：包括输入输出及状态设计、四组源码/行为说明样例、工程骨架、配置检查、DeepSeek 结构化生成适配、手写 pytest/coverage 环境验证、兼容旧产物的数据模型、正式 Prompt 构建，以及受限源码读取和基本 AST 检查。B3 真实请求尚待明确授权发送公开关联样例数据；AST 调用关系分析、测试执行和反馈循环尚未实现。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
 
-2026-09-27 新增范围：自动判断同文件函数关系，并自主规划测试集。所需 `1.1` 数据契约和 `b3-v2` Prompt 已实现；AST 事实提取、端到端生成/执行与报告仍未实现。修订任务预算为 58 小时。
+2026-09-27 新增范围：自动判断同文件函数关系，并自主规划测试集。所需 `1.1` 数据契约和 `b3-v2` Prompt 已实现，C1 已完成基本 AST 结构提取；C1a 调用关系证据、端到端生成/执行与报告仍未实现。修订任务预算为 58 小时。
 
 ## 函数关系与测试集
 
@@ -71,7 +71,18 @@ DeepSeek 官方示例使用服务地址 `https://api.deepseek.com`、Bearer 认�
 
 缺少 Key、未替换占位符、非法 URL、非整数或超出范围的轮次/超时都会报配置错误；错误提示不包含被拒绝的配置值。不要通过命令行传入明文 Key。`.env`、虚拟环境、缓存及 `outputs/` 已加入忽略规则。
 
-当前没有 `--source` / `--spec` 运行接口；任务清单中的端到端命令仍是后续设计，不是已实现命令。`models.py` 已实现 B1 数据契约，`llm_client.py` 已实现 B2 DeepSeek 适配层，`prompts.py` 已实现 B3 首轮与反馈上下文；`agent`、`reporting` 和源码/执行工具模块仍是注明阶段的骨架。
+当前没有 `--source` / `--spec` 端到端运行接口；任务清单中的完整生成命令仍是后续设计，不是已实现命令。`models.py` 已实现 B1 数据契约，`llm_client.py` 已实现 B2 DeepSeek 适配层，`prompts.py` 已实现 B3 首轮与反馈上下文；源码工具已完成 C1，`agent`、`reporting` 和测试执行工具仍是注明阶段的骨架。
+
+C1 可作为 Python 工具独立调用，不执行目标源码：
+
+```python
+from testgen_agent.tools import analyze_source
+
+source = analyze_source("examples/validation.py")
+print(source.canonical_json(indent=2))
+```
+
+默认只接受不超过 128 KiB 的 `.py` 文件，按 Python 编码声明读取，提取 1–5 个顶层同步函数、标准库导入及 if/match/loop/try/raise 位置。语法错误包含行号；异步结构、相对/通配符导入、第三方依赖和顶层类会报告当前不支持；无目标函数会立即停止。调用点和函数关系字段要到 C1a 才会填充。
 
 `models.py` 提供 `SourceInfo`、`RelationshipAnalysis`、`TestPlan`、`GeneratedTests`、`ExecutionResult`、`CoverageResult`、`AgentState`、`FinalReport` 及辅助类型。关系 Schema `1.1` 保存调用证据、入口、逐函数/关系策略、unit/collaboration 场景和有序数据传递；旧 `1.0` 单函数产物仍可读取。生成内容与工具实测结果分开；百分比和报告指标由计数及选定候选计算，未知值使用 `null`。接口、状态引用和序列化约定见 Design 第 4 节。
 
@@ -93,7 +104,7 @@ DeepSeek 官方示例使用服务地址 `https://api.deepseek.com`、Bearer 认�
 
 每次结果保存到 `outputs/b3/<run_id>/validation.json`。该命令会向外部服务发送 `examples/relationships.py`、`examples/relationships.md` 和 Prompt 内容；仅在明确允许发送这些数据后运行。它会检查关系 Schema、源码证据、入口、策略及单元/协作场景。B3 真实调用尚未执行，不能仅凭离线测试宣称真实验收完成。
 
-当前共 159 项自身测试通过，其中 B1 原始契约新增 60 项、B1 关系扩展新增 27 项、B2 新增 18 项、B3 新增 21 项；自动测试不发送真实 API 请求。
+当前共 182 项自身测试通过，其中 B1 原始契约新增 60 项、B1 关系扩展新增 27 项、B2 新增 18 项、B3 新增 21 项、C1 新增 23 项；自动测试不发送真实 API 请求，也不执行被分析源码。
 
 ## A3 环境验证
 

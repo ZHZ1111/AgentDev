@@ -1,3 +1,3 @@
-"""Test generation agent with configuration, environment checks and B1 contracts."""
+"""Test generation agent with contracts, LLM prompts and bounded source inspection."""
 
 __version__ = "0.1.0"

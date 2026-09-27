@@ -564,6 +564,42 @@ B3 的真实调用尚未执行：该调用会把上述公开关联样例源码�
 
 保持原有信任边界、重试预算和数据脱敏规则。离线测试覆盖未知关系、确认直接调用、独立旧样例和有序数据衔接；多层调用、名称遮蔽、递归等 AST 事实提取测试仍在 C1a 完成。真实关联样例验收仍待明确外发授权。
 
-## 7. 后续设计章节
+## 7. 源码读取与基本 AST 检查（C1）
 
-工具接口、反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。
+### 7.1 工具接口和错误边界
+
+`src/testgen_agent/tools/source_reader.py` 提供 `read_source(path, max_bytes=128*1024)`，返回不可变的 `LoadedSource(path, code, encoding, size_bytes)`。读取前检查路径存在、是普通文件且后缀为 `.py`；文件大小先按元数据检查，实际读取时再以 `max_bytes + 1` 为界检查，避免检查与读取之间文件变化后绕过限制。`max_bytes` 必须是正整数。
+
+编码不固定假设为 UTF-8，而是对二进制内容调用 `tokenize.detect_encoding()`，按 Python 的 UTF-8 BOM 和 PEP 263 编码声明规则解码。未知编码、声明冲突和无效字节统一形成 `SourceReadError(code="invalid_encoding")`，诊断不包含原始源码或字节。路径、类型、后缀、大小和读取失败分别保留稳定错误码，便于后续控制器决定停止而不是调用模型。
+
+`src/testgen_agent/tools/code_analyzer.py` 提供 `analyze_source(path)`，组合读取和分析并返回 `SourceInfo`；`analyze_loaded_source()` 允许复用已读取快照。语法检查使用 `ast.parse(..., type_comments=True)`，失败形成 `SourceAnalysisError(code="syntax_error")`，携带文件、行号和列偏移，公开消息只给出行号及 `SyntaxError.msg` 的简要原因。整个流程不导入也不执行目标文件，因此模块级语句和函数体副作用不会在分析阶段发生。
+
+错误类型保持分层：读取问题是 `SourceReadError`，语法和缺少目标函数是 `SourceAnalysisError`，有效 Python 但超出范围的是其子类 `UnsupportedSourceError`。三者都继承 `ValueError`，既便于精确处理，也允许简单调用方统一捕获输入问题。
+
+### 7.2 提取范围
+
+分析器只把模块体直接包含的 `FunctionDef` 作为目标，按源码顺序提取 1–5 个函数。`FunctionInfo.signature` 由 AST 规范化，保留位置参数、仅位置/仅关键字标记、可变参数、注解及默认值；同时记录清理后的 docstring 和 `def` 到函数体末尾的行号。嵌套函数不是额外目标，其条件也不并入外层函数的分支证据。
+
+每个目标函数体内收集以下上下文，位置均来自 AST：
+
+| AST 结构 | `SourceBranch.kind` | 保存的简短源码 |
+|---|---|---|
+| `if` / `elif` | `if` | 条件表达式 |
+| `match` | `match` | subject 表达式 |
+| `for` / `while` | `loop` | 循环头 |
+| `try` / `try*` | `try` | try 入口 |
+| `raise` | `raise` | 完整 raise 语句 |
+
+所有 `import` / `from ... import ...` 会形成 `ImportInfo`，保留语句、模块、名称和行号。当前单文件范围允许标准库导入；第三方或本地非标准库模块无法在隔离工作目录中得到可靠保证，因此以外部依赖拒绝，而不是在分析时尝试安装或导入。
+
+明显超出范围的异步函数/语法、任意相对导入、通配符导入、外部依赖和顶层类都会产生带行号、含“当前不支持”的错误。超过 5 个目标函数也会拒绝。没有目标函数时使用 `no_target_functions` 明确停止，后续控制器不得进入生成循环。
+
+### 7.3 C1 与 C1a 的边界和验证
+
+C1 只建立安全、可复现的源码快照和基本结构上下文。`call_sites`、`direct_calls`、`unresolved_calls` 在本阶段保持空元组；函数调用提取、名称绑定/遮蔽、递归环、入口候选和简单数据传递由 C1a 实现，不能从函数名称推断关系。
+
+新增 `tests/test_source_analysis.py` 共 **23 项**测试，覆盖不存在路径、目录、错误后缀、大小上限、非法上限、PEP 263 中文、未知编码、语法位置、复杂签名/default/docstring/行号、主要分支和异常路径、嵌套定义隔离、标准库导入、分析不执行源码、各类超范围结构、无目标、超过 5 个目标及三个现有样例。2026-09-27 全套 **182 项**测试以 `-W error` 通过，`pip check` 无损坏依赖。
+
+## 8. 后续设计章节
+
+调用关系、候选生成、执行工具、反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。
