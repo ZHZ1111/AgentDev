@@ -7,9 +7,15 @@ from typing import Any
 
 from .llm_client import GenerationContext
 from .models import CandidateRound, ContractModel, OracleMode, SourceInfo
+from .tools.code_analyzer import (
+    build_call_graph,
+    candidate_entry_functions,
+    find_call_cycles,
+    find_explicit_data_flows,
+)
 
 
-PROMPT_VERSION = "b3-v2"
+PROMPT_VERSION = "b3-v3"
 TASK_DATA_START = "TASK_DATA_JSON_START"
 TASK_DATA_END = "TASK_DATA_JSON_END"
 MAX_TOOL_LOG_CHARS = 12_000
@@ -120,6 +126,7 @@ SUPPORTED TASK
 - Return a plan before code. Cover meaningful normal, boundary, exception, and major source-branch behavior. Include each category when its expectation is supported; when a category is inapplicable or undefined, do not invent an oracle and explain the gap in assumptions or questions.
 - Use TestPlan schema_version 1.1. Select entry functions, analyze relationships, and provide exactly one reasoned strategy decision for every target function and every reported relationship.
 - AST call sites and direct_calls in task data are host-tool facts. Keep unresolved_calls uncertain. Never infer a confirmed relationship from matching names alone, and never upgrade an unresolved call to confirmed.
+- source_graph_hints is derived only from confirmed direct_calls. Treat its roots as candidate entries, not business truth; use the specification and docstrings to make the final entry choice. Cycles describe recursion groups and do not justify expanding a call chain indefinitely.
 - Distinguish scenario category from test_kind: normal/boundary/exception/branch describes behavior, while unit/collaboration describes test scope. A collaboration scenario needs evidence and names every involved function and relationship.
 - Do not turn every call edge into a collaboration test. Add one only when it verifies behavior beyond focused unit cases; otherwise select not_selected and explain why.
 - For an entry function that calls dependencies, invoke the real entry and its real same-file dependencies. For an explicitly supported data pipeline without one entry, use ordered steps and step_result references; do not invent workflows from names or compatible types.
@@ -149,7 +156,8 @@ _INITIAL_RULES = """
 INITIAL GENERATION
 - Use the requested oracle_mode exactly. In specification mode, ground expectations in the supplied behavior specification or docstrings and surface conflicts. In characterization mode, label every expected basis as implementation_assumption.
 - Inspect the listed source branches, call sites, confirmed direct calls, and unresolved calls. Decide candidate entries and unit/collaboration coverage without duplicating equivalent cases.
-- RelationshipAnalysis combines tool facts with your explanation. A confirmed direct_call must cite matching call_site_ids from direct_calls; candidate data_flow relationships need source/specification evidence; unknown relationships retain a precise unresolved question.
+- RelationshipAnalysis combines tool facts with your explanation. A confirmed direct_call must cite matching call_site_ids from direct_calls; candidate data_flow relationships need source/specification evidence; unknown relationships retain a precise unresolved question. Nested calls such as b(a(x)) and a simple assignment passed to a later call may support data-flow analysis; do not infer complex alias, container, or state flow.
+- Keep dynamic unresolved calls and shared mutable state uncertain unless explicit source plus specification evidence supports a bounded relationship. Do not turn this task into whole-program state or points-to analysis.
 - The host will validate the JSON contract and later validate and execute the code; do not fabricate those results.
 """
 
@@ -178,6 +186,7 @@ def build_generation_context(
         "requested_oracle_mode": oracle_mode.value,
         "behavior_specification": _optional_text(behavior_specification),
         "source": _model_data(source),
+        "source_graph_hints": _source_graph_hints(source),
     }
     return GenerationContext(
         system_instruction=_system_instruction(_INITIAL_RULES),
@@ -236,6 +245,7 @@ def build_feedback_context(
         "requested_oracle_mode": previous.generated.plan.oracle_mode.value,
         "behavior_specification": _optional_text(behavior_specification),
         "source": _model_data(source),
+        "source_graph_hints": _source_graph_hints(source),
         "previous_generated_tests": _model_data(previous.generated),
         "observed_execution": execution,
         "observed_coverage": coverage,
@@ -261,6 +271,29 @@ def _model_data(model: ContractModel | None) -> Any:
     if model is None:
         return None
     return json.loads(model.canonical_json())
+
+
+def _source_graph_hints(source: SourceInfo) -> dict[str, Any]:
+    return {
+        "confirmed_adjacency": {
+            caller: list(callees) for caller, callees in build_call_graph(source).items()
+        },
+        "candidate_entry_functions": list(candidate_entry_functions(source)),
+        "recursive_components": [list(component) for component in find_call_cycles(source)],
+        "explicit_data_flows": [
+            {
+                "producer_call_site_id": hint.producer_call_site_id,
+                "consumer_call_site_id": hint.consumer_call_site_id,
+                "caller": hint.caller,
+                "kind": hint.kind,
+                "via": hint.via,
+            }
+            for hint in find_explicit_data_flows(source)
+        ],
+        "interpretation": (
+            "Derived from confirmed direct calls only; roots are candidates, not declared business entries."
+        ),
+    }
 
 
 def _bounded_log(value: str) -> dict[str, Any]:

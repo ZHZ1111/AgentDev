@@ -13,10 +13,11 @@ from uuid import uuid4
 
 from .config import ConfigError, load_config
 from .llm_client import DeepSeekClient, LLMError
-from .models import FunctionInfo, OracleMode, SourceInfo, validate_plan_against_source
+from .models import OracleMode, validate_plan_against_source
 from .prompts import (
     PROMPT_VERSION, TASK_DATA_END, TASK_DATA_START, build_generation_context,
 )
+from .tools import analyze_source
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -42,40 +43,10 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         project_root = Path(__file__).resolve().parents[2]
-        source_text = (project_root / "examples/relationships.py").read_text(encoding="utf-8")
+        source_path = project_root / "examples/relationships.py"
         specification = (project_root / "examples/relationships.md").read_text(encoding="utf-8")
-        source = SourceInfo(
+        source = analyze_source(source_path).updated(
             source_path=Path("examples/relationships.py"),
-            source_code=source_text,
-            functions=(
-                FunctionInfo(
-                    name="calculate_total",
-                    signature="(unit_price: int, quantity: int) -> int",
-                    start_line=4,
-                    end_line=6,
-                    docstring="返回非负整数单价与数量的乘积。",
-                ),
-                FunctionInfo(
-                    name="checkout",
-                    signature="(unit_price: int, quantity: int) -> int",
-                    start_line=9,
-                    end_line=11,
-                    docstring="结账入口：返回 calculate_total 计算的总价。",
-                ),
-            ),
-            call_sites=({
-                "call_id": "call-checkout-total",
-                "caller": "checkout",
-                "expression": "calculate_total(unit_price, quantity)",
-                "line": 11,
-                "source": "return calculate_total(unit_price, quantity)",
-                "argument_expressions": ("unit_price", "quantity"),
-            },),
-            direct_calls=({
-                "call_site_id": "call-checkout-total",
-                "caller": "checkout",
-                "callee": "calculate_total",
-            },),
         )
         context = build_generation_context(source, specification, OracleMode.SPECIFICATION)
         config = load_config(env_file=args.env_file)

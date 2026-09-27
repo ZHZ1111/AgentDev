@@ -2,13 +2,13 @@
 
 课程项目：为单个 Python 文件中的 1–5 个顶层同步纯函数生成并执行 pytest 测试集。设计目标是由 Agent 自动分析函数关系，决定单元测试和协作测试策略，再根据失败及覆盖率反馈进行有限迭代。LLM 服务商选用 DeepSeek。
 
-当前完成 A1/A2/A3/B1/B2/C1，以及 B1 关系契约扩展和 B3 `b3-v2` 生成/反馈 Prompt 的离线验证：包括输入输出及状态设计、四组源码/行为说明样例、工程骨架、配置检查、DeepSeek 结构化生成适配、手写 pytest/coverage 环境验证、兼容旧产物的数据模型、正式 Prompt 构建，以及受限源码读取和基本 AST 检查。B3 真实请求尚待明确授权发送公开关联样例数据；AST 调用关系分析、测试执行和反馈循环尚未实现。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
+当前完成 A1/A2/A3/B1/B2/C1/C1a，以及 B1 关系契约扩展和 B3 `b3-v3` 生成/反馈 Prompt 的离线验证：包括输入输出及状态设计、四组源码/行为说明样例、工程骨架、配置检查、DeepSeek 结构化生成适配、手写 pytest/coverage 环境验证、兼容旧产物的数据模型、正式 Prompt 构建，以及受限源码读取、基本 AST 检查和保守的函数关系证据提取。B3 真实请求尚待明确授权发送公开关联样例数据；测试生成/执行和反馈循环尚未实现。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
 
-2026-09-27 新增范围：自动判断同文件函数关系，并自主规划测试集。所需 `1.1` 数据契约和 `b3-v2` Prompt 已实现，C1 已完成基本 AST 结构提取；C1a 调用关系证据、端到端生成/执行与报告仍未实现。修订任务预算为 58 小时。
+2026-09-27 新增范围：自动判断同文件函数关系，并自主规划测试集。所需 `1.1` 数据契约、`b3-v3` Prompt、C1 基本 AST 结构和 C1a 调用关系证据均已实现；端到端生成/执行与报告仍未实现。修订任务预算为 58 小时。
 
 ## 函数关系与测试集
 
-用户只需提供源码和必要的行为说明，无需手动列出函数关系或指定测试类型。当前契约可保存 AST 工具的调用点、确认边和未知调用，并校验 Agent 给出的关系、入口及测试策略；实际 AST 提取工具在 C1a 实现。
+用户只需提供源码和必要的行为说明，无需手动列出函数关系或指定测试类型。AST 工具会保存调用点、确认边和未知调用，构造确认调用图、递归组件和候选入口；宿主再校验 Agent 给出的关系、入口及测试策略。图根只是候选，不能取代规格中的业务入口判断。
 
 | 输入中的关系 | Agent 的预期处理 |
 |---|---|
@@ -82,7 +82,22 @@ source = analyze_source("examples/validation.py")
 print(source.canonical_json(indent=2))
 ```
 
-默认只接受不超过 128 KiB 的 `.py` 文件，按 Python 编码声明读取，提取 1–5 个顶层同步函数、标准库导入及 if/match/loop/try/raise 位置。语法错误包含行号；异步结构、相对/通配符导入、第三方依赖和顶层类会报告当前不支持；无目标函数会立即停止。调用点和函数关系字段要到 C1a 才会填充。
+默认只接受不超过 128 KiB 的 `.py` 文件，按 Python 编码声明读取，提取 1–5 个顶层同步函数、标准库导入、if/match/loop/try/raise 位置及函数体调用。语法错误包含行号；异步结构、相对/通配符导入、第三方依赖和顶层类会报告当前不支持；无目标函数会立即停止。只有绑定明确的同文件名称调用形成确认边；遮蔽、重绑定和动态调用会保留为未解析证据。
+
+调用图辅助接口可单独使用：
+
+```python
+from testgen_agent.tools import (
+    analyze_source, build_call_graph, candidate_entry_functions,
+    find_call_cycles, find_explicit_data_flows,
+)
+
+source = analyze_source("examples/relationships.py")
+print(build_call_graph(source))            # checkout -> calculate_total
+print(candidate_entry_functions(source))   # 仅为候选入口
+print(find_call_cycles(source))             # 递归强连通组件
+print(find_explicit_data_flows(source))     # 仅嵌套调用/简单赋值
+```
 
 `models.py` 提供 `SourceInfo`、`RelationshipAnalysis`、`TestPlan`、`GeneratedTests`、`ExecutionResult`、`CoverageResult`、`AgentState`、`FinalReport` 及辅助类型。关系 Schema `1.1` 保存调用证据、入口、逐函数/关系策略、unit/collaboration 场景和有序数据传递；旧 `1.0` 单函数产物仍可读取。生成内容与工具实测结果分开；百分比和报告指标由计数及选定候选计算，未知值使用 `null`。接口、状态引用和序列化约定见 Design 第 4 节。
 
@@ -95,7 +110,7 @@ print(source.canonical_json(indent=2))
 
 每次结果保存到 `outputs/b2/<run_id>/validation.json`。2026-09-26 实测 `deepseek-flash` 一次返回合法结构，耗时 1.573 秒、1125 tokens，无格式修复；精选证据为 [B2 验证结果](evaluation/b2_validation.json)。此命令使用固定轻量验证 Prompt，不等同于后续 B3 的正式 Prompt 或端到端 Agent。
 
-`prompts.py` 的 `b3-v2` 把可信规则放入 system message，把源码、调用事实、行为说明、候选和工具日志放入带边界标记的 JSON 数据。首轮要求 Agent 自主选择入口、关系和单元/协作策略，同时覆盖正常/边界/异常/分支场景及逐项预期依据；反馈轮携带此前关系、策略、候选、真实失败、缺失覆盖和剩余预算，并禁止删除有效断言、skip/xfail、广泛捕获异常或修改源码。
+`prompts.py` 的 `b3-v3` 把可信规则放入 system message，把源码、调用事实、确认图提示、行为说明、候选和工具日志放入带边界标记的 JSON 数据。首轮要求 Agent 自主选择入口、关系和单元/协作策略，图根仅作为候选；只分析嵌套调用和简单赋值等有明确源码证据的数据流，将动态调用与共享状态保持为不确定项。反馈轮携带此前关系、策略、候选、真实失败、缺失覆盖和剩余预算，并禁止删除有效断言、skip/xfail、广泛捕获异常或修改源码。
 
 ```powershell
 # 向 DeepSeek 发送公开 relationships 样例源码、行为说明及正式 B3 Prompt；可能产生 API 费用
@@ -104,7 +119,7 @@ print(source.canonical_json(indent=2))
 
 每次结果保存到 `outputs/b3/<run_id>/validation.json`。该命令会向外部服务发送 `examples/relationships.py`、`examples/relationships.md` 和 Prompt 内容；仅在明确允许发送这些数据后运行。它会检查关系 Schema、源码证据、入口、策略及单元/协作场景。B3 真实调用尚未执行，不能仅凭离线测试宣称真实验收完成。
 
-当前共 182 项自身测试通过，其中 B1 原始契约新增 60 项、B1 关系扩展新增 27 项、B2 新增 18 项、B3 新增 21 项、C1 新增 23 项；自动测试不发送真实 API 请求，也不执行被分析源码。
+当前共 205 项自身测试通过，其中 B1 原始契约新增 60 项、B1 关系扩展新增 27 项、B2 新增 18 项、B3 新增 21 项、C1 新增 23 项、C1a 新增 23 项；自动测试不发送真实 API 请求，也不执行被分析源码。
 
 ## A3 环境验证
 

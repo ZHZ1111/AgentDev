@@ -248,6 +248,10 @@ def test_project_examples_are_accepted():
         ("if", 10), ("raise", 11), ("if", 12), ("raise", 13), ("if", 14), ("if", 16),
     ]
     assert [item.name for item in relationships.functions] == ["calculate_total", "checkout"]
-    assert relationships.call_sites == ()
-    assert relationships.direct_calls == ()
+    assert [item.expression for item in relationships.call_sites] == [
+        "calculate_total(unit_price, quantity)",
+    ]
+    assert [(item.caller, item.callee) for item in relationships.direct_calls] == [
+        ("checkout", "calculate_total"),
+    ]
     assert relationships.unresolved_calls == ()

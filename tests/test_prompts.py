@@ -135,6 +135,8 @@ def test_generation_prompt_contains_all_required_policy_sections(source):
     assert "expected_basis" in system and "implementation_assumption" in system
     assert "schema_version 1.1" in system and "unit/collaboration" in system
     assert "unresolved_calls" in system and "matching names alone" in system
+    assert "candidate entries, not business truth" in system
+    assert "simple assignment" in system and "shared mutable state" in system
     assert "code as null" in system and "questions" in system
     assert "exactly one JSON object" in system and "shape example" in system
 
@@ -143,10 +145,20 @@ def test_generation_data_is_json_delimited_and_cannot_enter_system(source):
     specification = "规则数据；" + INJECTION_TEXT
     context = build_generation_context(source, specification, OracleMode.SPECIFICATION)
     data = payload(context)
+    assert data["prompt_version"] == "b3-v3"
     assert data["task_kind"] == "initial_generation"
     assert data["requested_oracle_mode"] == "specification"
     assert data["behavior_specification"] == specification
     assert data["source"]["source_code"] == source.source_code
+    assert data["source_graph_hints"] == {
+        "confirmed_adjacency": {"classify_score": []},
+        "candidate_entry_functions": ["classify_score"],
+        "recursive_components": [],
+        "explicit_data_flows": [],
+        "interpretation": (
+            "Derived from confirmed direct calls only; roots are candidates, not declared business entries."
+        ),
+    }
     assert INJECTION_TEXT not in context.system_instruction
     assert context.user_prompt.count(INJECTION_TEXT) == 2
 
@@ -178,6 +190,7 @@ def test_feedback_contains_previous_plan_candidate_failures_coverage_and_budget(
     )
     data = payload(context)
     assert data["task_kind"] == "feedback_revision"
+    assert data["source_graph_hints"]["candidate_entry_functions"] == ["classify_score"]
     assert data["round_budget"] == {
         "previous_round": 1,
         "requested_round": 2,
