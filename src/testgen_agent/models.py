@@ -153,6 +153,33 @@ class SourceBranch(ContractModel):
     source: Text
 
 
+class CallSite(ContractModel):
+    """AST-observed call expression; classification is stored separately."""
+
+    call_id: Text
+    caller: Identifier
+    expression: Text
+    line: Line
+    source: Text
+    argument_expressions: tuple[Text, ...] = ()
+
+
+class DirectCall(ContractModel):
+    """Tool-confirmed same-file name binding for one observed call site."""
+
+    call_site_id: Text
+    caller: Identifier
+    callee: Identifier
+
+
+class UnresolvedCall(ContractModel):
+    """Observed call that the static analyzer cannot safely bind."""
+
+    call_site_id: Text
+    caller: Identifier
+    reason: Text
+
+
 class SourceInfo(ContractModel):
     source_path: Path
     source_code: Text
@@ -160,6 +187,9 @@ class SourceInfo(ContractModel):
     encoding: Text = "utf-8"
     imports: tuple[ImportInfo, ...] = ()
     branches: tuple[SourceBranch, ...] = ()
+    call_sites: tuple[CallSite, ...] = ()
+    direct_calls: tuple[DirectCall, ...] = ()
+    unresolved_calls: tuple[UnresolvedCall, ...] = ()
 
     @model_validator(mode="after")
     def validate_locations(self) -> Self:
@@ -169,8 +199,30 @@ class SourceInfo(ContractModel):
         last_line = len(self.source_code.splitlines())
         if any(function.end_line > last_line for function in self.functions):
             raise ValueError("function location is outside the source")
-        if any(item.line > last_line for item in (*self.imports, *self.branches)):
-            raise ValueError("import/branch location is outside the source")
+        if any(item.line > last_line for item in (*self.imports, *self.branches, *self.call_sites)):
+            raise ValueError("import/branch/call location is outside the source")
+        function_names = set(names)
+        call_sites = {item.call_id: item for item in self.call_sites}
+        if len(call_sites) != len(self.call_sites):
+            raise ValueError("duplicate call-site IDs")
+        if any(item.caller not in function_names for item in self.call_sites):
+            raise ValueError("call-site caller is not a source function")
+        direct_ids = [item.call_site_id for item in self.direct_calls]
+        unresolved_ids = [item.call_site_id for item in self.unresolved_calls]
+        if len(set(direct_ids)) != len(direct_ids) or len(set(unresolved_ids)) != len(unresolved_ids):
+            raise ValueError("duplicate classified call-site references")
+        if set(direct_ids) & set(unresolved_ids):
+            raise ValueError("a call site cannot be both confirmed and unresolved")
+        for item in self.direct_calls:
+            call = call_sites.get(item.call_site_id)
+            if call is None or call.caller != item.caller:
+                raise ValueError("direct call must reference its matching observed call site")
+            if item.caller not in function_names or item.callee not in function_names:
+                raise ValueError("direct call functions must belong to the source")
+        for item in self.unresolved_calls:
+            call = call_sites.get(item.call_site_id)
+            if call is None or call.caller != item.caller:
+                raise ValueError("unresolved call must reference its matching observed call site")
         return self
 
 
@@ -184,6 +236,86 @@ class ScenarioInput(ContractModel):
     kwargs: dict[Identifier, JsonValue] = Field(default_factory=dict)
 
 
+class RelationshipEvidence(ContractModel):
+    kind: Literal["source", "specification", "docstring"]
+    detail: Text
+    line: Line | None = None
+    call_site_ids: tuple[Text, ...] = ()
+
+    @model_validator(mode="after")
+    def consistent_evidence(self) -> Self:
+        if len(set(self.call_site_ids)) != len(self.call_site_ids):
+            raise ValueError("duplicate call-site evidence references")
+        if self.kind == "source" and self.line is None and not self.call_site_ids:
+            raise ValueError("source relationship evidence needs a line or call-site reference")
+        return self
+
+
+class RelationshipAnalysis(ContractModel):
+    relation_id: Text
+    kind: Literal["direct_call", "data_flow", "shared_state", "unknown"]
+    involved_functions: Annotated[tuple[Identifier, ...], Field(min_length=1, max_length=5)]
+    evidence: Annotated[tuple[RelationshipEvidence, ...], Field(min_length=1)]
+    confidence: Literal["confirmed", "candidate", "unknown"]
+    unresolved_questions: tuple[Text, ...] = ()
+
+    @model_validator(mode="after")
+    def consistent_relationship(self) -> Self:
+        if len(set(self.involved_functions)) != len(self.involved_functions):
+            raise ValueError("duplicate functions in a relationship")
+        if self.kind != "unknown" and len(self.involved_functions) < 2:
+            raise ValueError("a concrete relationship needs at least two functions")
+        if self.kind == "unknown" and self.confidence != "unknown":
+            raise ValueError("unknown relationship kinds cannot claim confidence")
+        if self.confidence == "unknown" and not self.unresolved_questions:
+            raise ValueError("unknown relationships need an unresolved question")
+        if self.confidence == "confirmed" and self.kind == "unknown":
+            raise ValueError("unknown relationships cannot be confirmed")
+        return self
+
+
+class StrategyDecision(ContractModel):
+    subject_kind: Literal["function", "relationship"]
+    function_name: Identifier | None = None
+    relationship_id: Text | None = None
+    decision: Literal["unit_test", "collaboration_test", "not_selected"]
+    reason: Text
+
+    @model_validator(mode="after")
+    def consistent_subject(self) -> Self:
+        if self.subject_kind == "function":
+            if self.function_name is None or self.relationship_id is not None:
+                raise ValueError("function decisions need only function_name")
+            if self.decision == "collaboration_test":
+                raise ValueError("function decisions cannot directly select collaboration tests")
+        elif self.relationship_id is None or self.function_name is not None:
+            raise ValueError("relationship decisions need only relationship_id")
+        elif self.decision == "unit_test":
+            raise ValueError("relationship decisions cannot select unit tests")
+        return self
+
+
+class StepValue(ContractModel):
+    kind: Literal["literal", "step_result"]
+    value: JsonValue | None = None
+    step_id: Text | None = None
+
+    @model_validator(mode="after")
+    def consistent_value(self) -> Self:
+        if self.kind == "literal" and self.step_id is not None:
+            raise ValueError("literal step values cannot reference a prior step")
+        if self.kind == "step_result" and (self.step_id is None or self.value is not None):
+            raise ValueError("step-result values need only a prior step ID")
+        return self
+
+
+class ScenarioStep(ContractModel):
+    step_id: Text
+    function: Identifier
+    args: tuple[StepValue, ...] = ()
+    kwargs: dict[Identifier, StepValue] = Field(default_factory=dict)
+
+
 class TestScenario(ContractModel):
     scenario_id: Text
     target_function: Identifier
@@ -191,11 +323,32 @@ class TestScenario(ContractModel):
     inputs: ScenarioInput
     expected_behavior: Text
     expected_basis: ExpectedBasis
+    test_kind: Literal["unit", "collaboration"] = "unit"
+    involved_functions: tuple[Identifier, ...] = ()
+    relationship_ids: tuple[Text, ...] = ()
+    steps: tuple[ScenarioStep, ...] = ()
+
+    @model_validator(mode="after")
+    def ordered_steps(self) -> Self:
+        step_ids = [step.step_id for step in self.steps]
+        if len(set(step_ids)) != len(step_ids):
+            raise ValueError("duplicate scenario step IDs")
+        seen: set[str] = set()
+        for step in self.steps:
+            references = [item.step_id for item in (*step.args, *step.kwargs.values()) if item.kind == "step_result"]
+            if any(reference not in seen for reference in references):
+                raise ValueError("scenario steps may reference only earlier step results")
+            seen.add(step.step_id)
+        return self
 
 
 class TestPlan(ContractModel):
+    schema_version: Literal["1.0", "1.1"] = "1.0"
     target_functions: Annotated[tuple[Identifier, ...], Field(min_length=1, max_length=5)]
     oracle_mode: OracleMode
+    entry_functions: tuple[Identifier, ...] = ()
+    relationships: tuple[RelationshipAnalysis, ...] = ()
+    strategy: tuple[StrategyDecision, ...] = ()
     scenarios: tuple[TestScenario, ...] = ()
 
     @model_validator(mode="after")
@@ -211,6 +364,71 @@ class TestPlan(ContractModel):
             s.expected_basis.kind != "implementation_assumption" for s in self.scenarios
         ):
             raise ValueError("characterization scenarios must label implementation assumptions")
+        relationship_ids = [item.relation_id for item in self.relationships]
+        if len(set(relationship_ids)) != len(relationship_ids):
+            raise ValueError("duplicate relationship IDs")
+        target_set = set(self.target_functions)
+        if any(not set(item.involved_functions).issubset(target_set) for item in self.relationships):
+            raise ValueError("relationship functions must belong to plan targets")
+        if len(set(self.entry_functions)) != len(self.entry_functions) or not set(self.entry_functions).issubset(target_set):
+            raise ValueError("entry functions must be unique plan targets")
+        if self.schema_version == "1.0":
+            if self.entry_functions or self.relationships or self.strategy or any(
+                scenario.involved_functions or scenario.relationship_ids or scenario.steps
+                or scenario.test_kind != "unit" for scenario in self.scenarios
+            ):
+                raise ValueError("relationship fields require plan schema version 1.1")
+            return self
+        if not self.entry_functions:
+            raise ValueError("schema 1.1 plans need at least one entry function")
+        function_decisions = [item.function_name for item in self.strategy if item.subject_kind == "function"]
+        relationship_decisions = [item.relationship_id for item in self.strategy if item.subject_kind == "relationship"]
+        if len(set(function_decisions)) != len(function_decisions) or set(function_decisions) != target_set:
+            raise ValueError("schema 1.1 needs exactly one strategy decision per target function")
+        if len(set(relationship_decisions)) != len(relationship_decisions) or set(relationship_decisions) != set(relationship_ids):
+            raise ValueError("schema 1.1 needs exactly one strategy decision per relationship")
+        relationship_map = {item.relation_id: item for item in self.relationships}
+        function_strategy = {
+            item.function_name: item.decision
+            for item in self.strategy if item.subject_kind == "function"
+        }
+        relationship_strategy = {
+            item.relationship_id: item.decision
+            for item in self.strategy if item.subject_kind == "relationship"
+        }
+        if any(
+            relationship_map[relation_id].confidence == "unknown" and decision == "collaboration_test"
+            for relation_id, decision in relationship_strategy.items()
+        ):
+            raise ValueError("unknown relationships cannot be selected for collaboration tests")
+        for scenario in self.scenarios:
+            involved = set(scenario.involved_functions)
+            if not involved or scenario.target_function not in involved or not involved.issubset(target_set):
+                raise ValueError("scenario involved functions must include its target and belong to the plan")
+            if len(involved) != len(scenario.involved_functions):
+                raise ValueError("duplicate involved functions in a scenario")
+            if not set(scenario.relationship_ids).issubset(relationship_map):
+                raise ValueError("scenario references an unknown relationship")
+            if scenario.test_kind == "unit":
+                if involved != {scenario.target_function} or scenario.relationship_ids or scenario.steps:
+                    raise ValueError("unit scenarios cover one function without relationships or steps")
+                if function_strategy[scenario.target_function] != "unit_test":
+                    raise ValueError("unit scenarios require a matching unit-test strategy decision")
+            else:
+                if len(involved) < 2 or not scenario.relationship_ids:
+                    raise ValueError("collaboration scenarios need multiple functions and relationships")
+                if any(relationship_map[item].confidence == "unknown" for item in scenario.relationship_ids):
+                    raise ValueError("unknown relationships cannot justify collaboration scenarios")
+                if any(
+                    not set(relationship_map[item].involved_functions).issubset(involved)
+                    for item in scenario.relationship_ids
+                ):
+                    raise ValueError("collaboration scenarios must include all functions in referenced relationships")
+                if any(relationship_strategy[item] != "collaboration_test" for item in scenario.relationship_ids):
+                    raise ValueError("collaboration scenarios require matching strategy decisions")
+                if scenario.steps:
+                    if len(scenario.steps) < 2 or any(step.function not in involved for step in scenario.steps):
+                        raise ValueError("collaboration steps must call involved functions in a multi-step sequence")
         return self
 
 
@@ -490,7 +708,42 @@ def _issues(issues: tuple[Issue, ...], rounds: tuple[CandidateRound, ...]) -> No
                 raise ValueError("issue references a nonexistent scenario")
 
 
+def validate_plan_against_source(plan: TestPlan, source: SourceInfo) -> None:
+    """Cross-check model-produced relationship references against AST tool facts."""
+    function_names = {function.name for function in source.functions}
+    if not set(plan.target_functions).issubset(function_names):
+        raise ValueError("generated plan must target analyzed source functions")
+    call_site_ids = {item.call_id for item in source.call_sites}
+    direct_by_id = {item.call_site_id: item for item in source.direct_calls}
+    unresolved_ids = {item.call_site_id for item in source.unresolved_calls}
+    for relationship in plan.relationships:
+        evidence_ids = {
+            call_site_id
+            for evidence in relationship.evidence
+            for call_site_id in evidence.call_site_ids
+        }
+        if not evidence_ids.issubset(call_site_ids):
+            raise ValueError("relationship evidence references an unknown source call site")
+        if any(
+            evidence.kind == "source" and evidence.line is not None
+            and evidence.line > len(source.source_code.splitlines())
+            for evidence in relationship.evidence
+        ):
+            raise ValueError("relationship source evidence line is outside the source")
+        if relationship.confidence == "confirmed" and evidence_ids & unresolved_ids:
+            raise ValueError("unresolved source calls cannot support confirmed relationships")
+        if relationship.kind == "direct_call" and relationship.confidence == "confirmed":
+            expected = relationship.involved_functions
+            if not any(
+                call_site_id in direct_by_id
+                and (direct_by_id[call_site_id].caller, direct_by_id[call_site_id].callee) == expected
+                for call_site_id in evidence_ids
+            ):
+                raise ValueError("confirmed direct relationships need matching tool-confirmed call evidence")
+
+
 class AgentState(ContractModel):
+    schema_version: Literal["1.0", "1.1"] = "1.0"
     run_id: Text
     request: TaskInput
     oracle_mode: OracleMode
@@ -515,12 +768,12 @@ class AgentState(ContractModel):
         if self.source_info is not None and self.source_info.source_path != self.request.source_path:
             raise ValueError("source metadata belongs to a different input")
         for item in self.history:
-            if item.generated is not None and (
-                self.source_info is None or not set(item.generated.plan.target_functions).issubset(
-                    function.name for function in self.source_info.functions
-                )
-            ):
-                raise ValueError("generated plan must target analyzed source functions")
+            if item.generated is not None:
+                if item.generated.plan.schema_version != self.schema_version:
+                    raise ValueError("state and generated plan schema versions must agree")
+                if self.source_info is None:
+                    raise ValueError("generated plans require analyzed source metadata")
+                validate_plan_against_source(item.generated.plan, self.source_info)
         if self.stop_reason is not None and self.next_action not in {AgentAction.FINISH, AgentAction.REQUEST_REVIEW}:
             raise ValueError("a stopped task cannot request more generation or execution")
         return self
@@ -536,12 +789,13 @@ class ReportMetrics(ContractModel):
 
 
 class FinalReport(ContractModel):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.0", "1.1"] = "1.0"
     run_id: Text
     request: TaskInput
     oracle_mode: OracleMode
     status: TaskStatus
     stop_reason: StopReason
+    source_info: SourceInfo | None = None
     rounds: tuple[CandidateRound, ...] = ()
     selected_round: RoundNumber | None = None
     final_test_file: Path | None = None
@@ -554,6 +808,16 @@ class FinalReport(ContractModel):
     def consistent_report(self) -> Self:
         _history(self.rounds, self.request, self.oracle_mode)
         _issues(self.unresolved_issues, self.rounds)
+        if self.source_info is not None and self.source_info.source_path != self.request.source_path:
+            raise ValueError("report source metadata belongs to a different input")
+        for item in self.rounds:
+            if item.generated is not None:
+                if item.generated.plan.schema_version != self.schema_version:
+                    raise ValueError("report and generated plan schema versions must agree")
+                if self.schema_version == "1.1":
+                    if self.source_info is None:
+                        raise ValueError("schema 1.1 reports with generated plans need source metadata")
+                    validate_plan_against_source(item.generated.plan, self.source_info)
         candidate = _selected(self.rounds, self.selected_round)
         if (candidate is None) != (self.final_test_file is None):
             raise ValueError("final test file and selected candidate must both exist or both be null")

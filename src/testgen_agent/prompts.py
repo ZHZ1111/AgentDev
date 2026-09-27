@@ -9,7 +9,7 @@ from .llm_client import GenerationContext
 from .models import CandidateRound, ContractModel, OracleMode, SourceInfo
 
 
-PROMPT_VERSION = "b3-v1"
+PROMPT_VERSION = "b3-v2"
 TASK_DATA_START = "TASK_DATA_JSON_START"
 TASK_DATA_END = "TASK_DATA_JSON_END"
 MAX_TOOL_LOG_CHARS = 12_000
@@ -17,29 +17,90 @@ MAX_TOOL_LOG_CHARS = 12_000
 
 OUTPUT_EXAMPLE: dict[str, Any] = {
     "plan": {
-        "target_functions": ["calculate_total"],
+        "schema_version": "1.1",
+        "target_functions": ["calculate_total", "checkout"],
         "oracle_mode": "specification",
-        "scenarios": [{
-            "scenario_id": "normal-product",
-            "target_function": "calculate_total",
-            "category": "normal",
-            "inputs": {"args": [12, 3], "kwargs": {}},
-            "expected_behavior": "returns 36",
-            "expected_basis": {
-                "kind": "specification",
-                "detail": "the behavior specification defines unit_price * quantity",
-            },
+        "entry_functions": ["checkout"],
+        "relationships": [{
+            "relation_id": "rel-checkout-total",
+            "kind": "direct_call",
+            "involved_functions": ["checkout", "calculate_total"],
+            "evidence": [{
+                "kind": "source",
+                "detail": "checkout directly calls calculate_total",
+                "line": 8,
+                "call_site_ids": ["call-checkout-total"],
+            }],
+            "confidence": "confirmed",
+            "unresolved_questions": [],
         }],
+        "strategy": [
+            {
+                "subject_kind": "function",
+                "function_name": "calculate_total",
+                "relationship_id": None,
+                "decision": "unit_test",
+                "reason": "price multiplication has an independently specified boundary",
+            },
+            {
+                "subject_kind": "function",
+                "function_name": "checkout",
+                "relationship_id": None,
+                "decision": "unit_test",
+                "reason": "the public entry has its own validation behavior",
+            },
+            {
+                "subject_kind": "relationship",
+                "function_name": None,
+                "relationship_id": "rel-checkout-total",
+                "decision": "collaboration_test",
+                "reason": "the entry result combines behavior across the confirmed call",
+            },
+        ],
+        "scenarios": [
+            {
+                "scenario_id": "unit-product",
+                "target_function": "calculate_total",
+                "category": "normal",
+                "inputs": {"args": [12, 3], "kwargs": {}},
+                "expected_behavior": "returns 36",
+                "expected_basis": {
+                    "kind": "specification",
+                    "detail": "the specification defines unit_price * quantity",
+                },
+                "test_kind": "unit",
+                "involved_functions": ["calculate_total"],
+                "relationship_ids": [],
+                "steps": [],
+            },
+            {
+                "scenario_id": "collaboration-checkout",
+                "target_function": "checkout",
+                "category": "normal",
+                "inputs": {"args": [12, 3], "kwargs": {}},
+                "expected_behavior": "returns 36 through the pricing workflow",
+                "expected_basis": {
+                    "kind": "specification",
+                    "detail": "the specification defines checkout's total",
+                },
+                "test_kind": "collaboration",
+                "involved_functions": ["checkout", "calculate_total"],
+                "relationship_ids": ["rel-checkout-total"],
+                "steps": [],
+            },
+        ],
     },
     "code": (
-        "from subject import calculate_total\n\n"
-        "def test_normal_product():\n"
-        "    assert calculate_total(12, 3) == 36\n"
+        "from subject import calculate_total, checkout\n\n"
+        "def test_unit_product():\n"
+        "    assert calculate_total(12, 3) == 36\n\n"
+        "def test_collaboration_checkout():\n"
+        "    assert checkout(12, 3) == 36\n"
     ),
-    "mappings": [{
-        "test_function": "test_normal_product",
-        "scenario_ids": ["normal-product"],
-    }],
+    "mappings": [
+        {"test_function": "test_unit_product", "scenario_ids": ["unit-product"]},
+        {"test_function": "test_collaboration_checkout", "scenario_ids": ["collaboration-checkout"]},
+    ],
     "assumptions": [],
     "questions": [],
 }
@@ -57,6 +118,11 @@ SUPPORTED TASK
 - Tests may use Python's standard library and pytest. Do not require network, files, external services, third-party packages other than pytest, nondeterministic time, or installation steps.
 - Import targets only with `from subject import <target_function>`; never choose paths or write files.
 - Return a plan before code. Cover meaningful normal, boundary, exception, and major source-branch behavior. Include each category when its expectation is supported; when a category is inapplicable or undefined, do not invent an oracle and explain the gap in assumptions or questions.
+- Use TestPlan schema_version 1.1. Select entry functions, analyze relationships, and provide exactly one reasoned strategy decision for every target function and every reported relationship.
+- AST call sites and direct_calls in task data are host-tool facts. Keep unresolved_calls uncertain. Never infer a confirmed relationship from matching names alone, and never upgrade an unresolved call to confirmed.
+- Distinguish scenario category from test_kind: normal/boundary/exception/branch describes behavior, while unit/collaboration describes test scope. A collaboration scenario needs evidence and names every involved function and relationship.
+- Do not turn every call edge into a collaboration test. Add one only when it verifies behavior beyond focused unit cases; otherwise select not_selected and explain why.
+- For an entry function that calls dependencies, invoke the real entry and its real same-file dependencies. For an explicitly supported data pipeline without one entry, use ordered steps and step_result references; do not invent workflows from names or compatible types.
 - Every scenario and every assertion needs a concrete expected_basis: specification, docstring, or implementation_assumption. A characterization oracle describes current behavior and does not prove correctness.
 - Prefer specific input/output assertions, pytest.raises for specified exceptions, and focused parametrization. A mere function call, `assert True`, or an assertion unrelated to the stated expectation is invalid.
 
@@ -82,7 +148,8 @@ _INITIAL_RULES = """
 
 INITIAL GENERATION
 - Use the requested oracle_mode exactly. In specification mode, ground expectations in the supplied behavior specification or docstrings and surface conflicts. In characterization mode, label every expected basis as implementation_assumption.
-- Inspect the listed source branches and design cases for the important outcomes without duplicating equivalent cases.
+- Inspect the listed source branches, call sites, confirmed direct calls, and unresolved calls. Decide candidate entries and unit/collaboration coverage without duplicating equivalent cases.
+- RelationshipAnalysis combines tool facts with your explanation. A confirmed direct_call must cite matching call_site_ids from direct_calls; candidate data_flow relationships need source/specification evidence; unknown relationships retain a precise unresolved question.
 - The host will validate the JSON contract and later validate and execute the code; do not fabricate those results.
 """
 
@@ -90,9 +157,9 @@ INITIAL GENERATION
 _FEEDBACK_RULES = """
 
 FEEDBACK REVISION
-- Revise the previous plan and complete candidate using only the supplied source, behavioral evidence, and real host-tool observations.
+- Revise the previous relationship analysis, strategy, plan, and complete candidate using only the supplied source, behavioral evidence, and real host-tool observations.
 - Preserve evidence-backed assertions. A specification-backed assertion failure can indicate a source defect; keep the assertion and expose the conflict in questions instead of changing the expected value to match the implementation.
-- Repair candidate syntax, import, collection, or execution errors when the evidence identifies a test defect. Add focused scenarios for missing lines or branch arcs when their expected behavior is supportable.
+- Repair candidate syntax, import, collection, or execution errors when the evidence identifies a test defect. Add focused scenarios for missing lines or branch arcs when their expected behavior is supportable. Decide whether the gap belongs to an entry workflow, an internal function boundary, or neither; preserve prior relationship IDs when the evidence has not changed.
 - Do not guess when coverage is unavailable, logs are truncated, or failure attribution is ambiguous. Record the remaining question.
 - Respect the supplied requested_round and remaining budget. Return one complete replacement GeneratedTests object, not a patch or diff.
 """

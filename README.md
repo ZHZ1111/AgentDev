@@ -2,13 +2,13 @@
 
 课程项目：为单个 Python 文件中的 1–5 个顶层同步纯函数生成并执行 pytest 测试集。设计目标是由 Agent 自动分析函数关系，决定单元测试和协作测试策略，再根据失败及覆盖率反馈进行有限迭代。LLM 服务商选用 DeepSeek。
 
-当前完成 A1/A2/A3/B1/B2，以及 B3 的生成/反馈 Prompt 实现和离线验证：包括输入输出及状态设计、三个源码/行为说明样例、工程骨架、配置检查、DeepSeek 结构化生成适配、手写 pytest/coverage 环境验证、模块间数据模型和正式 Prompt 构建。B3 真实请求尚待明确授权发送公开样例数据；源码分析、测试执行和反馈循环尚未实现。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
+当前完成 A1/A2/A3/B1/B2，以及 B1 关系契约扩展和 B3 `b3-v2` 生成/反馈 Prompt 的离线验证：包括输入输出及状态设计、四组源码/行为说明样例、工程骨架、配置检查、DeepSeek 结构化生成适配、手写 pytest/coverage 环境验证、兼容旧产物的数据模型和正式 Prompt 构建。B3 真实请求尚待明确授权发送公开关联样例数据；AST 自动关系分析、测试执行和反馈循环尚未实现。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
 
-2026-09-27 新增设计：自动判断同文件函数关系，并自主规划测试集。该能力及所需数据契约、Prompt 扩展尚未实现，已有 A/B 验收不代表关系分析功能已完成。修订任务预算为 58 小时。
+2026-09-27 新增范围：自动判断同文件函数关系，并自主规划测试集。所需 `1.1` 数据契约和 `b3-v2` Prompt 已实现；AST 事实提取、端到端生成/执行与报告仍未实现。修订任务预算为 58 小时。
 
-## 函数关系与测试集（设计目标，尚未实现）
+## 函数关系与测试集
 
-用户只需提供源码和必要的行为说明，无需手动列出函数关系或指定测试类型。AST 工具提取调用点、行号和源码片段，Agent 结合这些证据及行为说明判断关系和测试策略。
+用户只需提供源码和必要的行为说明，无需手动列出函数关系或指定测试类型。当前契约可保存 AST 工具的调用点、确认边和未知调用，并校验 Agent 给出的关系、入口及测试策略；实际 AST 提取工具在 C1a 实现。
 
 | 输入中的关系 | Agent 的预期处理 |
 |---|---|
@@ -73,7 +73,7 @@ DeepSeek 官方示例使用服务地址 `https://api.deepseek.com`、Bearer 认�
 
 当前没有 `--source` / `--spec` 运行接口；任务清单中的端到端命令仍是后续设计，不是已实现命令。`models.py` 已实现 B1 数据契约，`llm_client.py` 已实现 B2 DeepSeek 适配层，`prompts.py` 已实现 B3 首轮与反馈上下文；`agent`、`reporting` 和源码/执行工具模块仍是注明阶段的骨架。
 
-`models.py` 提供 `SourceInfo`、`TestPlan`、`GeneratedTests`、`ExecutionResult`、`CoverageResult`、`AgentState`、`FinalReport` 及辅助类型。生成内容与工具实测结果分开；百分比和报告指标由计数及选定候选计算，未知值使用 `null`。接口、状态引用和序列化约定见 Design 第 4 节。
+`models.py` 提供 `SourceInfo`、`RelationshipAnalysis`、`TestPlan`、`GeneratedTests`、`ExecutionResult`、`CoverageResult`、`AgentState`、`FinalReport` 及辅助类型。关系 Schema `1.1` 保存调用证据、入口、逐函数/关系策略、unit/collaboration 场景和有序数据传递；旧 `1.0` 单函数产物仍可读取。生成内容与工具实测结果分开；百分比和报告指标由计数及选定候选计算，未知值使用 `null`。接口、状态引用和序列化约定见 Design 第 4 节。
 
 `llm_client.py` 提供 `DeepSeekClient.generate_tests(context)`：自动附加生成结果 Schema，使用 DeepSeek JSON Output，再用本地 Pydantic 严格校验。默认对瞬时故障最多重试 2 次，对格式错误最多修复 1 次，总 HTTP 请求不超过 4 次；400/401/402/403/404 立即失败。错误和公开配置不包含 Key、认证头或响应正文。B2 设计与实测见 Design 第 5 节。
 
@@ -84,16 +84,16 @@ DeepSeek 官方示例使用服务地址 `https://api.deepseek.com`、Bearer 认�
 
 每次结果保存到 `outputs/b2/<run_id>/validation.json`。2026-09-26 实测 `deepseek-flash` 一次返回合法结构，耗时 1.573 秒、1125 tokens，无格式修复；精选证据为 [B2 验证结果](evaluation/b2_validation.json)。此命令使用固定轻量验证 Prompt，不等同于后续 B3 的正式 Prompt 或端到端 Agent。
 
-`prompts.py` 把可信规则放入 system message，把源码、行为说明、候选和工具日志放入带边界标记的 JSON 数据。首轮要求正常/边界/异常/分支场景及逐项预期依据；反馈轮携带此前计划、候选、真实失败、缺失覆盖和剩余预算，并禁止删除有效断言、skip/xfail、广泛捕获异常或修改源码。
+`prompts.py` 的 `b3-v2` 把可信规则放入 system message，把源码、调用事实、行为说明、候选和工具日志放入带边界标记的 JSON 数据。首轮要求 Agent 自主选择入口、关系和单元/协作策略，同时覆盖正常/边界/异常/分支场景及逐项预期依据；反馈轮携带此前关系、策略、候选、真实失败、缺失覆盖和剩余预算，并禁止删除有效断言、skip/xfail、广泛捕获异常或修改源码。
 
 ```powershell
-# 向 DeepSeek 发送公开 calculation 样例源码、行为说明及正式 B3 Prompt；可能产生 API 费用
+# 向 DeepSeek 发送公开 relationships 样例源码、行为说明及正式 B3 Prompt；可能产生 API 费用
 .\.venv\Scripts\python.exe -m testgen_agent.b3_smoke
 ```
 
-每次结果保存到 `outputs/b3/<run_id>/validation.json`。该命令会向外部服务发送 `examples/calculation.py`、`examples/calculation.md` 和 Prompt 内容；仅在明确允许发送这些数据后运行。B3 真实调用尚未执行，不能仅凭离线测试宣称真实验收完成。
+每次结果保存到 `outputs/b3/<run_id>/validation.json`。该命令会向外部服务发送 `examples/relationships.py`、`examples/relationships.md` 和 Prompt 内容；仅在明确允许发送这些数据后运行。它会检查关系 Schema、源码证据、入口、策略及单元/协作场景。B3 真实调用尚未执行，不能仅凭离线测试宣称真实验收完成。
 
-当前共 132 项自身测试通过，其中 B1 新增 60 项、B2 新增 18 项、B3 新增 21 项；自动测试不发送真实 API 请求。
+当前共 159 项自身测试通过，其中 B1 原始契约新增 60 项、B1 关系扩展新增 27 项、B2 新增 18 项、B3 新增 21 项；自动测试不发送真实 API 请求。
 
 ## A3 环境验证
 
@@ -117,6 +117,7 @@ DeepSeek 官方示例使用服务地址 `https://api.deepseek.com`、Bearer 认�
 - `examples/calculation.py` / `.md`：正常计算。
 - `examples/validation.py` / `.md`：多分支校验及明确异常类型。
 - `examples/discount.py` / `.md`：有意保留满 100 打折的边界缺陷。
+- `examples/relationships.py` / `.md`：`checkout → calculate_total` 的确认直接调用、单元与协作策略样例。
 
 后续任务将在 `outputs/<run_id>/` 保存测试、双格式报告、轨迹及每轮快照；具体状态和验收约定见 Design。当前配置检查不会生成这些文件。
 

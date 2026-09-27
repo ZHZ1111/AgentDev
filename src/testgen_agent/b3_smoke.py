@@ -13,7 +13,7 @@ from uuid import uuid4
 
 from .config import ConfigError, load_config
 from .llm_client import DeepSeekClient, LLMError
-from .models import FunctionInfo, OracleMode, SourceInfo
+from .models import FunctionInfo, OracleMode, SourceInfo, validate_plan_against_source
 from .prompts import (
     PROMPT_VERSION, TASK_DATA_END, TASK_DATA_START, build_generation_context,
 )
@@ -42,27 +42,47 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         project_root = Path(__file__).resolve().parents[2]
-        source_text = (project_root / "examples/calculation.py").read_text(encoding="utf-8")
-        specification = (project_root / "examples/calculation.md").read_text(encoding="utf-8")
+        source_text = (project_root / "examples/relationships.py").read_text(encoding="utf-8")
+        specification = (project_root / "examples/relationships.md").read_text(encoding="utf-8")
         source = SourceInfo(
-            source_path=Path("examples/calculation.py"),
+            source_path=Path("examples/relationships.py"),
             source_code=source_text,
-            functions=(FunctionInfo(
-                name="calculate_total",
-                signature="(unit_price: int, quantity: int) -> int",
-                start_line=4,
-                end_line=9,
-                docstring=(
-                    "返回单价乘以数量；输入为非负整数，零单价或零数量返回 0。\n\n"
-                    "输入域是调用方前置条件，不包含 bool；域外行为未定义。"
+            functions=(
+                FunctionInfo(
+                    name="calculate_total",
+                    signature="(unit_price: int, quantity: int) -> int",
+                    start_line=4,
+                    end_line=6,
+                    docstring="返回非负整数单价与数量的乘积。",
                 ),
-            ),),
+                FunctionInfo(
+                    name="checkout",
+                    signature="(unit_price: int, quantity: int) -> int",
+                    start_line=9,
+                    end_line=11,
+                    docstring="结账入口：返回 calculate_total 计算的总价。",
+                ),
+            ),
+            call_sites=({
+                "call_id": "call-checkout-total",
+                "caller": "checkout",
+                "expression": "calculate_total(unit_price, quantity)",
+                "line": 11,
+                "source": "return calculate_total(unit_price, quantity)",
+                "argument_expressions": ("unit_price", "quantity"),
+            },),
+            direct_calls=({
+                "call_site_id": "call-checkout-total",
+                "caller": "checkout",
+                "callee": "calculate_total",
+            },),
         )
         context = build_generation_context(source, specification, OracleMode.SPECIFICATION)
         config = load_config(env_file=args.env_file)
         client = DeepSeekClient(config, max_tokens=4096)
         result = client.generate_tests(context)
         generated = result.generated
+        validate_plan_against_source(generated.plan, source)
         code = generated.code or ""
         try:
             ast.parse(code)
@@ -82,13 +102,26 @@ def main(argv: list[str] | None = None) -> int:
                 and context.user_prompt.endswith("\n" + TASK_DATA_END)
             ),
             "requested_oracle_mode_preserved": generated.plan.oracle_mode == OracleMode.SPECIFICATION,
-            "target_function_preserved": generated.plan.target_functions == ("calculate_total",),
+            "relationship_schema_11_used": generated.plan.schema_version == "1.1",
+            "target_functions_preserved": set(generated.plan.target_functions) == {"calculate_total", "checkout"},
+            "workflow_entry_selected": "checkout" in generated.plan.entry_functions,
+            "confirmed_direct_relationship_preserved": any(
+                relationship.kind == "direct_call"
+                and relationship.confidence == "confirmed"
+                and set(relationship.involved_functions) == {"checkout", "calculate_total"}
+                for relationship in generated.plan.relationships
+            ),
+            "strategy_complete": len(generated.plan.strategy) == 3,
+            "unit_and_collaboration_scenarios_present": (
+                {scenario.test_kind for scenario in generated.plan.scenarios}
+                == {"unit", "collaboration"}
+            ),
             "normal_and_boundary_scenarios_present": {"normal", "boundary"}.issubset(categories),
             "all_scenarios_have_supported_basis": all(
                 scenario.expected_basis.kind in {"specification", "docstring"}
                 for scenario in generated.plan.scenarios
             ),
-            "import_convention_followed": "from subject import calculate_total" in code,
+            "import_convention_followed": "from subject import" in code,
             "generated_code_is_python": syntax_valid,
             "no_forbidden_test_bypass": not any(fragment in code for fragment in forbidden_fragments),
             "tool_metrics_absent_from_generation": not any(
@@ -110,6 +143,15 @@ def main(argv: list[str] | None = None) -> int:
         exit_code = 1
     except LLMError as error:
         record.update({"status": "failed", "error": error.safe_details()})
+        exit_code = 1
+    except ValueError:
+        record.update({
+            "status": "failed",
+            "error": {
+                "code": "relationship_validation",
+                "message": "生成计划未通过源码函数关系与策略交叉校验。",
+            },
+        })
         exit_code = 1
 
     artifact = workspace / "validation.json"

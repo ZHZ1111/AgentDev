@@ -119,8 +119,10 @@ def payload(context) -> dict:
 
 def test_output_example_satisfies_generated_tests_contract():
     parsed = GeneratedTests.model_validate(OUTPUT_EXAMPLE)
-    assert parsed.plan.target_functions == ("calculate_total",)
-    assert parsed.mappings[0].test_function == "test_normal_product"
+    assert parsed.plan.schema_version == "1.1"
+    assert parsed.plan.target_functions == ("calculate_total", "checkout")
+    assert parsed.plan.relationships[0].relation_id == "rel-checkout-total"
+    assert parsed.mappings[0].test_function == "test_unit_product"
 
 
 def test_generation_prompt_contains_all_required_policy_sections(source):
@@ -131,6 +133,8 @@ def test_generation_prompt_contains_all_required_policy_sections(source):
     assert "from subject import <target_function>" in system
     assert all(category in system for category in ("normal", "boundary", "exception", "major source-branch"))
     assert "expected_basis" in system and "implementation_assumption" in system
+    assert "schema_version 1.1" in system and "unit/collaboration" in system
+    assert "unresolved_calls" in system and "matching names alone" in system
     assert "code as null" in system and "questions" in system
     assert "exactly one JSON object" in system and "shape example" in system
 

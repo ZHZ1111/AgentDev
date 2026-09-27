@@ -1,7 +1,7 @@
 # 测试生成 Agent 技术设计
 
-> 当前进度：A1、A2、A3、B1、B2 已完成，B3 的生成/反馈 Prompt 与离线验证已完成。当前提供配置检查 CLI、DeepSeek 结构化生成适配层、正式 Prompt 构建入口、环境验证入口及模块间的数据契约；B3 真实请求尚待明确授权将公开样例源码和说明发送给 DeepSeek。通用源码分析、执行工具和 Agent 反馈循环尚未实现；本文其余任务接口、状态和输出目录仍是后续实现约定。A3 的手写测试不是模型生成结果。
-> 2026-09-27 范围更新：Agent 自主判断同文件函数关联并规划单元/协作测试集。下文第 1.8、4.8、6.5 节是新增设计，尚未实现；原 A/B 验收记录只适用于此前契约和 Prompt。
+> 当前进度：A1、A2、A3、B1、B2 已完成；B1 关系契约扩展及 B3 `b3-v2` 生成/反馈 Prompt 已完成离线验证。当前提供配置检查 CLI、DeepSeek 结构化生成适配层、正式 Prompt 构建入口、关系/策略数据契约、环境验证入口及兼容旧产物的模型；B3 真实请求尚待明确授权将公开关联样例源码和说明发送给 DeepSeek。通用 AST 分析、执行工具和 Agent 反馈循环尚未实现；本文其余任务接口、状态和输出目录仍是后续实现约定。A3 的手写测试不是模型生成结果。
+> 2026-09-27 范围更新：Agent 自主判断同文件函数关联并规划单元/协作测试集。第 1.8 节范围已落实到第 4.8 节的 `1.1` 数据契约和第 6.5 节的 `b3-v2` Prompt；关系事实的自动 AST 提取及端到端执行仍属于 C–F 阶段。
 
 ## 1. 范围与验收（A1）
 
@@ -67,7 +67,7 @@
 - `test_subject.py` 使用 `from subject import <函数名>` 导入。配合相邻的 `subject.py`，从运行目录执行 `python -m pytest test_subject.py`；单独复制测试文件并不能保证导入成功。
 - 若没有可用候选，顶层 `test_subject.py` 不生成，报告中的最终测试路径为 `null`；错误候选仍留在轮次快照中。不能用空文件代替成功结果。
 - `report.md` 和 `report.json` 至少包含：输入及行为依据模式、模型标识与非敏感配置、最终状态、停止原因、实际轮数与调用次数、场景及依据、首轮和最终候选结果、最终文件与快照位置、未解决问题。
-- 按新增关系设计扩展后，报告还包含函数关系、证据位置、单元/协作测试选择与理由、未解析关系；每轮计划保留相关场景和关系引用。它们属于待实现输出，不是当前 B1 模型已有字段。
+- `1.1` 数据契约已能在每轮计划和最终报告中保留函数关系、证据位置、单元/协作测试选择与理由、未解析关系及场景引用；报告文件的实际渲染与落盘仍由 F 阶段实现。
 - 执行结果至少展示退出码、收集数、实际执行数、通过/失败/错误/跳过数和超时标记；模型不能填写这些实际测量值。
 - 覆盖率至少展示目标文件、已覆盖/总语句、已覆盖/总分支、百分比、缺失行和分支。范围仅限 `subject.py`，不包含测试或 Agent 代码，不叠加不同轮的数据。
 - 覆盖采集失败时标记为不可用并说明原因；分母为 0 时标记为不适用，不能填 100%。失败候选的覆盖率可展示，但需要同时标明该候选失败。
@@ -104,7 +104,7 @@
 
 停止原因另行记录，不与最终状态混用，例如 `coverage_target_met`、`round_limit_reached`、`no_progress`、`suspected_source_defect`、`ambiguous_specification`、`execution_timeout`、`unrecoverable_error`。达到预算上限不会自动变成 `completed`。
 
-### 1.6 三个最小样例
+### 1.6 四个最小样例
 
 样例源码和行为说明一一对应，docstring 与说明保持一致。均只使用标准 Python、无外部依赖、无文件或网络副作用。
 
@@ -113,6 +113,7 @@
 | 正常计算 | `examples/calculation.py` / `examples/calculation.md` | `calculate_total(12, 3) == 36`；`(0, 5)`、`(12, 0)` 都为 0 | 非空有效测试可运行，正常与零值边界通过；目标行覆盖达标，分支不适用。 |
 | 多分支校验 | `examples/validation.py` / `examples/validation.md` | 0/59 为 `fail`，60/89 为 `pass`，90/100 为 `excellent`；-1/101 抛 `ValueError`，浮点/字符串/布尔值抛 `TypeError` | 覆盖类别边界和类型/范围错误。若首轮遗漏分支，反馈应引导追加；不能保证模型首轮一定遗漏。 |
 | 明确规格下的缺陷 | `examples/discount.py` / `examples/discount.md` | 99 → 99，100 → **90**，101 → 90；源码在 100 时实际返回 **100** | 生成规格支持的断言，实际执行发现阈值错误，进入 `needs_review`，保留断言和疑似缺陷证据。 |
+| 同文件直接调用 | `examples/relationships.py` / `examples/relationships.md` | `checkout → calculate_total` 为确认边；两函数 12×3 均为 36，零值为 0 | 分别规划乘法单元测试和入口协作测试，保存调用证据与选择理由，不 mock 同文件依赖。 |
 
 计算样例的非负整数输入域是前置条件，域外行为未定义；不要求自动生成不存在的输入校验。校验样例明确排除 `bool`。折扣样例约定向下取整，避免浮点或金额舍入歧义。
 
@@ -123,8 +124,9 @@
 - 已固定六类输入、默认值和非法输入处理。
 - 已固定最终测试、双格式报告、轨迹及每轮快照的输出约定。
 - 已分开生成、可运行、全部通过与覆盖充分四个维度，并定义四个最终状态及判定优先级。
-- 已准备三个源码文件和三个 UTF-8 行为说明，覆盖正常计算、多分支校验和明确规格缺陷。
+- 已准备四个源码文件和四个 UTF-8 行为说明，覆盖正常计算、多分支校验、明确规格缺陷和同文件直接调用。
 - 2026-09-26 使用本地 Python 3.13.9 做三个源码文件的语法/导入检查及 32 项行为核验（含整数子类、异常类型和已知缺陷确认）：正常计算与校验符合规格；折扣的 100 边界确实得到 100，违反预期 90。该偏差为有意保留的课程样例。核验前后源码 SHA-256 一致，未产生缓存或修改源码。
+- 2026-09-27 对新增关系样例执行 4 项行为核验：`calculate_total(12,3)`、`calculate_total(0,5)`、`checkout(12,3)`、`checkout(12,0)` 均符合说明；核验前后源码 SHA-256 一致。
 
 本记录不替代 A3 的真实 API、样例 pytest 和 coverage 验收；A2 的工程环境和依赖验收见第 2 节。
 
@@ -318,8 +320,8 @@ Agent 自身测试扩充至 **33 项并全部通过**，新检查覆盖最小请
 
 | 核心结构 | 主要字段 | 生产方 → 消费方 |
 |---|---|---|
-| `SourceInfo` | `source_path`、`source_code`、`encoding`、`functions`、`imports`、`branches`；函数信息含名称、签名、docstring 和起止行 | C1 源码工具 → Prompt / 控制器 |
-| `TestPlan` | `target_functions`、`oracle_mode`、`scenarios`；场景含 ID、目标函数、类别、参数、预期行为及依据 | B2/B3 模型输出 → 生成校验 / 反馈上下文 |
+| `SourceInfo` | `source_path`、`source_code`、`encoding`、`functions`、`imports`、`branches`、`call_sites`、`direct_calls`、`unresolved_calls` | C1 源码工具 → Prompt / 控制器 |
+| `TestPlan` | Schema 版本、目标与入口函数、oracle、关系分析、逐函数/关系策略和场景；场景分开记录行为类别与 unit/collaboration 类型 | B2/B3 模型输出 → 生成校验 / 反馈上下文 |
 | `GeneratedTests` | `plan`、`code`、`mappings`、`assumptions`、`questions` | B2 适配层校验后的模型内容 → C2 候选写入 / 控制器 |
 | `ExecutionResult` | `kind`、`exit_code`、收集/执行/各结局计数、stdout/stderr、超时、日志截断及耗时 | D1 执行工具 → 控制器 / 报告 |
 | `CoverageResult` | `target_file`、可用状态、覆盖/总语句及分支、缺失行/弧、采集错误；百分比由计数计算 | D2 覆盖工具 → 控制器 / 报告 |
@@ -386,7 +388,7 @@ flowchart LR
 
 ### 4.6 最终报告与序列化
 
-`FinalReport` 使用版本标识 `1.0`，要求选定轮次和最终文件路径同时存在或同时为空。选定轮次必须可用；报告的指标从该轮执行/覆盖记录读取，调用次数来自宿主，Token 用量未知时使用 `null`，已知组件合计须一致。
+旧报告使用版本标识 `1.0`；关系扩展报告使用 `1.1`。两者都要求选定轮次和最终文件路径同时存在或同时为空。`1.1` 报告在存在生成候选时必须保留 `SourceInfo`，并交叉校验关系证据；旧 `1.0` 单函数产物继续按原契约读取。选定轮次必须可用；报告的指标从该轮执行/覆盖记录读取，调用次数来自宿主，Token 用量未知时使用 `null`，已知组件合计须一致。
 
 状态自洽校验包括：
 
@@ -421,23 +423,23 @@ report_data = report.model_dump(mode="json")
 
 B1 仅固定并验证模块间的数据结构；B2、B3 的实现与验收记录见第 5、6 节，C/D/E 和正式报告输出仍按任务清单继续实施。
 
-### 4.8 关系与测试策略数据契约扩展（新增设计，待实现）
+### 4.8 关系与测试策略数据契约扩展（已实现）
 
-第 4.1–4.7 节描述当前已实现契约；新增字段不能直接传入当前模型，因为当前契约禁止额外字段。实施顺序必须是更新模型及 Schema、更新 Prompt、再更新生成/反馈/报告模块和验收，不仅修改提示词。
+2026-09-27 在 `models.py` 增加关系 Schema `1.1`。旧计划省略版本时按 `1.0` 解析；`1.0` 禁止夹带关系字段，`1.1` 强制完整关系策略。历史 A3/B2 证据无需改写，新产物可以显式迁移。
 
-| 扩展对象 | 建议新增信息 | 来源与校验要求 |
+| 扩展对象 | 已实现信息 | 来源与校验要求 |
 |---|---|---|
-| `SourceInfo` | `call_sites`、已确认直接调用边、`unresolved_calls` | AST 工具产生；保存 caller/callee、行号、片段及解析状态，检查位置和函数名称 |
-| `RelationshipAnalysis` | 关系 ID、direct_call/data_flow/shared_state 等类型、涉及函数、源码/规格依据、confirmed/candidate/unknown、未知项 | 工具证据与 Agent 解释分开；模型不能自行把未知关系升级成静态确认事实 |
-| `TestPlan` | 关系分析、入口选择、测试策略及选择/不选择理由 | 每个引用来自本次源码或关系集；未规划协作时也说明依据 |
-| `TestScenario` | `test_kind`、`involved_functions`、`relationship_ids`；必要时有序调用步骤及返回值引用 | unit/collaboration 与 normal/boundary/exception/branch 分别表示类型和类别；所有目标、关系和步骤引用有效 |
-| `AgentState` / `FinalReport` | 保留关系证据与策略，报告关键策略行为的覆盖情况与未解决项 | 在各轮使用一致的关系 ID；实际执行与覆盖指标仍由工具产生 |
+| `SourceInfo` | `CallSite`、`DirectCall`、`UnresolvedCall` 三组事实 | 调用点保存稳定 ID、caller、表达式、参数表达式、行号和片段；确认边与未知原因引用调用点，校验位置、函数名、唯一性和互斥性 |
+| `RelationshipAnalysis` | 关系 ID、`direct_call/data_flow/shared_state/unknown`、涉及函数、证据、`confirmed/candidate/unknown`、未决问题 | 源码/规格/docstring 证据分开保存；unknown 必须保留问题，confirmed 不能使用未解析调用点 |
+| `TestPlan` | `schema_version=1.1`、`entry_functions`、`relationships`、`strategy` | 每个目标函数和每个关系恰有一条 `unit_test/collaboration_test/not_selected` 决策及理由；入口与引用必须来自计划目标 |
+| `TestScenario` | `test_kind`、`involved_functions`、`relationship_ids`、可选有序 `ScenarioStep` | category 与 test_kind 分维度；协作场景需至少两个函数和非 unknown 关系；步骤结果只能引用此前步骤 |
+| `AgentState` / `FinalReport` | `schema_version`，报告增加 `source_info` | `validate_plan_against_source()` 将模型关系与 AST 事实交叉校验；状态/报告和各轮计划版本一致，`1.1` 报告保留证据来源 |
 
 对入口调用链场景，原 `target_function` 仍表示实际调用的入口，例如 `checkout`，`inputs` 仍是入口输入；`involved_functions` 说明依赖。对没有封装入口的显式数据链，需用有序步骤表示先调用 A，再把输出传给 B，不能用单个输入对象伪装已表达完整组合。
 
 协作测试与执行工具的关系应保持诚实：计划中的涉及函数是设计信息，实际执行路径可能因条件提前退出。工具未采集逐函数调用轨迹时，不把计划宣称为所有依赖都实际执行；模块级覆盖率也不能证明某条调用链或组合断言已被验证。
 
-迁移时明确 Schema 版本和旧产物读取约定，为新增默认值、引用、步骤及旧单函数场景补充测试；B1 原有测试通过不等于扩展已验收。无需重写已有历史证据以伪装采用新格式。
+新增 `tests/test_relationship_models.py` 共 **27 项**测试，覆盖调用点分类、关系置信度、策略/场景一致性、调用方向、场景两维分类、关系引用、步骤顺序、旧 `1.0` 兼容、状态/报告版本和未知调用不得升级为确认关系。B1 原 60 项契约测试保持通过；扩展后的总测试数见第 6.4 节。自动 AST 提取事实仍由 C1a 实现，当前契约测试使用合成的工具事实。
 
 ## 5. DeepSeek LLM 适配层（B2）
 
@@ -505,7 +507,7 @@ B2 完成后，累计 **111 项自身测试全部通过**（`-W error`），`pip
 
 ### 6.1 构建接口与信任边界
 
-实现位置为 `src/testgen_agent/prompts.py`，版本标识为 `b3-v1`。对外提供两个纯构建函数：
+实现位置为 `src/testgen_agent/prompts.py`，当前版本标识为 `b3-v2`。对外提供两个纯构建函数：
 
 - `build_generation_context(source, behavior_specification, oracle_mode)`：为第一轮生成构造 `GenerationContext`。
 - `build_feedback_context(source, behavior_specification, previous, requested_round, max_rounds)`：从已保存候选及真实工具结果构造下一轮反馈上下文。
@@ -545,22 +547,22 @@ stdout/stderr 各保留最多 12,000 字符，同时记录 `truncated` 和原始
 
 新增 `tests/test_prompts.py`，共 **21 项**离线测试。覆盖：示例符合 `GeneratedTests` 契约、七类 Prompt 内容、JSON 数据边界、中文和注入文本原样保留、characterization 模式、反馈计划/代码/失败/覆盖/预算、日志截断、覆盖缺失、无候选/无执行拒绝、非法轮次拒绝，以及正式 Prompt 通过 B2 MockTransport 后的成功解析、格式错误和认证失败受控返回。
 
-截至 2026-09-27，累计 **132 项自身测试全部通过**（`-W error`），`pip check` 通过。`python -m testgen_agent.b3_smoke` 已实现：它固定读取公开课程样例 `examples/calculation.py` 与 `examples/calculation.md`，构造正式首轮 Prompt，调用 DeepSeek，并检查结构、oracle、正常/边界场景、依据、导入、Python 语法和绕过模式；脱敏结果写入 `outputs/b3/<run_id>/validation.json`。
+截至 2026-09-27，累计 **159 项自身测试全部通过**（`-W error`），`pip check` 通过。`python -m testgen_agent.b3_smoke` 已改为读取公开关联样例 `examples/relationships.py` 与 `examples/relationships.md`，构造正式首轮 Prompt，调用 DeepSeek，并检查 `1.1` Schema、源码证据交叉校验、入口、确认直接关系、完整策略、单元/协作场景、oracle、正常/边界场景、导入、Python 语法和绕过模式；脱敏结果写入 `outputs/b3/<run_id>/validation.json`。
 
-B3 的真实调用尚未执行：该调用会把上述公开样例源码、行为说明及正式 Prompt 发送给 DeepSeek，需要用户对这批具体数据外发作明确授权。获得授权并成功运行前，不把 B3 标记为真实 LLM 验收完成，也不创建 `evaluation/b3_validation.json`。
+B3 的真实调用尚未执行：该调用会把上述公开关联样例源码、行为说明及正式 Prompt 发送给 DeepSeek，需要用户对这批具体数据外发作明确授权。获得授权并成功运行前，不把 B3 标记为真实 LLM 验收完成，也不创建 `evaluation/b3_validation.json`。
 
-### 6.5 关联测试 Prompt 扩展（新增设计，待实现）
+### 6.5 关联测试 Prompt 扩展（已实现）
 
-第 6.1–6.4 节记录当前 `b3-v1` 实现；它尚未提供本次新增的关系契约和策略验收。后续 Prompt 版本需要：
+`b3-v2` 已接入关系契约和策略验收：
 
-- 在任务数据中加入 AST 调用点、已确认边和未解析表达式，将它们与模型推断分开。
-- 要求 Agent 自主决定入口、函数关系和单元/协作场景，附源码或规格依据；无需用户输入调用图。
-- 对关联函数判断额外测试价值，不把所有调用边变成强制组合，也不凭名称虚构关系。
-- 协作测试真实调用同文件依赖；预期和异常传播仍遵守既有 oracle 规则。
-- 在反馈轮携带关系、策略及历史场景，结合真实失败和缺失分支选择补充方向；保留原有有效断言。
-- 用扩展后的生成 Schema 与示例约束输出，并测试未知关系、独立函数、多层调用和数据衔接。
+- 任务数据的 `SourceInfo` 携带 AST 调用点、已确认边和未解析表达式，并与模型输出的 `RelationshipAnalysis` 分开。
+- Agent 必须自主决定入口、函数关系和单元/协作场景，附源码或规格依据；用户无需输入调用图。
+- 每个函数和关系都需给出选择或不选择理由；禁止把所有调用边机械转换为协作测试，也禁止凭名称或类型虚构数据流。
+- 协作测试真实调用同文件入口和依赖；无统一入口但有明确数据流时使用有序步骤和 `step_result` 引用。预期和异常传播继续遵守 oracle 规则。
+- 反馈轮保留关系、策略和历史场景，结合真实失败与缺失分支判断补充入口流程还是内部函数边界，并在证据未变化时保留关系 ID。
+- Prompt 内置可通过 `1.1` Schema 的双函数直接调用示例；B2 每次调用继续动态注入最新 `GeneratedTests` Schema。
 
-保持原有信任边界、重试预算和数据脱敏规则。原单函数真实验证即使完成，也不能替代关联样例的端到端验收。
+保持原有信任边界、重试预算和数据脱敏规则。离线测试覆盖未知关系、确认直接调用、独立旧样例和有序数据衔接；多层调用、名称遮蔽、递归等 AST 事实提取测试仍在 C1a 完成。真实关联样例验收仍待明确外发授权。
 
 ## 7. 后续设计章节
 
