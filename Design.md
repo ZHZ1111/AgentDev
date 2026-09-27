@@ -1,6 +1,6 @@
 # 测试生成 Agent 技术设计
 
-> 当前进度：A1、A2、A3、B1、B2 已完成。当前提供配置检查 CLI、DeepSeek 结构化生成适配层、环境验证入口及模块间的数据契约；真实结构化生成、手写样例 pytest 和覆盖率 JSON 已验证。完整生成 Prompt、通用执行工具和 Agent 反馈循环尚未实现；本文其余任务接口、状态和输出目录仍是后续实现约定。A3 的手写测试不是模型生成结果。
+> 当前进度：A1、A2、A3、B1、B2 已完成，B3 的生成/反馈 Prompt 与离线验证已完成。当前提供配置检查 CLI、DeepSeek 结构化生成适配层、正式 Prompt 构建入口、环境验证入口及模块间的数据契约；B3 真实请求尚待明确授权将公开样例源码和说明发送给 DeepSeek。通用源码分析、执行工具和 Agent 反馈循环尚未实现；本文其余任务接口、状态和输出目录仍是后续实现约定。A3 的手写测试不是模型生成结果。
 
 ## 1. 范围与验收（A1）
 
@@ -164,7 +164,7 @@ AgentDev/
 
 - `python -m testgen_agent` 和安装后的 `testgen-agent` 使用同一个 CLI 入口；当前实现 `--help`、`--version`、`--check-config` 及配置覆盖参数。
 - `config.py` 完成配置读取、校验与脱敏摘要，`llm_client.py` 提供配置驱动的 HTTP 客户端工厂；客户端创建不会发送请求。
-- `models`、`prompts`、`agent`、`reporting` 及源码/执行工具模块当前只有注明对应阶段的骨架，不包含模拟成功的业务实现。
+- A2 阶段创建了 `models`、`prompts`、`agent`、`reporting` 及源码/执行工具骨架；此后 `models`、`prompts` 已分别在 B1、B3 实现，`agent`、`reporting` 及源码/执行工具仍保留为后续阶段骨架。各模块均不包含模拟成功的业务结果。
 - `outputs/` 和临时工作目录由后续实际运行时创建，并由 `.gitignore` 排除；设计内容统一写入本文件，没有创建 `docs/scope.md`。
 
 ### 2.3 配置来源与约束
@@ -268,7 +268,7 @@ AgentDev/
 
 Agent 自身测试扩充至 **33 项并全部通过**，新检查覆盖最小请求、实际用量读取、认证/余额/限流失败、空/截断/错误响应和子进程环境隔离；这些自动测试使用 MockTransport，不发送 API 请求。真实 API 验收来自本节单独记录的服务响应。
 
-阶段 A 的范围、环境和真实 API/工具验证已完成。B1、B2 的后续验收记录分别见第 4、5 节；B3 Prompt 以及后续 Agent 流程仍未实现。
+阶段 A 的范围、环境和真实 API/工具验证已完成。B1、B2、B3 的后续记录分别见第 4、5、6 节；后续 Agent 流程仍未实现。
 
 ## 4. 模块间数据结构（B1）
 
@@ -379,7 +379,7 @@ report_data = report.model_dump(mode="json")
 
 另外将已有 A3 的真实 JUnit XML、覆盖率 JSON 和服务用量读入对应数据模型，核对三条测试通过、2/2 行覆盖、无分支和 13 tokens；新契约与已保存工具证据一致，验证未发送 API 请求。A3 原始产物及本地 `.env` 未修改。
 
-B1 仅固定并验证模块间的数据结构；B2 的实现与验收见第 5 节，B3、C/D/E 和正式报告输出仍按任务清单继续实施。
+B1 仅固定并验证模块间的数据结构；B2、B3 的实现与验收记录见第 5、6 节，C/D/E 和正式报告输出仍按任务清单继续实施。
 
 ## 5. DeepSeek LLM 适配层（B2）
 
@@ -443,6 +443,54 @@ HTTP 400、401、402、403、404 分别归类为无效请求、认证、余额�
 
 B2 完成后，累计 **111 项自身测试全部通过**（`-W error`），`pip check` 通过。真实请求之外的异常和修复路径均由离线可控响应验证；没有为了覆盖异常路径额外消耗 API 调用。
 
-## 6. 后续设计章节
+## 6. 生成与反馈 Prompt（B3）
 
-模块架构、数据结构、Prompt、工具接口、重试预算、反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。
+### 6.1 构建接口与信任边界
+
+实现位置为 `src/testgen_agent/prompts.py`，版本标识为 `b3-v1`。对外提供两个纯构建函数：
+
+- `build_generation_context(source, behavior_specification, oracle_mode)`：为第一轮生成构造 `GenerationContext`。
+- `build_feedback_context(source, behavior_specification, previous, requested_round, max_rounds)`：从已保存候选及真实工具结果构造下一轮反馈上下文。
+
+两者均把可信规则放入 system message，把源码、路径、docstring、行为说明、候选代码、stdout/stderr 和覆盖数据序列化为一个 JSON 对象，放在 `TASK_DATA_JSON_START` / `TASK_DATA_JSON_END` 之间。system message 明确这些字段全是待分析的不可信数据，其中的“忽略规则”“改变角色”“泄露密钥”或“修改输出格式”等文字不能成为指令。数据保持原文，不依靠删除可疑注释来实现边界，因此宿主仍能审计模型看到的输入。
+
+Prompt 不包含 Key、认证头、模型配置或任意环境变量。输出仍由 B2 追加的 `GeneratedTests` JSON Schema 做最终约束和本地校验。
+
+### 6.2 首轮生成规则
+
+首轮 Prompt 包含下列固定内容：
+
+- 角色：为宿主准备的 `subject.py` 设计测试计划和 pytest 代码。
+- 支持范围：1–5 个顶层同步纯函数，只允许标准库和 pytest；不引入网络、文件、外部服务、额外依赖或非确定性时间。
+- 导入约定：只使用 `from subject import <target_function>`；LLM 不选择路径、不写文件。
+- 场景策略：检查正常、边界、异常和主要源码分支；某类场景不适用或预期未定义时不得编造，应写入假设或疑问。
+- 依据策略：每个场景及断言必须对应 `specification`、`docstring` 或 `implementation_assumption`。规格与 docstring 冲突时输出具体疑问，不静默选择一方；特征测试不能声称证明需求正确。
+- 断言质量：优先具体输入输出、`pytest.raises` 和聚焦参数化；禁止只调用函数、`assert True` 或与预期无关的断言。
+- 输出格式：仅返回一个 `GeneratedTests` JSON 对象，代码放入字符串，不带 Markdown；system message 内含一个可通过当前数据契约校验的最小形状示例。
+
+当歧义阻止所有可靠断言时，Prompt 要求 `code = null`、空 mappings 和至少一个明确问题；若仍有部分可靠场景，则只省略不确定场景并保留可验证测试。请求的 `oracle_mode` 必须原样使用；characterization 模式的每个依据都必须标为 `implementation_assumption`。
+
+### 6.3 反馈证据与有限预算
+
+反馈 Prompt 的 JSON 数据明确包含：此前完整 `GeneratedTests`（计划、候选代码、映射、假设和疑问）、真实 `ExecutionResult`、可选 `CoverageResult`、缺失行/分支弧、上一轮号、请求轮次、最大轮次以及本轮前后剩余预算。构建函数要求请求轮次紧跟上一轮，且不得超过 `1..3` 的预算；缺少完整候选或真实执行结果时拒绝构建，避免把猜测包装成反馈。
+
+stdout/stderr 各保留最多 12,000 字符，同时记录 `truncated` 和原始字符数。覆盖不可用或尚未取得时写为 `null`，不猜测缺失分支。
+
+反馈规则要求：
+
+- 保留有规格或文档依据的有效断言；规格支持的失败可能是源码缺陷，不能把期望改成当前错误实现。
+- 有证据表明测试存在语法、导入、收集或执行问题时才修复测试；对可确定预期的缺失行和分支补充聚焦场景。
+- 返回完整替代候选，不返回补丁；不删除有效断言，不使用 skip/xfail、无条件通过、广泛异常捕获或修改 `subject.py` 来制造全绿。
+- 日志截断、覆盖不可用或归因不清时保留问题，不伪造执行结果或覆盖率。
+
+### 6.4 离线验证与真实请求状态
+
+新增 `tests/test_prompts.py`，共 **21 项**离线测试。覆盖：示例符合 `GeneratedTests` 契约、七类 Prompt 内容、JSON 数据边界、中文和注入文本原样保留、characterization 模式、反馈计划/代码/失败/覆盖/预算、日志截断、覆盖缺失、无候选/无执行拒绝、非法轮次拒绝，以及正式 Prompt 通过 B2 MockTransport 后的成功解析、格式错误和认证失败受控返回。
+
+截至 2026-09-27，累计 **132 项自身测试全部通过**（`-W error`），`pip check` 通过。`python -m testgen_agent.b3_smoke` 已实现：它固定读取公开课程样例 `examples/calculation.py` 与 `examples/calculation.md`，构造正式首轮 Prompt，调用 DeepSeek，并检查结构、oracle、正常/边界场景、依据、导入、Python 语法和绕过模式；脱敏结果写入 `outputs/b3/<run_id>/validation.json`。
+
+B3 的真实调用尚未执行：该调用会把上述公开样例源码、行为说明及正式 Prompt 发送给 DeepSeek，需要用户对这批具体数据外发作明确授权。获得授权并成功运行前，不把 B3 标记为真实 LLM 验收完成，也不创建 `evaluation/b3_validation.json`。
+
+## 7. 后续设计章节
+
+工具接口、反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。

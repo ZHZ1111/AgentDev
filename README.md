@@ -2,7 +2,7 @@
 
 课程项目：为小型 Python 纯函数生成并执行 pytest 测试，根据失败及覆盖率反馈进行有限迭代。LLM 服务商选用 DeepSeek。
 
-当前完成 A1/A2/A3/B1/B2：输入输出及状态设计、三个源码/行为说明样例、工程骨架、配置检查、DeepSeek 结构化生成适配、手写 pytest/coverage 环境验证，以及模块间的数据模型。**完整生成 Prompt、源码分析、测试执行和反馈循环尚未实现。** 设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
+当前完成 A1/A2/A3/B1/B2，以及 B3 的生成/反馈 Prompt 实现和离线验证：包括输入输出及状态设计、三个源码/行为说明样例、工程骨架、配置检查、DeepSeek 结构化生成适配、手写 pytest/coverage 环境验证、模块间数据模型和正式 Prompt 构建。B3 真实请求尚待明确授权发送公开样例数据；源码分析、测试执行和反馈循环尚未实现。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
 
 ## 安装（Windows PowerShell）
 
@@ -54,7 +54,7 @@ DeepSeek 官方示例使用服务地址 `https://api.deepseek.com`、Bearer 认�
 
 缺少 Key、未替换占位符、非法 URL、非整数或超出范围的轮次/超时都会报配置错误；错误提示不包含被拒绝的配置值。不要通过命令行传入明文 Key。`.env`、虚拟环境、缓存及 `outputs/` 已加入忽略规则。
 
-当前没有 `--source` / `--spec` 运行接口；任务清单中的端到端命令仍是后续设计，不是已实现命令。`models.py` 已实现 B1 数据契约，`llm_client.py` 已实现 B2 DeepSeek 适配层；`prompts`、`agent`、`reporting` 和源码/执行工具模块仍是注明阶段的骨架。
+当前没有 `--source` / `--spec` 运行接口；任务清单中的端到端命令仍是后续设计，不是已实现命令。`models.py` 已实现 B1 数据契约，`llm_client.py` 已实现 B2 DeepSeek 适配层，`prompts.py` 已实现 B3 首轮与反馈上下文；`agent`、`reporting` 和源码/执行工具模块仍是注明阶段的骨架。
 
 `models.py` 提供 `SourceInfo`、`TestPlan`、`GeneratedTests`、`ExecutionResult`、`CoverageResult`、`AgentState`、`FinalReport` 及辅助类型。生成内容与工具实测结果分开；百分比和报告指标由计数及选定候选计算，未知值使用 `null`。接口、状态引用和序列化约定见 Design 第 4 节。
 
@@ -67,7 +67,16 @@ DeepSeek 官方示例使用服务地址 `https://api.deepseek.com`、Bearer 认�
 
 每次结果保存到 `outputs/b2/<run_id>/validation.json`。2026-09-26 实测 `deepseek-flash` 一次返回合法结构，耗时 1.573 秒、1125 tokens，无格式修复；精选证据为 [B2 验证结果](evaluation/b2_validation.json)。此命令使用固定轻量验证 Prompt，不等同于后续 B3 的正式 Prompt 或端到端 Agent。
 
-当前共 111 项自身测试通过，其中 B1 新增 60 项、B2 新增 18 项；自动测试不发送真实 API 请求。
+`prompts.py` 把可信规则放入 system message，把源码、行为说明、候选和工具日志放入带边界标记的 JSON 数据。首轮要求正常/边界/异常/分支场景及逐项预期依据；反馈轮携带此前计划、候选、真实失败、缺失覆盖和剩余预算，并禁止删除有效断言、skip/xfail、广泛捕获异常或修改源码。
+
+```powershell
+# 向 DeepSeek 发送公开 calculation 样例源码、行为说明及正式 B3 Prompt；可能产生 API 费用
+.\.venv\Scripts\python.exe -m testgen_agent.b3_smoke
+```
+
+每次结果保存到 `outputs/b3/<run_id>/validation.json`。该命令会向外部服务发送 `examples/calculation.py`、`examples/calculation.md` 和 Prompt 内容；仅在明确允许发送这些数据后运行。B3 真实调用尚未执行，不能仅凭离线测试宣称真实验收完成。
+
+当前共 132 项自身测试通过，其中 B1 新增 60 项、B2 新增 18 项、B3 新增 21 项；自动测试不发送真实 API 请求。
 
 ## A3 环境验证
 
