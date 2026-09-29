@@ -2,7 +2,7 @@
 
 课程项目：为单个 Python 文件中的 1–5 个顶层同步纯函数生成并执行 pytest 测试集。设计目标是由 Agent 自动分析函数关系，决定单元测试和协作测试策略，再根据失败及覆盖率反馈进行有限迭代。LLM 服务商选用 DeepSeek。
 
-当前完成 A1/A2/A3/B1/B2/C1/C1a、C2 的离线实现，以及 D1 的正式测试执行工具；B1 关系契约扩展和 B3 `b3-v3` 生成/反馈 Prompt 已通过离线验证。现有功能包括输入输出及状态设计、五组源码/行为说明样例、配置检查、DeepSeek 结构化生成适配、手写 pytest/coverage 环境验证、数据模型、正式 Prompt、受限源码/关系分析、首轮候选校验和固定路径落盘，以及带超时和结构化结果的 pytest 执行。B3/C2 真实请求尚待明确授权发送公开关联样例数据；D2 覆盖工具和反馈循环尚未实现。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
+当前完成 A1/A2/A3/B1/B2/C1/C1a、C2 的离线实现，以及 D1/D2 的正式测试执行和覆盖工具；B1 关系契约扩展和 B3 `b3-v4` 生成/反馈 Prompt 已通过离线验证。现有功能包括输入输出及状态设计、五组源码/行为说明样例、配置检查、DeepSeek 结构化生成适配、手写 pytest/coverage 环境验证、数据模型、正式 Prompt、受限源码/关系分析、首轮候选校验和固定路径落盘、带超时的 pytest 执行，以及独立行/分支覆盖指标与源码位置提示。B3/C2 真实请求尚待明确授权发送公开关联样例数据；反馈循环尚未实现。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
 
 2026-09-27 新增范围：自动判断同文件函数关系，并自主规划测试集。所需 `1.1` 数据契约、`b3-v3` Prompt、C1 基本 AST 结构和 C1a 调用关系证据均已实现；端到端生成/执行与报告仍未实现。修订任务预算为 58 小时。
 
@@ -110,7 +110,7 @@ print(find_explicit_data_flows(source))     # 仅嵌套调用/简单赋值
 
 每次结果保存到 `outputs/b2/<run_id>/validation.json`。2026-09-26 实测 `deepseek-flash` 一次返回合法结构，耗时 1.573 秒、1125 tokens，无格式修复；精选证据为 [B2 验证结果](evaluation/b2_validation.json)。此命令使用固定轻量验证 Prompt，不等同于后续 B3 的正式 Prompt 或端到端 Agent。
 
-`prompts.py` 的 `b3-v3` 把可信规则放入 system message，把源码、调用事实、确认图提示、行为说明、候选和工具日志放入带边界标记的 JSON 数据。首轮要求 Agent 自主选择入口、关系和单元/协作策略，图根仅作为候选；只分析嵌套调用和简单赋值等有明确源码证据的数据流，将动态调用与共享状态保持为不确定项。反馈轮携带此前关系、策略、候选、真实失败、缺失覆盖和剩余预算，并禁止删除有效断言、skip/xfail、广泛捕获异常或修改源码。
+`prompts.py` 的 `b3-v4` 把可信规则放入 system message，把源码、调用事实、确认图提示、行为说明、候选和工具日志放入带边界标记的 JSON 数据。首轮要求 Agent 自主选择入口、关系和单元/协作策略，图根仅作为候选；只分析嵌套调用和简单赋值等有明确源码证据的数据流，将动态调用与共享状态保持为不确定项。反馈轮携带此前关系、策略、候选、真实失败、缺失覆盖和剩余预算，并禁止删除有效断言、skip/xfail、广泛捕获异常或修改源码。D2 增加独立行/分支百分比及 `coverage_source_hints`，把缺失位置关联到源码和所属函数，保留负数代码对象退出弧的含义。
 
 ```powershell
 # 向 DeepSeek 发送公开 relationships 样例源码、行为说明及正式 B3 Prompt；可能产生 API 费用
@@ -134,9 +134,24 @@ print(result.all_passed)
 
 `timeout` 接受 `1..300` 秒的整数，默认 30 秒。工具使用当前解释器和参数列表，只执行固定测试文件，关闭外部 pytest 配置、conftest 和自动插件加载；子进程仅继承必要 OS 环境，LLM Key 及自定义密钥变量不传入。每次在 `rounds/01/executions/run-*/` 保存独立的完整 stdout/stderr、结构化 pytest JSON、可用的 JUnit XML 和 `execution.json`。返回日志截断到约 16K 并标明截断，失败位置和主要诊断保留；超时终止子进程并保留最近完整的计数快照。
 
-返回 `ExecutionResult` 区分通过、断言失败、运行异常、收集/导入错误、内部/用法错误、无测试、超时、启动失败和结构化结果不可用。`kind=passed` 仅表示 pytest 返回 0，验收应检查 `all_passed`；空测试、skip/xfail/xpass 或不完整结果都不能达到全通过。输入/布局错误抛出 `TypeError`、`ValueError` 或 `ExecutionWorkspaceError`，诊断文件 I/O 失败抛出 `ExecutionArtifactError`。D1 当前支持首轮固定布局，后续轮次与覆盖率将在 D2/E 阶段接入；仅用于可信课程样例，进程隔离不提供恶意代码的安全沙箱。
+返回 `ExecutionResult` 区分通过、断言失败、运行异常、收集/导入错误、内部/用法错误、无测试、超时、启动失败和结构化结果不可用。`kind=passed` 仅表示 pytest 返回 0，验收应检查 `all_passed`；空测试、skip/xfail/xpass 或不完整结果都不能达到全通过。输入/布局错误抛出 `TypeError`、`ValueError` 或 `ExecutionWorkspaceError`，诊断文件 I/O 失败抛出 `ExecutionArtifactError`。执行工具当前支持首轮固定布局，后续轮次由 E 阶段扩展；仅用于可信课程样例，进程隔离不提供恶意代码的安全沙箱。
 
-2026-09-29 全套 276 项自身测试通过，其中 D1 新增 40 项；原有 C2 31 项测试保留。D1 实际启动 pytest 验证各类结局、参数化和阶段统计、超时、日志截断、环境隔离、路径约束及连续运行诊断隔离；C2 关联候选通过正式 D1 工具获得 2 个通过项。自动测试不发送真实 API 请求，合成适配器产物仍明确标注为离线测试数据。
+D2 同时采集测试和覆盖结果：
+
+```python
+from testgen_agent.tools import run_tests_with_coverage
+
+run = run_tests_with_coverage("outputs/my-run", timeout=30)
+print(run.execution.kind, run.candidate_all_passed)
+print(run.coverage.status, run.coverage.line_percent, run.coverage.branch_percent)
+print(run.artifacts)
+```
+
+`run_tests_with_coverage()` 通过 coverage 启动同一份固定 pytest 候选，每次创建新的 `.coverage` 数据库，不追加或合并旧数据；导出命令显式选择该工作区的 `subject.py`，测试及 Agent 文件不计入分母。返回 `CoverageRunResult`，包含执行结果、`CoverageResult`、产物目录和源码提示。行/分支百分比分别由各自计数计算；分母为 0 返回 `None`，含义为“不适用”；采集不可用时状态为 `unavailable`、指标未知并有错误原因。覆盖达标与候选全通过是两个独立事实，失败候选可保留覆盖数据。
+
+产物在 D1 诊断目录中追加 `.coveragerc`、本次 `.coverage`、原始 `coverage.json`、导出日志及诊断、`coverage_result.json`、`coverage_source_hints.json`、`run_result.json`。导出另有 `min(timeout, 30)` 秒时限；超时、导出/解析失败、错误统计范围或源码快照变化都会标记覆盖率不可用，保留已取得的执行结果。测试超时的数据库不用于报告。主机产物 I/O 失败仍用 `ExecutionArtifactError`，已保存的 `execution.json` 保留。
+
+2026-09-29 全套 313 项自身测试通过，其中 D2 新增 37 项，D1 40 项及原有 C2 31 项均保留。D2 实测单侧分支为行覆盖 3/4（75%）、分支覆盖 1/2（50%），连续执行证明旧数据没有抬高新候选指标；覆盖异常、零分母、负数退出弧和实测反馈 Prompt 也经过验证。自动测试不发送真实 API 请求，合成适配器产物仍明确标注为离线测试数据。
 
 ## A3 环境验证
 

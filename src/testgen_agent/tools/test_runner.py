@@ -39,6 +39,13 @@ def run_tests(workspace: str | Path, timeout: int = 30) -> ExecutionResult:
     saves raw logs, plugin JSON, JUnit XML (when available), and execution.json in
     rounds/01/executions/run-*/. This is process isolation, not a security sandbox.
     """
+    return _run_tests(workspace, timeout)[0]
+
+
+def _run_tests(
+    workspace: str | Path, timeout: int, *, collect_coverage: bool = False,
+) -> tuple[ExecutionResult, Path]:
+    """Shared D1/D2 execution; each invocation creates its own artifact directory."""
     if isinstance(timeout, bool) or not isinstance(timeout, int):
         raise TypeError("timeout must be an integer")
     if not 1 <= timeout <= 300:
@@ -57,8 +64,19 @@ def run_tests(workspace: str | Path, timeout: int = 30) -> ExecutionResult:
             "-p", "no:cacheprovider",
             "-p", "testgen_agent.tools._pytest_results",
             f"--junitxml={artifacts / 'pytest.xml'}", "--color=no", "--tb=short",
-            "-rA", "-q", str(test_path),
+            # The validated relative filename avoids pytest interpreting [] in
+            # parent directory names as a parametrized node selector.
+            "-rA", "-q", str(test_path.relative_to(root)),
         ]
+        if collect_coverage:
+            coverage_config = artifacts / ".coveragerc"
+            coverage_config.write_text("[run]\nbranch = True\n[report]\nfail_under = 0\n", encoding="utf-8")
+            # Never append/combine or consult workspace/project coverage config.
+            command = [
+                sys.executable, "-P", "-m", "coverage", "run",
+                f"--rcfile={coverage_config}", f"--data-file={artifacts / '.coverage'}",
+                "--branch", "-m", "pytest", *command[4:],
+            ]
         environment = _test_environment(report_path, root)
         started = perf_counter()
         timed_out = False
@@ -132,7 +150,7 @@ def run_tests(workspace: str | Path, timeout: int = 30) -> ExecutionResult:
         (artifacts / "execution.json").write_text(
             result.canonical_json(indent=2) + "\n", encoding="utf-8",
         )
-        return result
+        return result, artifacts
     except OSError as error:
         raise ExecutionArtifactError("Unable to save or read execution artifacts.") from error
 

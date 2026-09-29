@@ -1,6 +1,6 @@
 # 测试生成 Agent 技术设计
 
-> 当前进度：A1、A2、A3、B1、B2、C1、C1a 和 D1 已完成，C2 已完成实现和离线验收；B1 关系契约扩展及 B3 `b3-v3` 生成/反馈 Prompt 已完成离线验证。当前提供配置检查 CLI、DeepSeek 结构化生成适配层、正式 Prompt 构建入口、关系/策略数据契约、受限 AST 源码/调用分析、首轮候选宿主校验/落盘、独立 pytest 执行工具及兼容旧产物的模型；B3/C2 真实请求尚待明确授权将公开关联样例源码和说明发送给 DeepSeek。D2 覆盖工具和 Agent 反馈循环尚未实现；本文其余任务接口、状态和输出目录仍是后续实现约定。A3 的手写测试和 C2 的离线合成候选都不是模型生成结果。
+> 当前进度：A1、A2、A3、B1、B2、C1、C1a、D1 和 D2 已完成，C2 已完成实现和离线验收；B1 关系契约扩展及 B3 `b3-v4` 生成/反馈 Prompt 已完成离线验证。当前提供配置检查 CLI、DeepSeek 结构化生成适配层、正式 Prompt 构建入口、关系/策略数据契约、受限 AST 源码/调用分析、首轮候选宿主校验/落盘、独立 pytest 执行和目标覆盖工具及兼容旧产物的模型；B3/C2 真实请求尚待明确授权将公开关联样例源码和说明发送给 DeepSeek。Agent 反馈循环尚未实现；本文其余任务接口、状态和输出目录仍是后续实现约定。A3 的手写测试和 C2 的离线合成候选都不是模型生成结果。
 > 2026-09-27 范围更新：Agent 自主判断同文件函数关联并规划单元/协作测试集。第 1.8 节范围已落实到第 4.8 节的 `1.1` 数据契约、第 6.5 节的 `b3-v3` Prompt、第 8 节的自动关系事实提取及第 9 节的首轮候选流程；端到端执行仍属于 D–F 阶段。
 
 ## 1. 范围与验收（A1）
@@ -509,7 +509,7 @@ B2 完成后，累计 **111 项自身测试全部通过**（`-W error`），`pip
 
 ### 6.1 构建接口与信任边界
 
-实现位置为 `src/testgen_agent/prompts.py`，当前版本标识为 `b3-v3`。对外提供两个纯构建函数：
+实现位置为 `src/testgen_agent/prompts.py`，当前版本标识为 D2 更新后的 `b3-v4`（在 `b3-v3` 上增加实测覆盖源码位置提示和独立百分比）。对外提供两个纯构建函数：
 
 - `build_generation_context(source, behavior_specification, oracle_mode)`：为第一轮生成构造 `GenerationContext`。
 - `build_feedback_context(source, behavior_specification, previous, requested_round, max_rounds)`：从已保存候选及真实工具结果构造下一轮反馈上下文。
@@ -698,6 +698,36 @@ C1 完成时只建立安全、可复现的源码快照和基本结构上下文�
 
 C2 原有合成关联候选现在交给正式 `run_tests()`，工具实际观测收集、执行、通过均为 **2**。全套 **276 项**以 `-W error` 通过，编译检查和 `pip check` 通过。本阶段完成执行工具；D2 覆盖率和 D3 包含覆盖数据人工比对的整体可信度验收继续待实现。
 
-## 11. 后续设计章节
+## 11. 目标文件行/分支覆盖采集（D2）
 
-覆盖工具、反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。
+### 11.1 共用执行器和独立数据
+
+新增 `tools/coverage_runner.py`：`run_tests_with_coverage(workspace, timeout=30)` 返回不可变外层 `CoverageRunResult`，包含同一次运行的 `execution`、`coverage`、`artifacts` 目录和 `source_hints`；`candidate_all_passed` 直接由 execution 派生。D1 `run_tests()` 的返回接口保持兼容，两个接口共用 `_run_tests()` 的路径校验、环境、pytest 配置隔离、插件、超时和真实退出码分类；当前均执行 C2 的首轮固定测试文件。
+
+执行命令为当前解释器 `-P -m coverage run --rcfile=<本次配置> --data-file=<本次数据库> --branch -m pytest ...`，不 append/combine。`.coveragerc` 和 `.coverage` 位于新建的 `rounds/01/executions/run-*/`；宿主空配置不继承工程 source、exclude、fail_under 或用户 COVERAGE 环境设置。测试路径使用已校验的工作区相对路径，避免 pytest 把父目录方括号解释成参数化项。
+
+### 11.2 精确目标过滤和指标
+
+pytest 结束后，使用同一配置/数据路径调用 `coverage json -o <本次 coverage.json> <绝对 subject.py>`，将文件名作为明确参数而不是 glob。原始数据库可含测试/工具跟踪数据，JSON 仅导出目标；宿主 `parse_coverage_json()` 要求 branch_coverage 为 true、files 中恰好一个文件且其规范路径等于本次 `subject.py`，拒绝遗漏、额外文件及同名的其他路径。
+
+仅读取目标 summary 的 covered_lines / num_statements 和 covered_branches / num_branches，忽略 combined percent_covered 和全局 totals。交由既有 `CoverageResult` 验证非负严格计数、缺失项唯一性及分母减覆盖数关系；行和分支百分比分别计算。分母为 0 返回 null，表示“不适用”；unavailable 指标未知，不能解释成 0 或 100。未导入目标的合法测试可得目标零覆盖；只含注释的文件可得 0 个语句和 0 个分支。
+
+### 11.3 失败保留与源码关联
+
+测试的 execution timeout 与导出时限独立，导出最多等待 min(timeout, 30) 秒。断言/运行/收集失败或空测试仍可导出已采集的覆盖数据；`candidate_all_passed` 及原执行结局同时保留，覆盖率达标不会掩盖失败。启动失败、测试超时或缺少本次数据库时不报告未经完成的数据。导出非零退出、启动/超时/I/O 错误、JSON 缺失/损坏/非分支或目标范围错误，均形成 unavailable 和原因，执行观察与 `execution.json` 保留。无法保存宿主结果文件时继续使用 D1 `ExecutionArtifactError`，已保存诊断不删除。
+
+`coverage_mapper.py` 的 `build_coverage_source_hints()` 通过 AST 和源码文本把缺失行、分支两端关联到原始行文本及最内层命名函数。正数端点表示 source_line；负数端点保留原始有符号弧，并标注 code_object_exit、绝对行号锚点及对应定义行，不把负数当源文件索引。位置越界会拒绝，不填猜测片段。执行前后对读取的源码快照进行比较；源码改变或无法对应缺失位置时标记覆盖不可用。
+
+`b3-v4` 的反馈数据新增 `coverage_source_hints`，已有原始 missing_lines / missing_branches 保留；observed_coverage 同时带宿主按计数计算的独立百分比。这些源码片段仍处于带边界的任务 JSON 内。无覆盖结果时提示为 null，采集不可用时保持错误原因与空缺失列表，不生成假缺口。
+
+每次在 D1 产物旁保存 `.coveragerc`、本次 `.coverage`、原始 `coverage.json`、coverage_export 的完整 stdout/stderr 和结构化诊断、`coverage_result.json`、`coverage_source_hints.json` 及 `run_result.json`。联合快照明确写入 candidate_all_passed、原 execution、coverage 及提示，便于下轮和人工回看。
+
+### 11.4 实测验收
+
+2026-09-29 新增 `tests/test_coverage_runner.py` **37 项**：真实 coverage 子进程验证单侧分支为行 **3/4（75%）**、分支 **1/2（50%）**，联合百分比与行百分比不同；全覆盖后换单侧候选仍得到 75% / 50%，根目录旧数据库和 COVERAGE 环境配置不影响结果。覆盖失败候选、未导入目标、空分母、无分支、负数退出弧、中文空格方括号路径、超时、源码变化与实测反馈上下文。导出异常及报告损坏通过明确的受控宿主注入验证。
+
+全套 **313 项**以 `-W error` 通过，编译检查和 `pip check` 通过；D1 40 项与已有 Prompt/C2 检查保持兼容。本阶段完成覆盖工具，D3 独立的整体可信度验收及 E 控制循环继续待完成。
+
+## 12. 后续设计章节
+
+可信度验收、反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。

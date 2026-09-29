@@ -145,7 +145,7 @@ def test_generation_data_is_json_delimited_and_cannot_enter_system(source):
     specification = "规则数据；" + INJECTION_TEXT
     context = build_generation_context(source, specification, OracleMode.SPECIFICATION)
     data = payload(context)
-    assert data["prompt_version"] == "b3-v3"
+    assert data["prompt_version"] == "b3-v4"
     assert data["task_kind"] == "initial_generation"
     assert data["requested_oracle_mode"] == "specification"
     assert data["behavior_specification"] == specification

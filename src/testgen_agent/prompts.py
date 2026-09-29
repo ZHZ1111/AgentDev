@@ -13,9 +13,10 @@ from .tools.code_analyzer import (
     find_call_cycles,
     find_explicit_data_flows,
 )
+from .tools.coverage_mapper import build_coverage_source_hints
 
 
-PROMPT_VERSION = "b3-v3"
+PROMPT_VERSION = "b3-v4"
 TASK_DATA_START = "TASK_DATA_JSON_START"
 TASK_DATA_END = "TASK_DATA_JSON_END"
 MAX_TOOL_LOG_CHARS = 12_000
@@ -223,7 +224,7 @@ def build_feedback_context(
     execution = previous.execution.model_dump(mode="json")
     execution["stdout"] = _bounded_log(previous.execution.stdout)
     execution["stderr"] = _bounded_log(previous.execution.stderr)
-    coverage = _model_data(previous.coverage) if previous.coverage is not None else None
+    coverage = previous.coverage.model_dump(mode="json") if previous.coverage is not None else None
     missing_coverage = None if previous.coverage is None else {
         "status": previous.coverage.status,
         "missing_lines": list(previous.coverage.missing_lines),
@@ -250,6 +251,10 @@ def build_feedback_context(
         "observed_execution": execution,
         "observed_coverage": coverage,
         "uncovered_observations": missing_coverage,
+        "coverage_source_hints": (
+            build_coverage_source_hints(source.source_code, previous.coverage)
+            if previous.coverage is not None else None
+        ),
     }
     return GenerationContext(
         system_instruction=_system_instruction(_FEEDBACK_RULES),

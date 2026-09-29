@@ -334,14 +334,16 @@ D1 验收记录（2026-09-29）：实现 `tools/test_runner.py` 的 `run_tests(w
 
 ### D2. 使用 coverage 采集目标文件结果
 
-- [ ] 通过 coverage 启动 pytest，例如在工作目录运行 `python -m coverage run --branch -m pytest test_subject.py`。
-- [ ] 每轮使用新的覆盖率数据，避免叠加前轮数据造成虚假提升。
-- [ ] 导出 coverage JSON；报告生成失败时保留原始执行结果，标记覆盖率不可用。
-- [ ] 过滤到本次复制的 `subject.py`，不把测试文件和 Agent 文件计入分母。
-- [ ] 分别计算行覆盖率与分支覆盖率，不把 combined coverage 误标为行覆盖率。
-- [ ] 分母为 0 时显示“不适用”，不人为填成 100%。
-- [ ] 将缺失行和缺失分支关联到目标源码片段，供下一轮 Prompt 使用。
-- [ ] 测试失败时可以展示采集到的覆盖数据，但明确标注此次候选未通过。
+- [x] 通过 coverage 启动 pytest，例如在工作目录运行 `python -m coverage run --branch -m pytest test_subject.py`。
+- [x] 每轮使用新的覆盖率数据，避免叠加前轮数据造成虚假提升。
+- [x] 导出 coverage JSON；报告生成失败时保留原始执行结果，标记覆盖率不可用。
+- [x] 过滤到本次复制的 `subject.py`，不把测试文件和 Agent 文件计入分母。
+- [x] 分别计算行覆盖率与分支覆盖率，不把 combined coverage 误标为行覆盖率。
+- [x] 分母为 0 时显示“不适用”，不人为填成 100%。
+- [x] 将缺失行和缺失分支关联到目标源码片段，供下一轮 Prompt 使用。
+- [x] 测试失败时可以展示采集到的覆盖数据，但明确标注此次候选未通过。
+
+D2 验收记录（2026-09-29）：新增 `run_tests_with_coverage()` / `CoverageRunResult`，共用 D1 的固定路径、环境、超时和结构化执行逻辑，通过 `coverage run --branch -m pytest` 启动一次真实测试进程。每次运行固定新的 `.coverage` 和空配置，不 append/combine，也不继承 COVERAGE 环境配置。JSON 导出明确选择工作区 `subject.py`；宿主验证单一目标路径、分支采集及计数契约，只使用文件的独立行/分支计数计算百分比。导出失败或超时、JSON 损坏、错误文件范围和源码快照不一致时返回 unavailable、未知计数及原因，原 `ExecutionResult` 与 `execution.json` 保留。`coverage_mapper.py` 关联缺失行/弧到源码及所属函数，负数退出端点按代码对象退出保存；`b3-v4` 反馈 Prompt 接收这些提示及独立百分比。每次保存原始数据/JSON、导出日志与诊断、coverage/source hints/联合结果快照；联合结果明确包含候选是否全通过。新增 37 项 D2 测试，实测单侧分支行覆盖 3/4（75%）、分支覆盖 1/2（50%）；全覆盖后换单侧候选仍是 75%/50%，根目录旧数据库及环境配置未污染结果；零分母返回不适用，失败/空测试覆盖数据不冒充候选通过。全套 313 项以 `-W error` 通过，编译检查、`pip check` 与差异检查通过。当前执行/覆盖接口保持首轮目录；D3 专门的可信度验收和 E 反馈控制器继续待完成。
 
 ### D3. 验证执行工具的结果可信度
 
