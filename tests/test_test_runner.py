@@ -212,7 +212,7 @@ def test_slow():
     assert perf_counter() - started < 9
     assert result.kind == ExecutionKind.TIMEOUT and result.timed_out
     assert result.exit_code is not None and not result.all_passed
-    assert result.collected == 2 and result.executed == result.passed == 1
+    assert result.collected == result.executed == 2 and result.passed == 1
     artifacts, = artifact_dirs(workspace)
     partial = json.loads((artifacts / "pytest_result.json").read_text(encoding="utf-8"))
     assert not partial["completed"]

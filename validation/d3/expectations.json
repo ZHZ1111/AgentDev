@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "origin": "handwritten expectations derived from source.py and fixed pytest fixtures; no LLM output",
+  "coverage_oracles": {
+    "full": {"covered_lines": 4, "total_lines": 4, "covered_branches": 2, "total_branches": 2, "executed_lines": [1, 2, 3, 4], "missing_lines": [], "executed_branches": [[2, 3], [2, 4]], "missing_branches": [], "line_percent": 100.0, "branch_percent": 100.0},
+    "positive": {"covered_lines": 3, "total_lines": 4, "covered_branches": 1, "total_branches": 2, "executed_lines": [1, 2, 3], "missing_lines": [4], "executed_branches": [[2, 3]], "missing_branches": [[2, 4]], "line_percent": 75.0, "branch_percent": 50.0},
+    "negative": {"covered_lines": 3, "total_lines": 4, "covered_branches": 1, "total_branches": 2, "executed_lines": [1, 2, 4], "missing_lines": [3], "executed_branches": [[2, 4]], "missing_branches": [[2, 3]], "line_percent": 75.0, "branch_percent": 50.0},
+    "import_only": {"covered_lines": 1, "total_lines": 4, "covered_branches": 0, "total_branches": 2, "executed_lines": [1], "missing_lines": [2, 3, 4], "executed_branches": [], "missing_branches": [[2, 3], [2, 4]], "line_percent": 25.0, "branch_percent": 0.0},
+    "unimported": {"covered_lines": 0, "total_lines": 4, "covered_branches": 0, "total_branches": 2, "executed_lines": [], "missing_lines": [1, 2, 3, 4], "executed_branches": [], "missing_branches": [[2, 3], [2, 4]], "line_percent": 0.0, "branch_percent": 0.0}
+  },
+  "cases": {
+    "passed": {"kind": "passed", "exit_code": 0, "all_passed": true, "coverage_oracle": "full", "counts": {"collected": 2, "executed": 2, "passed": 2, "failed": 0, "errors": 0, "skipped": 0, "xfailed": 0, "xpassed": 0}, "junit": {"reported_cases": 2, "passed": 2, "failures": 0, "errors": 0, "skipped": 0}},
+    "assertion_failed": {"kind": "assertion_failed", "exit_code": 1, "all_passed": false, "coverage_oracle": "positive", "diagnostic": "AssertionError", "counts": {"collected": 1, "executed": 1, "passed": 0, "failed": 1, "errors": 0, "skipped": 0, "xfailed": 0, "xpassed": 0}, "junit": {"reported_cases": 1, "passed": 0, "failures": 1, "errors": 0, "skipped": 0}},
+    "runtime_error": {"kind": "execution_error", "exit_code": 1, "all_passed": false, "coverage_oracle": "positive", "diagnostic": "controlled_runtime_error", "counts": {"collected": 1, "executed": 1, "passed": 0, "failed": 0, "errors": 1, "skipped": 0, "xfailed": 0, "xpassed": 0}, "junit": {"reported_cases": 1, "passed": 0, "failures": 1, "errors": 0, "skipped": 0}},
+    "import_failed": {"kind": "collection_error", "exit_code": 2, "all_passed": false, "coverage_oracle": "import_only", "diagnostic": "missing_d3_function", "counts": {"collected": 0, "executed": 0, "passed": 0, "failed": 0, "errors": 1, "skipped": 0, "xfailed": 0, "xpassed": 0}, "junit": {"reported_cases": 1, "passed": 0, "failures": 0, "errors": 1, "skipped": 0}},
+    "empty": {"kind": "no_tests", "exit_code": 5, "all_passed": false, "coverage_oracle": "unimported", "counts": {"collected": 0, "executed": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0, "xfailed": 0, "xpassed": 0}, "junit": {"reported_cases": 0, "passed": 0, "failures": 0, "errors": 0, "skipped": 0}},
+    "timeout": {"kind": "timeout", "all_passed": false, "counts": {"collected": 1, "executed": 1, "passed": 0, "failed": 0, "errors": 0, "skipped": 0, "xfailed": 0, "xpassed": 0}}
+  },
+  "junit_interpretation": "JUnit reports a call-phase ValueError as failure and a collection error as a synthetic testcase. Tool execution_error/errors and collected=0 intentionally use the D1 contract instead of copying those JUnit counts."
+}

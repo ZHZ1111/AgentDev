@@ -1,6 +1,6 @@
 # 测试生成 Agent 技术设计
 
-> 当前进度：A1、A2、A3、B1、B2、C1、C1a、D1 和 D2 已完成，C2 已完成实现和离线验收；B1 关系契约扩展及 B3 `b3-v4` 生成/反馈 Prompt 已完成离线验证。当前提供配置检查 CLI、DeepSeek 结构化生成适配层、正式 Prompt 构建入口、关系/策略数据契约、受限 AST 源码/调用分析、首轮候选宿主校验/落盘、独立 pytest 执行和目标覆盖工具及兼容旧产物的模型；B3/C2 真实请求尚待明确授权将公开关联样例源码和说明发送给 DeepSeek。Agent 反馈循环尚未实现；本文其余任务接口、状态和输出目录仍是后续实现约定。A3 的手写测试和 C2 的离线合成候选都不是模型生成结果。
+> 当前进度：A1、A2、A3、B1、B2、C1、C1a、D1、D2 和 D3 已完成，C2 已完成实现和离线验收；B1 关系契约扩展及 B3 `b3-v4` 生成/反馈 Prompt 已完成离线验证。当前提供配置检查 CLI、DeepSeek 结构化生成适配层、正式 Prompt 构建入口、关系/策略数据契约、受限 AST 源码/调用分析、首轮候选宿主校验/落盘、独立 pytest 执行和目标覆盖工具、可重跑的独立可信度验收及兼容旧产物的模型；B3/C2 真实请求尚待明确授权将公开关联样例源码和说明发送给 DeepSeek。Agent 反馈循环尚未实现；本文其余任务接口、状态和输出目录仍是后续实现约定。A3/D3 的手写测试和 C2 的离线合成候选都不是模型生成结果。
 > 2026-09-27 范围更新：Agent 自主判断同文件函数关联并规划单元/协作测试集。第 1.8 节范围已落实到第 4.8 节的 `1.1` 数据契约、第 6.5 节的 `b3-v3` Prompt、第 8 节的自动关系事实提取及第 9 节的首轮候选流程；端到端执行仍属于 D–F 阶段。
 
 ## 1. 范围与验收（A1）
@@ -680,7 +680,7 @@ C1 完成时只建立安全、可复现的源码快照和基本结构上下文�
 
 ### 10.2 结构化观察和结局归类
 
-宿主显式加载 `_pytest_results.py` 小型插件，记录收集项 node ID、setup/call/teardown 的 outcome、断言/pytest failure 与其他异常的区别、xfail 信息、失败位置及主要 traceback。会话开始、收集结束、每个阶段和会话结束都以临时文件加原子替换保存 JSON，超时后可读最近完整快照；统计不依赖控制台字符串。同时由 pytest 导出 JUnit XML 作为诊断和人工比对产物。
+宿主显式加载 `_pytest_results.py` 小型插件，记录收集项 node ID、setup/call/teardown 的 outcome、断言/pytest failure 与其他异常的区别、xfail 信息、失败位置及主要 traceback。会话开始、收集结束、每个阶段和会话结束都以临时文件加原子替换保存 JSON，超时后可读最近完整快照；统计不依赖控制台字符串。D3 补充 call 进入时的 `started_calls` 原子快照，执行数按该记录计算并校验其唯一性及收集项引用，避免挂起的 call 因没有结束报告而漏计。同时由 pytest 导出 JUnit XML 作为诊断和人工比对产物。
 
 收集数按参数化后的测试项计，执行数只统计进入 call 的项。每个测试项只有一个最终结局：setup/teardown 错误优先归为 errors，call 断言/异常优先于清理阶段跳过，其他阶段跳过也阻止全通过；call 通过但 teardown 出错不能重复算一个通过和一个错误。普通 `assert`、`pytest.fail()` 与 `pytest.raises` 未满足属于 failed；call 中的 ValueError 等运行异常属于 errors；非严格 xfail/xpass 单独计数，严格 XPASS 按 pytest 失败项记录。完整运行必须有完整阶段记录和互斥结局，结束后再通过 B1 计数契约校验。
 
@@ -728,6 +728,32 @@ pytest 结束后，使用同一配置/数据路径调用 `coverage json -o <本�
 
 全套 **313 项**以 `-W error` 通过，编译检查和 `pip check` 通过；D1 40 项与已有 Prompt/C2 检查保持兼容。本阶段完成覆盖工具，D3 独立的整体可信度验收及 E 控制循环继续待完成。
 
-## 12. 后续设计章节
+## 12. 执行和覆盖工具独立可信度验收（D3）
 
-可信度验收、反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。
+### 12.1 人工期望与独立参考
+
+`validation/d3/source.py` 是四行的纯函数 `classify(value)`：第 1 行定义，第 2 行判断，第 3/4 行返回非负/负数结果。人工列出的可执行语句为 `[1, 2, 3, 4]`，分支弧为 `2→3` 和 `2→4`；手写测试、覆盖期望及口径解释见 [validation/d3/README.md](validation/d3/README.md) 与 [expectations.json](validation/d3/expectations.json)。期望预先写入，不由工具运行结果反推，也不冒充 LLM 生成产物。
+
+`d3_validation.validate_tools()` 为六类样例分别准备工具和参考工作区。工具调用正式 `run_tests_with_coverage()`；参考使用当前解释器直接执行 coverage/pytest 参数列表，不加载 Agent 结果插件，独立构造必要环境和空配置、读取 JUnit 与 coverage JSON，不调用 D2 解析器或百分比辅助函数。两条路径分别对照人工期望，检查退出码、分类、计数、独立行/分支百分比、精确执行/缺失行和弧，以及只包含 `subject.py` 的统计范围。
+
+JUnit 把 call 阶段的 ValueError 记录为 failure，但 D1 契约区分运行错误与断言失败；导入收集错误产生一个诊断 testcase，不等于收集到一个测试项。因此期望保存两种口径并独立比对，而不把 XML 节点数机械复制为工具计数。断言失败/运行异常仍保留真实覆盖，候选不通过；空测试、异常和超时的 `all_passed` 必须为 false。
+
+### 12.2 有界超时和计数修复
+
+受控超时测试写入自身 PID 后睡眠 60 秒，验收默认 3 秒时限，要求两条路径均在允许的启动/清理余量内结束，并通过该 PID 的独立观察确认进程已停止。Windows 查询只申请 `SYNCHRONIZE` 权限，通过零等待判断进程句柄是否已触发，随后关闭句柄；权限不足或缺少 PID 标记不会被当作成功。[OpenProcess](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess)、[WaitForSingleObject](https://learn.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-waitforsingleobject)
+
+首轮比对发现 D1 在 call 尚未结束时记为执行 0 项，尽管 PID 标记证明该项已开始。修复 `_pytest_results.py`：在 `pytest_runtest_call` hookwrapper 进入时保存 `started_calls`，宿主校验该列表并以其长度计算执行数；未完成 call 不增加 passed/failed/errors。D3 超时样例现为 collected=1、executed=1、passed=0，覆盖 unavailable；原 D1 的“先通过一项，再超时一项”回归相应改为 executed=2、passed=1。首轮失败记录仍保留在独立的输出目录，不覆盖后续成功证据。
+
+### 12.3 连续候选与证据保全
+
+同一工作区连续运行全覆盖、只测试非负、只测试负数三个候选，预期独立行/分支覆盖依次为 100%/100%、75%/50%、75%/50%，缺失返回行分别为无、4、3。首轮全覆盖数据库还复制到工作区根目录作为旧数据，之后核对字节哈希不变；每次执行目录唯一，此前诊断文件的 SHA-256 全部保持不变。原始源码、候选原件及工作区副本同样核对哈希；失败记录保留关键异常信息与原始日志。
+
+`python -m testgen_agent.d3_validation` 每次在新建的 `outputs/d3/<run_id>/` 保存命令、各工作区副本、原始 stdout/stderr、JUnit/coverage 数据、逐项 `comparison.json` 和总 `validation.json`；`--evidence` 可额外保存精选 JSON，但拒绝覆盖已有文件。退出码 0 仅在全部检查通过时返回；不符为 1，参数错误为 2。该入口只使用固定本地可信样例，无真实 API 请求；不提供安全沙箱承诺，也不扩展到 E 反馈循环。
+
+### 12.4 实测记录
+
+2026-09-29 09:31:40（UTC+8）在 Windows 11 / Python 3.13.9、pytest 9.1.1、coverage 7.16.1 运行六类样例与三次连续候选，全部通过；精选证据为 [evaluation/d3_validation.json](evaluation/d3_validation.json)，原始诊断根目录为 `outputs/d3/20260929T013140Z-51d68511/`。源码未改变、失败诊断保留，超时进程已结束。新增 `tests/test_d3_validation.py` **15 项**检查，全套 **328 项**以 `-W error` 通过，编译检查、`pip check` 和差异检查通过。Windows 已实测，POSIX 分支未进行平台验收。
+
+## 13. 后续设计章节
+
+反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。

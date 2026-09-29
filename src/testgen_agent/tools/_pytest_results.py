@@ -16,6 +16,7 @@ class _Recorder:
             "schema_version": 1,
             "items": None,
             "reports": [],
+            "started_calls": [],
             "collection_errors": [],
             "completed": False,
             "exit_code": None,
@@ -41,6 +42,14 @@ class _Recorder:
                 "detail": str(report.longrepr),
             })
             self.save()
+
+    @pytest.hookimpl(hookwrapper=True, tryfirst=True)
+    def pytest_runtest_call(self, item):
+        # A hung call never produces logreport. Record phase entry separately so
+        # timeout observations count tests that actually started, not only ended.
+        self.data["started_calls"].append(item.nodeid)
+        self.save()
+        yield
 
     @pytest.hookimpl(hookwrapper=True, tryfirst=True)
     def pytest_runtest_makereport(self, item, call):

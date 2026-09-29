@@ -264,9 +264,17 @@ def _read_observations(path: Path) -> tuple[dict, str, bool, int | None, str | N
         ):
             raise ValueError("invalid collected items")
         reports = data["reports"]
+        started_calls = data["started_calls"]
         collection_errors = data["collection_errors"]
         if not isinstance(reports, list) or not isinstance(collection_errors, list):
             raise ValueError("invalid reports")
+        if (
+            not isinstance(started_calls, list)
+            or not all(isinstance(nodeid, str) for nodeid in started_calls)
+            or len(started_calls) != len(set(started_calls))
+            or any(items is None or nodeid not in items for nodeid in started_calls)
+        ):
+            raise ValueError("invalid call phase entries")
         grouped: dict[str, dict] = {}
         details = []
         for report in reports:
@@ -279,6 +287,8 @@ def _read_observations(path: Path) -> tuple[dict, str, bool, int | None, str | N
             ):
                 raise ValueError("invalid item report")
             phases = grouped.setdefault(nodeid, {})
+            if phase == "call" and nodeid not in started_calls:
+                raise ValueError("call report has no observed phase entry")
             if phase in phases:
                 raise ValueError("duplicate phase report")
             phases[phase] = report
@@ -306,7 +316,7 @@ def _read_observations(path: Path) -> tuple[dict, str, bool, int | None, str | N
             details.append(f"{error['nodeid']} (collection)\n{error['detail']}")
         counters = dict(
             collected=len(items) if items is not None else None,
-            executed=sum("call" in phases for phases in grouped.values()),
+            executed=len(started_calls),
             passed=0, failed=0, errors=len(collection_errors), skipped=0, xfailed=0, xpassed=0,
         )
         for phases in grouped.values():
