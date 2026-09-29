@@ -1,7 +1,7 @@
 # 测试生成 Agent 技术设计
 
-> 当前进度：A1、A2、A3、B1、B2、C1、C1a 已完成；B1 关系契约扩展及 B3 `b3-v3` 生成/反馈 Prompt 已完成离线验证。当前提供配置检查 CLI、DeepSeek 结构化生成适配层、正式 Prompt 构建入口、关系/策略数据契约、受限 AST 源码/调用分析、环境验证入口及兼容旧产物的模型；B3 真实请求尚待明确授权将公开关联样例源码和说明发送给 DeepSeek。测试生成、执行工具和 Agent 反馈循环尚未实现；本文其余任务接口、状态和输出目录仍是后续实现约定。A3 的手写测试不是模型生成结果。
-> 2026-09-27 范围更新：Agent 自主判断同文件函数关联并规划单元/协作测试集。第 1.8 节范围已落实到第 4.8 节的 `1.1` 数据契约、第 6.5 节的 `b3-v3` Prompt 及第 8 节的自动关系事实提取；端到端生成和执行仍属于 C2–F 阶段。
+> 当前进度：A1、A2、A3、B1、B2、C1、C1a 和 D1 已完成，C2 已完成实现和离线验收；B1 关系契约扩展及 B3 `b3-v3` 生成/反馈 Prompt 已完成离线验证。当前提供配置检查 CLI、DeepSeek 结构化生成适配层、正式 Prompt 构建入口、关系/策略数据契约、受限 AST 源码/调用分析、首轮候选宿主校验/落盘、独立 pytest 执行工具及兼容旧产物的模型；B3/C2 真实请求尚待明确授权将公开关联样例源码和说明发送给 DeepSeek。D2 覆盖工具和 Agent 反馈循环尚未实现；本文其余任务接口、状态和输出目录仍是后续实现约定。A3 的手写测试和 C2 的离线合成候选都不是模型生成结果。
+> 2026-09-27 范围更新：Agent 自主判断同文件函数关联并规划单元/协作测试集。第 1.8 节范围已落实到第 4.8 节的 `1.1` 数据契约、第 6.5 节的 `b3-v3` Prompt、第 8 节的自动关系事实提取及第 9 节的首轮候选流程；端到端执行仍属于 D–F 阶段。
 
 ## 1. 范围与验收（A1）
 
@@ -104,7 +104,7 @@
 
 停止原因另行记录，不与最终状态混用，例如 `coverage_target_met`、`round_limit_reached`、`no_progress`、`suspected_source_defect`、`ambiguous_specification`、`execution_timeout`、`unrecoverable_error`。达到预算上限不会自动变成 `completed`。
 
-### 1.6 四个最小样例
+### 1.6 五个最小样例
 
 样例源码和行为说明一一对应，docstring 与说明保持一致。均只使用标准 Python、无外部依赖、无文件或网络副作用。
 
@@ -114,6 +114,7 @@
 | 多分支校验 | `examples/validation.py` / `examples/validation.md` | 0/59 为 `fail`，60/89 为 `pass`，90/100 为 `excellent`；-1/101 抛 `ValueError`，浮点/字符串/布尔值抛 `TypeError` | 覆盖类别边界和类型/范围错误。若首轮遗漏分支，反馈应引导追加；不能保证模型首轮一定遗漏。 |
 | 明确规格下的缺陷 | `examples/discount.py` / `examples/discount.md` | 99 → 99，100 → **90**，101 → 90；源码在 100 时实际返回 **100** | 生成规格支持的断言，实际执行发现阈值错误，进入 `needs_review`，保留断言和疑似缺陷证据。 |
 | 同文件直接调用 | `examples/relationships.py` / `examples/relationships.md` | `checkout → calculate_total` 为确认边；两函数 12×3 均为 36，零值为 0 | 分别规划乘法单元测试和入口协作测试，保存调用证据与选择理由，不 mock 同文件依赖。 |
+| 同文件独立函数 | `examples/independent.py` / `examples/independent.md` | `rectangle_area(4,5) == 20`；`is_even(4)` 为真、`is_even(3)` 为假；两函数无关系 | 分别规划两个单元测试策略，不凭同文件、名称或类型编造协作流程。 |
 
 计算样例的非负整数输入域是前置条件，域外行为未定义；不要求自动生成不存在的输入校验。校验样例明确排除 `bool`。折扣样例约定向下取整，避免浮点或金额舍入歧义。
 
@@ -127,6 +128,7 @@
 - 已准备四个源码文件和四个 UTF-8 行为说明，覆盖正常计算、多分支校验、明确规格缺陷和同文件直接调用。
 - 2026-09-26 使用本地 Python 3.13.9 做三个源码文件的语法/导入检查及 32 项行为核验（含整数子类、异常类型和已知缺陷确认）：正常计算与校验符合规格；折扣的 100 边界确实得到 100，违反预期 90。该偏差为有意保留的课程样例。核验前后源码 SHA-256 一致，未产生缓存或修改源码。
 - 2026-09-27 对新增关系样例执行 4 项行为核验：`calculate_total(12,3)`、`calculate_total(0,5)`、`checkout(12,3)`、`checkout(12,0)` 均符合说明；核验前后源码 SHA-256 一致。
+- 2026-09-27 C2 增加独立函数对照样例；该新增不改写上述 A1 阶段验收事实，C2 验证见第 9 节。
 
 本记录不替代 A3 的真实 API、样例 pytest 和 coverage 验收；A2 的工程环境和依赖验收见第 2 节。
 
@@ -195,7 +197,7 @@ AgentDev/
 ├── src/testgen_agent/
 │   ├── __init__.py / __main__.py
 │   ├── cli.py / config.py / llm_client.py
-│   ├── models.py / prompts.py / agent.py / reporting.py
+│   ├── models.py / prompts.py / generation.py / agent.py / reporting.py
 │   └── tools/
 │       ├── __init__.py
 │       ├── source_reader.py / code_analyzer.py / test_runner.py
@@ -206,7 +208,7 @@ AgentDev/
 
 - `python -m testgen_agent` 和安装后的 `testgen-agent` 使用同一个 CLI 入口；当前实现 `--help`、`--version`、`--check-config` 及配置覆盖参数。
 - `config.py` 完成配置读取、校验与脱敏摘要，`llm_client.py` 提供配置驱动的 HTTP 客户端工厂；客户端创建不会发送请求。
-- A2 阶段创建了 `models`、`prompts`、`agent`、`reporting` 及源码/执行工具骨架；此后 `models`、`prompts` 已分别在 B1、B3 实现，`agent`、`reporting` 及源码/执行工具仍保留为后续阶段骨架。各模块均不包含模拟成功的业务结果。
+- A2 阶段创建了 `models`、`prompts`、`agent`、`reporting` 及源码/执行工具骨架；此后 `models`、`prompts`、源码分析工具、`generation` 和 `test_runner` 已分别在 B1、B3、C1/C1a、C2 和 D1 实现。`agent`、`reporting` 仍保留为后续阶段骨架；生产模块不包含伪装为真实模型或真实执行的固定成功结果。
 - `outputs/` 和临时工作目录由后续实际运行时创建，并由 `.gitignore` 排除；设计内容统一写入本文件，没有创建 `docs/scope.md`。
 
 ### 2.3 配置来源与约束
@@ -234,7 +236,7 @@ AgentDev/
 
 客户端从配置读取地址、密钥和超时，以相对路径 `chat/completions` 发起调用，保留可配置的 `/v1` 前缀，不跟随重定向；HTTPX 默认不自动重试。A2 不实现真实生成方法、退避策略或响应修复，这些预算和错误处理在 B2 中实现。
 
-`request_timeout_seconds` 当前设置 HTTPX 的连接、读、写及连接池等待超时，不表示整个响应的总墙钟时限；`execution_timeout_seconds` 将在 D 阶段用于测试子进程的总执行时限，两者不混用。
+`request_timeout_seconds` 当前设置 HTTPX 的连接、读、写及连接池等待超时，不表示整个响应的总墙钟时限；D1 的 `run_tests()` 已接受单轮测试子进程的执行超时（默认 30 秒），控制器后续将传入 `execution_timeout_seconds`，两者不混用。
 
 模型名没有默认值，`.env.example` 中仅提供模型和密钥占位符，使用者必须替换。官方文档列出的模型只是选择参考，不能替代账号真实权限验证；最终模型标识、测试日期、延迟和用量在 A3 记录。A2 不保存真实 Key，不发送付费 API 请求。
 
@@ -359,7 +361,7 @@ flowchart LR
 
 计数使用非负严格整数，不将字符串、布尔值或小数转换成计数。未观测到的计数为 `null`，超时或进程未启动时不能默认填写“通过 0 条”来假装已取得统计。
 
-`kind` 分别表示 `passed`、`assertion_failed`、`execution_error`、`collection_error`、`internal_error`、`usage_error`、`interrupted`、`no_tests`、`timeout`、`launch_error`。普通 pytest 结果与对应退出码保持一致；超时类型和 `timed_out` 标志必须相符，进程未启动时退出码为 `null`，且不允许报告非零测试项计数。
+`kind` 分别表示 `passed`、`assertion_failed`、`execution_error`、`collection_error`、`internal_error`、`usage_error`、`interrupted`、`no_tests`、`timeout`、`launch_error` 和 D1 新增的 `result_error`。普通 pytest 结果与对应退出码保持一致；超时类型和 `timed_out` 标志必须相符，进程未启动时退出码为 `null`，且不允许报告非零测试项计数。`result_error` 保留已观测的实际退出码，表示结构化诊断缺失、矛盾或无法分类，不能成为可运行/全通过结果。
 
 - `collected`：收集到的不同测试项数，参数化实例分别计数。
 - `executed`：实际进入 call 阶段的不同测试项数，由工具独立观测；setup 失败和纯跳过不计入，call 阶段发生的 xfail 可计入。
@@ -622,6 +624,80 @@ C1 完成时只建立安全、可复现的源码快照和基本结构上下文�
 
 新增 `tests/test_call_analysis.py` 共 **23 项**测试，覆盖真实关联样例、调用字段/参数、嵌套和简单赋值数据流、标准库隔离、动态调用、六类局部遮蔽、模块赋值/装饰器/global 写入、推导式作用域、嵌套定义隔离、自递归、互递归、独立函数、嵌套 callable 的唯一 ID、图接口类型检查，以及真实分析证据通过 `validate_plan_against_source()`。2026-09-27 全套 **205 项**测试以 `-W error` 通过，`pip check` 无损坏依赖。
 
-## 9. 后续设计章节
+## 9. 首轮测试计划、代码校验与候选落盘（C2）
 
-候选生成、执行工具、反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。
+### 9.1 一次结构化生成和接口边界
+
+实现位置为 `src/testgen_agent/generation.py`。`generate_initial_candidate(source, behavior_specification, oracle_mode, workspace, client)` 使用 B3 `build_generation_context()` 构造上下文，并且只调用一次客户端的 `generate_tests(context)`；B2 内部为瞬时故障或格式修复发生的受控 HTTP 重试仍按其统一预算记录，不被 C2 再套一层调用循环。返回值必须是已经过 B2/Pydantic 校验的 `LLMGenerationResult`，其中一次同时包含结构化 `TestPlan` 和可选 pytest 代码。
+
+客户端使用最小 `GenerationClient` Protocol，生产端可直接传入 `DeepSeekClient`，离线测试传入明确命名为 `SyntheticClient` 的固定契约产物。合成结果只用于验证宿主校验和文件布局，不作为真实 LLM 能力证据。没有可靠 oracle 时，合法的 `code=null`、空 mappings 和精确 questions 会作为不可执行但可审计的首轮候选保存。
+
+### 9.2 宿主侧计划和 pytest 校验
+
+`validate_generated_tests()` 在任何测试文件写入之前执行以下宿主规则：
+
+- 要求 `TestPlan 1.1` 且 target_functions 与 AST 分析出的全部函数集合完全一致；调用 `validate_plan_against_source()` 验证关系引用、方向、确认边和未知调用边界。模型契约继续负责场景类型、涉及函数、关系 ID、策略决策、expected basis 和有序步骤的一致性。
+- 使用 `ast.parse()` 校验测试语法；mappings 中的每个 pytest 名称必须对应一个真实模块级同步 `test_*` 函数，代码中也不得夹带未映射测试。
+- 对每个映射测试，根据 scenario target 和有序 steps 核对真实目标调用；assert 必须直接包含目标调用或引用该调用的简单赋值结果，`pytest.raises` 的 body 必须调用目标。常量断言、只有调用没有 oracle、把断言藏进嵌套函数都会拒绝。
+- 目标只能用无别名的 `from subject import <target_function>` 导入；禁止重新定义、参数遮蔽、赋值、推导式捕获或删除目标名称，避免实际调用被替换。
+- 允许 pytest 和不涉及外部副作用的标准库；拒绝相对/第三方导入、文件/进程/网络模块、模块级执行副作用、异步测试、mock/patch/monkeypatch、skip/xfail、宽泛异常捕获、动态执行和文件修改调用。协作场景因此默认运行真实 `subject.py` 入口和依赖。
+
+这些检查只能证明候选结构、来源引用和明显代码质量满足执行前置条件，不能证明预期值符合业务规格，也不能替代 pytest/coverage 的真实观察。失败形成带稳定 code 和可选行号的 `CandidateValidationError`。
+
+### 9.3 固定工作区和审计快照
+
+`stage_initial_candidate()` 只在宿主提供且尚不存在的新目录中创建以下固定布局：
+
+```text
+<workspace>/
+├── subject.py
+└── rounds/01/
+    ├── test_subject.py       # 仅宿主校验通过且 code 非空时存在
+    ├── plan.json
+    ├── candidate.json
+    └── llm_result.json
+```
+
+`subject.py` 由已分析的 `SourceInfo` 快照按原编码重新写出，原始源文件只读且测试核对字节未变化。模型不能提供路径或文件名。已有 workspace 立即拒绝，避免覆盖用户数据。计划和脱敏 LLM 结果总会先保存；无效语法/代码写入 `CandidateRound.validation_error`，保留原始生成内容但不创建 `test_subject.py`；有效候选的 `test_path` 保存相对路径 `rounds/01/test_subject.py`，便于后续 D/E 阶段迁移和比较。
+
+### 9.4 样例与离线验收边界
+
+新增 `examples/independent.py` / `.md`：`rectangle_area` 和 `is_even` 没有调用、数据传递或共享状态，离线计划只含两个 unit decisions/scenarios 和两个候选入口，不生成 relationship/collaboration。现有 `relationships` 样例使用真实 C1a call ID 构造确认关系，保存 `calculate_total` 单元场景和真实 `checkout` 协作场景；测试代码直接调用入口，不 mock 依赖。calculation、validation、discount 三个原始样例分别用正常断言、`pytest.raises` 和边界断言通过同一宿主校验。
+
+新增 `tests/test_generation.py` 共 **31 项**，覆盖一次客户端调用、固定路径、源码字节不变、三类 JSON 往返、关系/独立策略、三个旧样例、无代码疑问、语法拒绝快照、映射/断言、导入/依赖、mock 与绕过、skip marker、计划遗漏/伪造关系、目标重绑定、嵌套函数和防覆盖。另在 pytest 临时目录用当前解释器实际执行一份标注为离线合成适配器产物的关联候选，结果为 **2 passed**；该操作不是 D 阶段执行器，也不冒充模型生成。2026-09-27 全套 **236 项**测试以 `-W error` 通过，`pip check` 无损坏依赖。
+
+真实 B3/C2 请求仍未执行，因为会把公开 `relationships.py`、行为说明和完整 Prompt 发送给 DeepSeek，并可能产生费用；获得用户明确外发授权并成功运行前，不把 C2 记为真实 LLM 验收完成。
+
+## 10. 独立测试执行工具（D1）
+
+### 10.1 接口和固定工作目录
+
+`testgen_agent.tools.run_tests(workspace, timeout=30)` 返回 `ExecutionResult`；超时参数为 `1..300` 的整数，布尔值、小数和字符串均拒绝。工作区必须已由宿主准备好 `subject.py` 和 `rounds/01/test_subject.py`，与 C2 首轮布局直接衔接。`workspace.py` 保存生成与执行共用的宿主固定路径；调用方不能传入任意测试文件、shell 命令或模型决定的输出路径。D1 当前只支持首轮，后续轮次选择由 E 阶段扩展。
+
+使用当前 `sys.executable` 通过参数列表执行 `python -P -m pytest`，`shell=False`、stdin 关闭、cwd 为解析后的工作区。仅显式选择该测试文件；独立空配置、`--noconftest`、importlib 模式和禁用自动插件加载隔离父目录配置、附加测试及外部插件。固定导入路径只包含宿主包与本次工作区，支持 Windows 空格和中文路径；符号链接/junction 路径拒绝执行。此工具仅面向可信课程样例，进程及环境隔离不等同于恶意代码安全沙箱。
+
+输入类型/超时错误抛出 `TypeError` / `ValueError`；缺少工作区、固定文件或链接越界抛出 `ExecutionWorkspaceError`；诊断目录/文件无法写入或读取抛出 `ExecutionArtifactError`。进程启动失败以及启动后的所有执行结局用 `ExecutionResult` 返回。
+
+### 10.2 结构化观察和结局归类
+
+宿主显式加载 `_pytest_results.py` 小型插件，记录收集项 node ID、setup/call/teardown 的 outcome、断言/pytest failure 与其他异常的区别、xfail 信息、失败位置及主要 traceback。会话开始、收集结束、每个阶段和会话结束都以临时文件加原子替换保存 JSON，超时后可读最近完整快照；统计不依赖控制台字符串。同时由 pytest 导出 JUnit XML 作为诊断和人工比对产物。
+
+收集数按参数化后的测试项计，执行数只统计进入 call 的项。每个测试项只有一个最终结局：setup/teardown 错误优先归为 errors，call 断言/异常优先于清理阶段跳过，其他阶段跳过也阻止全通过；call 通过但 teardown 出错不能重复算一个通过和一个错误。普通 `assert`、`pytest.fail()` 与 `pytest.raises` 未满足属于 failed；call 中的 ValueError 等运行异常属于 errors；非严格 xfail/xpass 单独计数，严格 XPASS 按 pytest 失败项记录。完整运行必须有完整阶段记录和互斥结局，结束后再通过 B1 计数契约校验。
+
+按真实退出码区分通过（0）、断言/执行错误（1）、收集错误/中断（2）、pytest 内部错误（3）、用法错误（4）和无测试（5）；其他退出码或不可信的结构化观察返回 `result_error`，实际退出码保留。仅有 skip/xfail/xpass、没有测试或提前退出时，`all_passed` 均为 false。启动失败的退出码为 null、计数未知。
+
+### 10.3 超时、环境和诊断产物
+
+测试子进程环境使用 OS 必要变量白名单；不继承 LLM Key、自定义密钥、`PYTEST_ADDOPTS`、`PYTEST_PLUGINS` 或调用方 `PYTHONPATH`。Windows 超时先对本次 PID 执行 `taskkill /T /F`（最多等待 5 秒），再确认主进程结束并回收；POSIX 使用独立会话并终止其进程组。调用方中断也结束测试进程。耗时包含启动、等待和超时清理，`timed_out` 明确表示超时；快照存在时计数表示已观测项，缺少快照时保持未知。Windows 路径及进程处理已实测，POSIX 分支尚未进行平台验收。
+
+每次创建新的 `rounds/01/executions/run-*/`，保存 `pytest.ini`、`stdout.txt`、`stderr.txt`、`pytest_result.json`、可用的 `pytest.xml` 和 `execution.json`，诊断不会覆盖前次运行。原始 stdout/stderr 直接流入文件；返回值保留约 16K 的头尾日志并设置截断标志，stderr 补充插件记录的失败位置和主要信息。完整原始日志与结构化 traceback 可供后续回看。诊断目录位于宿主工作区内，D1 不重新写入 subject 或测试文件。
+
+### 10.4 实测验证
+
+2026-09-29 新增 `tests/test_test_runner.py` **40 项**检查，实际启动 pytest 覆盖全通过、断言失败、运行异常、导入/语法收集失败、空测试、参数化、setup/teardown 错误与跳过、xfail/xpass、提前返回 0、受控超时、长日志及中文空格路径、环境/配置隔离、连续运行和路径链接拒绝。启动失败及结构化记录损坏通过受控宿主注入验证；pytest 特殊退出码通过明确的 `pytest.exit` 样例验证映射，不将主动退出样例当作 pytest 自身缺陷证据。
+
+C2 原有合成关联候选现在交给正式 `run_tests()`，工具实际观测收集、执行、通过均为 **2**。全套 **276 项**以 `-W error` 通过，编译检查和 `pip check` 通过。本阶段完成执行工具；D2 覆盖率和 D3 包含覆盖数据人工比对的整体可信度验收继续待实现。
+
+## 11. 后续设计章节
+
+覆盖工具、反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。

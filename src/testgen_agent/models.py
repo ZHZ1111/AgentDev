@@ -480,6 +480,7 @@ class ExecutionKind(StrEnum):
     NO_TESTS = "no_tests"
     TIMEOUT = "timeout"
     LAUNCH_ERROR = "launch_error"
+    RESULT_ERROR = "result_error"
 
 
 class ExecutionResult(ContractModel):
@@ -516,6 +517,8 @@ class ExecutionResult(ContractModel):
             raise ValueError("timeout kind and timed_out flag must agree")
         if self.kind == ExecutionKind.LAUNCH_ERROR and self.exit_code is not None:
             raise ValueError("an unstarted process cannot have an exit code")
+        if self.kind == ExecutionKind.RESULT_ERROR and self.exit_code is None:
+            raise ValueError("a result-error run must preserve the observed exit code")
         if self.collected is not None and self.executed is not None and self.executed > self.collected:
             raise ValueError("executed items exceed collected items")
         if self.kind in {ExecutionKind.NO_TESTS, ExecutionKind.LAUNCH_ERROR} and any(

@@ -2,7 +2,7 @@
 
 课程项目：为单个 Python 文件中的 1–5 个顶层同步纯函数生成并执行 pytest 测试集。设计目标是由 Agent 自动分析函数关系，决定单元测试和协作测试策略，再根据失败及覆盖率反馈进行有限迭代。LLM 服务商选用 DeepSeek。
 
-当前完成 A1/A2/A3/B1/B2/C1/C1a，以及 B1 关系契约扩展和 B3 `b3-v3` 生成/反馈 Prompt 的离线验证：包括输入输出及状态设计、四组源码/行为说明样例、工程骨架、配置检查、DeepSeek 结构化生成适配、手写 pytest/coverage 环境验证、兼容旧产物的数据模型、正式 Prompt 构建，以及受限源码读取、基本 AST 检查和保守的函数关系证据提取。B3 真实请求尚待明确授权发送公开关联样例数据；测试生成/执行和反馈循环尚未实现。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
+当前完成 A1/A2/A3/B1/B2/C1/C1a、C2 的离线实现，以及 D1 的正式测试执行工具；B1 关系契约扩展和 B3 `b3-v3` 生成/反馈 Prompt 已通过离线验证。现有功能包括输入输出及状态设计、五组源码/行为说明样例、配置检查、DeepSeek 结构化生成适配、手写 pytest/coverage 环境验证、数据模型、正式 Prompt、受限源码/关系分析、首轮候选校验和固定路径落盘，以及带超时和结构化结果的 pytest 执行。B3/C2 真实请求尚待明确授权发送公开关联样例数据；D2 覆盖工具和反馈循环尚未实现。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
 
 2026-09-27 新增范围：自动判断同文件函数关系，并自主规划测试集。所需 `1.1` 数据契约、`b3-v3` Prompt、C1 基本 AST 结构和 C1a 调用关系证据均已实现；端到端生成/执行与报告仍未实现。修订任务预算为 58 小时。
 
@@ -71,7 +71,7 @@ DeepSeek 官方示例使用服务地址 `https://api.deepseek.com`、Bearer 认�
 
 缺少 Key、未替换占位符、非法 URL、非整数或超出范围的轮次/超时都会报配置错误；错误提示不包含被拒绝的配置值。不要通过命令行传入明文 Key。`.env`、虚拟环境、缓存及 `outputs/` 已加入忽略规则。
 
-当前没有 `--source` / `--spec` 端到端运行接口；任务清单中的完整生成命令仍是后续设计，不是已实现命令。`models.py` 已实现 B1 数据契约，`llm_client.py` 已实现 B2 DeepSeek 适配层，`prompts.py` 已实现 B3 首轮与反馈上下文；源码工具已完成 C1，`agent`、`reporting` 和测试执行工具仍是注明阶段的骨架。
+当前没有 `--source` / `--spec` 端到端运行接口；任务清单中的完整生成命令仍是后续设计，不是已实现命令。`models.py` 已实现 B1 数据契约，`llm_client.py` 已实现 B2 DeepSeek 适配层，`prompts.py` 已实现 B3 首轮与反馈上下文，源码工具已完成 C1/C1a，`generation.py` 已完成 C2 的首轮调用、宿主校验和候选落盘，`tools/test_runner.py` 已完成 D1 的独立执行接口；`agent`、`reporting` 仍是注明阶段的骨架。
 
 C1 可作为 Python 工具独立调用，不执行目标源码：
 
@@ -119,7 +119,24 @@ print(find_explicit_data_flows(source))     # 仅嵌套调用/简单赋值
 
 每次结果保存到 `outputs/b3/<run_id>/validation.json`。该命令会向外部服务发送 `examples/relationships.py`、`examples/relationships.md` 和 Prompt 内容；仅在明确允许发送这些数据后运行。它会检查关系 Schema、源码证据、入口、策略及单元/协作场景。B3 真实调用尚未执行，不能仅凭离线测试宣称真实验收完成。
 
-当前共 205 项自身测试通过，其中 B1 原始契约新增 60 项、B1 关系扩展新增 27 项、B2 新增 18 项、B3 新增 21 项、C1 新增 23 项、C1a 新增 23 项；自动测试不发送真实 API 请求，也不执行被分析源码。
+`generation.py` 提供 `generate_initial_candidate()`：一次取得结构化 `GeneratedTests` 后，校验计划证据、场景到真实测试函数映射、目标调用、有效断言、固定导入及禁止绕过项，并在宿主指定的新目录写入 `subject.py`、`rounds/01/test_subject.py`、`plan.json`、`candidate.json` 和脱敏 LLM 结果快照。无代码疑问和无效候选都会保留审计快照；无效代码不会写成可执行测试。有效工作区可交给 D1 的 `run_tests()`；生成和执行尚未接入 CLI 或 Agent 控制循环。
+
+D1 可作为 Python 工具独立调用，工作区须已由宿主准备 `subject.py` 和 `rounds/01/test_subject.py`：
+
+```python
+from testgen_agent.tools import run_tests
+
+# 替换成已有的 C2 工作区；有效候选也可直接传 artifacts.workspace。
+result = run_tests("outputs/my-run", timeout=30)
+print(result.canonical_json(indent=2))
+print(result.all_passed)
+```
+
+`timeout` 接受 `1..300` 秒的整数，默认 30 秒。工具使用当前解释器和参数列表，只执行固定测试文件，关闭外部 pytest 配置、conftest 和自动插件加载；子进程仅继承必要 OS 环境，LLM Key 及自定义密钥变量不传入。每次在 `rounds/01/executions/run-*/` 保存独立的完整 stdout/stderr、结构化 pytest JSON、可用的 JUnit XML 和 `execution.json`。返回日志截断到约 16K 并标明截断，失败位置和主要诊断保留；超时终止子进程并保留最近完整的计数快照。
+
+返回 `ExecutionResult` 区分通过、断言失败、运行异常、收集/导入错误、内部/用法错误、无测试、超时、启动失败和结构化结果不可用。`kind=passed` 仅表示 pytest 返回 0，验收应检查 `all_passed`；空测试、skip/xfail/xpass 或不完整结果都不能达到全通过。输入/布局错误抛出 `TypeError`、`ValueError` 或 `ExecutionWorkspaceError`，诊断文件 I/O 失败抛出 `ExecutionArtifactError`。D1 当前支持首轮固定布局，后续轮次与覆盖率将在 D2/E 阶段接入；仅用于可信课程样例，进程隔离不提供恶意代码的安全沙箱。
+
+2026-09-29 全套 276 项自身测试通过，其中 D1 新增 40 项；原有 C2 31 项测试保留。D1 实际启动 pytest 验证各类结局、参数化和阶段统计、超时、日志截断、环境隔离、路径约束及连续运行诊断隔离；C2 关联候选通过正式 D1 工具获得 2 个通过项。自动测试不发送真实 API 请求，合成适配器产物仍明确标注为离线测试数据。
 
 ## A3 环境验证
 
@@ -144,7 +161,8 @@ print(find_explicit_data_flows(source))     # 仅嵌套调用/简单赋值
 - `examples/validation.py` / `.md`：多分支校验及明确异常类型。
 - `examples/discount.py` / `.md`：有意保留满 100 打折的边界缺陷。
 - `examples/relationships.py` / `.md`：`checkout → calculate_total` 的确认直接调用、单元与协作策略样例。
+- `examples/independent.py` / `.md`：同文件两个独立函数的单元策略对照，不应编造协作关系。
 
-后续任务将在 `outputs/<run_id>/` 保存测试、双格式报告、轨迹及每轮快照；具体状态和验收约定见 Design。当前配置检查不会生成这些文件。
+C2 已能在宿主指定的新工作区保存 `subject.py` 和首轮 plan/candidate/LLM 快照；后续端到端任务将在 `outputs/<run_id>/` 继续保存执行结果、覆盖率、双格式报告和轨迹。具体状态及验收约定见 Design；当前配置检查不会生成这些文件。
 
 测试执行只面向本地可信课程样例；后续真实 DeepSeek 请求可能产生费用。仓库不包含真实 Key，使用者自行配置。

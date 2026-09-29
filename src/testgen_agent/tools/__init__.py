@@ -1,4 +1,4 @@
-"""Bounded source analysis and (in stage D) test execution tools."""
+"""Bounded source analysis and host-prepared pytest execution tools."""
 
 from .code_analyzer import (
     DataFlowHint,
@@ -12,9 +12,12 @@ from .code_analyzer import (
     find_call_cycles,
 )
 from .source_reader import LoadedSource, MAX_SOURCE_BYTES, SourceReadError, read_source
+from .test_runner import ExecutionArtifactError, ExecutionWorkspaceError, run_tests
 
 __all__ = [
     "LoadedSource",
+    "ExecutionArtifactError",
+    "ExecutionWorkspaceError",
     "MAX_SOURCE_BYTES",
     "SourceAnalysisError",
     "SourceReadError",
@@ -27,4 +30,5 @@ __all__ = [
     "find_explicit_data_flows",
     "find_call_cycles",
     "read_source",
+    "run_tests",
 ]
