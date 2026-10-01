@@ -699,7 +699,7 @@ class TokenUsage(ContractModel):
 def _history(rounds: tuple[CandidateRound, ...], request: TaskInput, oracle_mode: OracleMode) -> None:
     if len(rounds) > request.max_rounds or [item.number for item in rounds] != list(range(1, len(rounds) + 1)):
         raise ValueError("round history must be consecutive and within the configured budget")
-    if any(item.generated and item.generated.plan.oracle_mode != oracle_mode for item in rounds):
+    if any(item.generated and item.validation_error is None and item.generated.plan.oracle_mode != oracle_mode for item in rounds):
         raise ValueError("candidate oracle mode differs from the original task")
 
 
@@ -785,7 +785,7 @@ class AgentState(ContractModel):
         if self.source_info is not None and self.source_info.source_path != self.request.source_path:
             raise ValueError("source metadata belongs to a different input")
         for item in self.history:
-            if item.generated is not None:
+            if item.generated is not None and item.validation_error is None:
                 if item.generated.plan.schema_version != self.schema_version:
                     raise ValueError("state and generated plan schema versions must agree")
                 if self.source_info is None:
@@ -828,7 +828,7 @@ class FinalReport(ContractModel):
         if self.source_info is not None and self.source_info.source_path != self.request.source_path:
             raise ValueError("report source metadata belongs to a different input")
         for item in self.rounds:
-            if item.generated is not None:
+            if item.generated is not None and item.validation_error is None:
                 if item.generated.plan.schema_version != self.schema_version:
                     raise ValueError("report and generated plan schema versions must agree")
                 if self.schema_version == "1.1":

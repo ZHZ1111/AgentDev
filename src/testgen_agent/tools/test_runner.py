@@ -14,7 +14,7 @@ from time import perf_counter
 from pydantic import ValidationError
 
 from ..models import ExecutionKind, ExecutionResult
-from ..workspace import ROUND_DIRECTORY, SUBJECT_FILENAME, TEST_FILENAME
+from ..workspace import SUBJECT_FILENAME, TEST_FILENAME, round_directory
 
 
 MAX_LOG_BYTES = 16_000
@@ -29,21 +29,21 @@ class ExecutionArtifactError(OSError):
     """Host diagnostics could not be created or saved."""
 
 
-def run_tests(workspace: str | Path, timeout: int = 30) -> ExecutionResult:
-    """Run only rounds/01/test_subject.py, using the current Python interpreter.
+def run_tests(workspace: str | Path, timeout: int = 30, *, round_number: int = 1) -> ExecutionResult:
+    """Run only rounds/NN/test_subject.py (NN defaults to 01).
 
     ``workspace`` is a trusted, host-prepared task directory with ``subject.py``.
     ``timeout`` is an integer in 1..300 seconds. Invalid input raises TypeError,
     ValueError or ExecutionWorkspaceError; artifact I/O raises ExecutionArtifactError.
     Launch, pytest, timeout and diagnostic failures return ExecutionResult. Each call
     saves raw logs, plugin JSON, JUnit XML (when available), and execution.json in
-    rounds/01/executions/run-*/. This is process isolation, not a security sandbox.
+    rounds/NN/executions/run-*/. This is process isolation, not a security sandbox.
     """
-    return _run_tests(workspace, timeout)[0]
+    return _run_tests(workspace, timeout, round_number=round_number)[0]
 
 
 def _run_tests(
-    workspace: str | Path, timeout: int, *, collect_coverage: bool = False,
+    workspace: str | Path, timeout: int, *, collect_coverage: bool = False, round_number: int = 1,
 ) -> tuple[ExecutionResult, Path]:
     """Shared D1/D2 execution; each invocation creates its own artifact directory."""
     if isinstance(timeout, bool) or not isinstance(timeout, int):
@@ -52,8 +52,8 @@ def _run_tests(
         raise ValueError("timeout must be in 1..300 seconds")
     if not isinstance(workspace, (str, Path)):
         raise TypeError("workspace must be a string or Path")
-    root, test_path = _validate_workspace(Path(workspace))
-    artifacts = _create_artifacts(root)
+    root, test_path = _validate_workspace(Path(workspace), round_number)
+    artifacts = _create_artifacts(root, round_number)
     report_path = artifacts / "pytest_result.json"
     config_path = artifacts / "pytest.ini"
     try:
@@ -168,7 +168,8 @@ def _contained_path(root: Path, relative: Path) -> Path:
     return current
 
 
-def _validate_workspace(workspace: Path) -> tuple[Path, Path]:
+def _validate_workspace(workspace: Path, round_number: int = 1) -> tuple[Path, Path]:
+    relative = round_directory(round_number)
     if workspace.is_symlink() or workspace.is_junction():
         raise ExecutionWorkspaceError("Workspace cannot be a symbolic link or junction.")
     try:
@@ -178,14 +179,14 @@ def _validate_workspace(workspace: Path) -> tuple[Path, Path]:
     if not root.is_dir():
         raise ExecutionWorkspaceError("Task workspace must be a directory.")
     subject = _contained_path(root, Path(SUBJECT_FILENAME))
-    test_path = _contained_path(root, ROUND_DIRECTORY / TEST_FILENAME)
+    test_path = _contained_path(root, relative / TEST_FILENAME)
     if not subject.is_file() or not test_path.is_file():
-        raise ExecutionWorkspaceError("Workspace needs subject.py and rounds/01/test_subject.py.")
+        raise ExecutionWorkspaceError(f"Workspace needs subject.py and {relative / TEST_FILENAME}.")
     return root, test_path
 
 
-def _create_artifacts(root: Path) -> Path:
-    parent = _contained_path(root, ROUND_DIRECTORY / "executions")
+def _create_artifacts(root: Path, round_number: int = 1) -> Path:
+    parent = _contained_path(root, round_directory(round_number) / "executions")
     try:
         parent.mkdir(exist_ok=True)
         return Path(tempfile.mkdtemp(prefix="run-", dir=parent))

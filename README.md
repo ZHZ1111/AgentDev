@@ -2,7 +2,7 @@
 
 课程项目：为单个 Python 文件中的 1–5 个顶层同步纯函数生成并执行 pytest 测试集。设计目标是由 Agent 自动分析函数关系，决定单元测试和协作测试策略，再根据失败及覆盖率反馈进行有限迭代。LLM 服务商选用 DeepSeek。
 
-当前完成 A1/A2/A3/B1/B2/C1/C1a、C2 的离线实现，以及 D1/D2 正式执行与覆盖工具、D3 独立可信度验收、E1 状态/动作控制器和 E2 按失败原因选择动作；B1 关系契约扩展和 B3 `b3-v4` Prompt 已通过离线验证。控制器可连接首轮生成、校验和真实执行，按失败来源和规格证据返回修复、补充、人工确认或结束动作，并准备包含调用链证据的下一轮上下文。自动多轮执行尚未实现，B3/C2 真实请求仍未验收。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
+当前完成 A1/A2/A3/B1/B2/C1/C1a、C2 的离线实现，以及 D1/D2 正式执行与覆盖工具、D3 独立可信度验收和 E1–E3 控制器、失败分类、任务记忆及有限反馈循环；B1 关系契约扩展和 B3 `b3-v4` Prompt 已通过离线验证。`run_agent()` 可生成、校验并执行最多三轮候选，依据真实反馈继续或停止，保留旧测试、选择最佳候选并导出结束摘要。真实 LLM 多轮集成尚未验收，CLI、逐步轨迹和完整报告仍待后续阶段。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
 
 2026-09-27 新增范围：自动判断同文件函数关系，并自主规划测试集。所需关系契约、Prompt、AST 结构与调用证据均已实现；首轮生成/执行可通过 E1 Python 接口连接，完整多轮 CLI 与报告仍未实现。修订任务预算为 58 小时。
 
@@ -119,7 +119,7 @@ print(find_explicit_data_flows(source))     # 仅嵌套调用/简单赋值
 
 每次结果保存到 `outputs/b3/<run_id>/validation.json`。该命令会向外部服务发送 `examples/relationships.py`、`examples/relationships.md` 和 Prompt 内容；仅在明确允许发送这些数据后运行。它会检查关系 Schema、源码证据、入口、策略及单元/协作场景。B3 真实调用尚未执行，不能仅凭离线测试宣称真实验收完成。
 
-`generation.py` 提供 `generate_initial_candidate()`：一次取得结构化 `GeneratedTests` 后，校验计划证据、场景到真实测试函数映射、目标调用、有效断言、固定导入及禁止绕过项，并在宿主指定的新目录写入 `subject.py`、`rounds/01/test_subject.py`、`plan.json`、`candidate.json` 和脱敏 LLM 结果快照。无代码疑问和无效候选都会保留审计快照；无效代码不会写成可执行测试。有效工作区可交给 D1 的 `run_tests()`；生成和执行尚未接入 CLI 或 Agent 控制循环。
+`generation.py` 提供 `generate_initial_candidate()`：一次取得结构化 `GeneratedTests` 后，校验计划证据、场景到真实测试函数映射、目标调用、有效断言、固定导入及禁止绕过项，并在宿主指定的新目录写入 `subject.py`、`rounds/01/test_subject.py`、`plan.json`、`candidate.json` 和脱敏 LLM 结果快照。无代码疑问和无效候选都会保留审计快照；无效代码不会写成可执行测试。有效工作区可交给 D1 的 `run_tests()`；生成和执行已接入 E3 的 Python 控制循环，CLI 尚未接入。
 
 D1 可作为 Python 工具独立调用，工作区须已由宿主准备 `subject.py` 和 `rounds/01/test_subject.py`：
 
@@ -134,7 +134,7 @@ print(result.all_passed)
 
 `timeout` 接受 `1..300` 秒的整数，默认 30 秒。工具使用当前解释器和参数列表，只执行固定测试文件，关闭外部 pytest 配置、conftest 和自动插件加载；子进程仅继承必要 OS 环境，LLM Key 及自定义密钥变量不传入。每次在 `rounds/01/executions/run-*/` 保存独立的完整 stdout/stderr、结构化 pytest JSON、可用的 JUnit XML 和 `execution.json`。返回日志截断到约 16K 并标明截断，失败位置和主要诊断保留；超时终止子进程并保留最近完整的计数快照。
 
-返回 `ExecutionResult` 区分通过、断言失败、运行异常、收集/导入错误、内部/用法错误、无测试、超时、启动失败和结构化结果不可用。`kind=passed` 仅表示 pytest 返回 0，验收应检查 `all_passed`；空测试、skip/xfail/xpass 或不完整结果都不能达到全通过。输入/布局错误抛出 `TypeError`、`ValueError` 或 `ExecutionWorkspaceError`，诊断文件 I/O 失败抛出 `ExecutionArtifactError`。执行工具当前支持首轮固定布局，后续轮次由 E 阶段扩展；仅用于可信课程样例，进程隔离不提供恶意代码的安全沙箱。
+返回 `ExecutionResult` 区分通过、断言失败、运行异常、收集/导入错误、内部/用法错误、无测试、超时、启动失败和结构化结果不可用。`kind=passed` 仅表示 pytest 返回 0，验收应检查 `all_passed`；空测试、skip/xfail/xpass 或不完整结果都不能达到全通过。输入/布局错误抛出 `TypeError`、`ValueError` 或 `ExecutionWorkspaceError`，诊断文件 I/O 失败抛出 `ExecutionArtifactError`。执行工具默认使用首轮固定布局，E3 可通过 round_number=2/3 选择后续轮次；仅用于可信课程样例，进程隔离不提供恶意代码的安全沙箱。
 
 D2 同时采集测试和覆盖结果：
 
@@ -170,7 +170,7 @@ print(run.artifacts)
 
 `agent.py` 提供 `run_initial_step(request, client=..., oracle_mode=..., tools=...)`：读取 `TaskInput.source_path` 和可选 `spec_path`，分析源码，调用适配器生成一次候选，校验后执行，返回 `ControllerResult`（状态、下一步动作、理由、动作摘要及原始候选产物）。`request.output_dir` 必须是新的独立工作区；显式传入 `behavior_specification` 可覆盖说明文件内容。`AgentTools` 可替换分析、生成和执行接口，便于离线验证。
 
-`choose_action(state)` 根据真实执行、覆盖及模型已有关系/策略选择动作；`build_action_context(state)` 只准备当前允许的生成/修复/补充上下文，不发送请求。覆盖缺失关联到所属函数和传递调用者链，模型需说明补充单元边界或入口协作行为的依据。测试全通过且覆盖达标仍要检查已选协作关系是否有场景与有效断言；有疑问、断言失败、超时或预算耗尽会阻止无条件继续生成。E2 已增加失败归因；自动修订执行、历史记忆和轨迹落盘留到 E3–E4。
+`choose_action(state)` 根据真实执行、覆盖及模型已有关系/策略选择动作；`build_action_context(state)` 只准备当前允许的生成/修复/补充上下文，不发送请求。覆盖缺失关联到所属函数和传递调用者链，模型需说明补充单元边界或入口协作行为的依据。测试全通过且覆盖达标仍要检查已选协作关系是否有场景与有效断言；有疑问、断言失败、超时或预算耗尽会阻止无条件继续生成。E2/E3 已接入失败归因、有限修订执行和历史记忆，逐步轨迹仍留到 E4。
 
 ```powershell
 # 离线适配器 + 真实本地 pytest/coverage，不发送 LLM 请求
@@ -190,7 +190,22 @@ pytest 工具在 `ExecutionResult.failures` 中保留真实异常类型、测试
 .\.venv\Scripts\python.exe -m pytest tests/test_failure_analysis.py -q -W error
 ```
 
-2026-10-01 E2 新增 29 项检查通过。真实折扣样例在输入 100、预期 90 时失败，控制器报告疑似源码缺陷并保留断言 90 和原源码；只请求一次离线适配器。自动多轮执行与完整报告仍留到 E3/G。
+2026-10-01 E2 新增 29 项检查通过。真实折扣样例在输入 100、预期 90 时失败，控制器报告疑似源码缺陷并保留断言 90 和原源码；只请求一次离线适配器。E3 已接入有限多轮执行，完整报告仍留到 G。
+
+## E3 任务记忆与有限反馈循环
+
+通过 Python 接口 `run_agent(request, client=..., oracle_mode=..., tools=...)` 执行完整有限循环。`request` 为 `TaskInput`，`output_dir` 必须是新工作区，`max_rounds` 为 1–3；`client` 实现已有 `GenerationClient.generate_tests()`，可以是真实适配器或离线响应序列。传入真实客户端会向外部服务发送源码、行为说明和反馈；这里的验收只使用离线响应，不发送 API 请求。
+
+每轮分别保存到 `rounds/01`、`02`、`03`，工具使用独立覆盖数据库。后续 Prompt 携带原始需求、历史关系/策略/场景、真实错误与覆盖缺口、已通过测试名称、最佳候选及剩余预算。宿主要求旧的已通过测试函数、场景及支持代码保持不变，补充场景另建测试函数；删除或改写会被拒绝。重复候选、新代码但覆盖无提升、规格疑问、疑似缺陷、超时、预算耗尽或不可恢复错误都会结束。
+
+最佳候选优先选全通过且覆盖达标的版本，其次按覆盖可用、分支/行覆盖和通过数比较，同分保留早轮。追加候选无效时保留旧版本；失败缺陷证据始终留在历史与问题中。结束产物为 `state.json`、含真实状态/停止原因的 `summary.json`，以及选中候选的根目录 `test_subject.py`；没有可用候选时不伪造最终测试。`summary.json` 是结束摘要，详细 `trace.jsonl` 和双格式最终报告仍留在 E4/G。
+
+```powershell
+# 离线模型序列 + 真实多轮 pytest/coverage，不发送 API 请求
+.\.venv\Scripts\python.exe -m pytest tests/test_agent_loop.py -q -W error
+```
+
+2026-10-01 E3 新增 34 项检查：三轮依次补正数、零值、负数分支并达到 100% 分支覆盖，另验证旧测试保护、无效候选回退、缺陷证据保留、无进展/预算/错误停止、实测用量累计、未知用量和任务隔离。真实 LLM 多轮效果尚未验收，当前 CLI 尚未接入。
 
 ## A3 环境验证
 
@@ -217,6 +232,6 @@ pytest 工具在 `ExecutionResult.failures` 中保留真实异常类型、测试
 - `examples/relationships.py` / `.md`：`checkout → calculate_total` 的确认直接调用、单元与协作策略样例。
 - `examples/independent.py` / `.md`：同文件两个独立函数的单元策略对照，不应编造协作关系。
 
-C2 已能在宿主指定的新工作区保存 `subject.py` 和首轮 plan/candidate/LLM 快照；后续端到端任务将在 `outputs/<run_id>/` 继续保存执行结果、覆盖率、双格式报告和轨迹。具体状态及验收约定见 Design；当前配置检查不会生成这些文件。
+C2/E3 已能在新工作区保存 `subject.py`、各轮 plan/candidate/LLM 快照、执行结果、覆盖率、任务状态、选中测试和结束摘要；双格式最终报告和逐步轨迹留到后续阶段。具体状态及验收约定见 Design；当前配置检查不会生成这些文件。
 
 测试执行只面向本地可信课程样例；后续真实 DeepSeek 请求可能产生费用。仓库不包含真实 Key，使用者自行配置。

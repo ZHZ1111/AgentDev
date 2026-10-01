@@ -35,7 +35,7 @@ class CoverageRunResult:
         return self.execution.all_passed
 
 
-def run_tests_with_coverage(workspace: str | Path, timeout: int = 30) -> CoverageRunResult:
+def run_tests_with_coverage(workspace: str | Path, timeout: int = 30, *, round_number: int = 1) -> CoverageRunResult:
     """Run the same D1 candidate once, under coverage, then export only subject.py.
 
     The pytest timeout remains 1..300 seconds; export has a separate timeout of
@@ -49,7 +49,7 @@ def run_tests_with_coverage(workspace: str | Path, timeout: int = 30) -> Coverag
         raise TypeError("timeout must be an integer")
     if not 1 <= timeout <= 300:
         raise ValueError("timeout must be in 1..300 seconds")
-    root, _ = _validate_workspace(Path(workspace))
+    root, _ = _validate_workspace(Path(workspace), round_number)
     target = root / SUBJECT_FILENAME
     snapshot = None
     snapshot_error = None
@@ -58,7 +58,7 @@ def run_tests_with_coverage(workspace: str | Path, timeout: int = 30) -> Coverag
     except SourceReadError:
         snapshot_error = "source_snapshot_unavailable"
 
-    execution, artifacts = _run_tests(root, timeout, collect_coverage=True)
+    execution, artifacts = _run_tests(root, timeout, collect_coverage=True, round_number=round_number)
     export = _export_coverage(root, artifacts, execution, timeout)
     coverage = CoverageResult(target_file=target, status="unavailable", error=export["error"]) if export["error"] else (
         parse_coverage_json(artifacts / "coverage.json", target_file=target)

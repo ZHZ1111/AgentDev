@@ -177,7 +177,7 @@ def test_failure_details_cannot_be_attached_to_success():
         passed(1).updated(failures=failure_execution().failures)
 
 
-def test_changed_candidate_with_same_coverage_can_still_be_revised(source):
+def test_changed_candidate_with_same_coverage_stops_without_progress(source):
     coverage = m.CoverageResult(target_file=source.source_path, status="available",
                                covered_lines=0, total_lines=1, covered_branches=0, total_branches=0,
                                missing_lines=(source.functions[0].end_line,))
@@ -185,7 +185,7 @@ def test_changed_candidate_with_same_coverage_can_still_be_revised(source):
     previous = state.history[0]
     generated = previous.generated.updated(code=previous.generated.code + "\n# different candidate\n")
     state = state.updated(history=(previous, previous.updated(number=2, generated=generated)), current_round=2)
-    assert choose_action(state).action == "add_missing_cases"
+    assert choose_action(state).stop_reason == "no_progress"
 
 
 def test_changed_exception_is_not_identical_measured_outcome(source):
