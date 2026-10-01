@@ -754,6 +754,34 @@ JUnit 把 call 阶段的 ValueError 记录为 failure，但 D1 契约区分运�
 
 2026-09-29 09:31:40（UTC+8）在 Windows 11 / Python 3.13.9、pytest 9.1.1、coverage 7.16.1 运行六类样例与三次连续候选，全部通过；精选证据为 [evaluation/d3_validation.json](evaluation/d3_validation.json)，原始诊断根目录为 `outputs/d3/20260929T013140Z-51d68511/`。源码未改变、失败诊断保留，超时进程已结束。新增 `tests/test_d3_validation.py` **15 项**检查，全套 **328 项**以 `-W error` 通过，编译检查、`pip check` 和差异检查通过。Windows 已实测，POSIX 分支未进行平台验收。
 
-## 13. 后续设计章节
+## 13. 显式状态与动作控制器（E1）
+
+`agent.py` 使用已有 `AgentAction` / `AgentState` 契约，新增 `ActionDecision`（动作、理由、停止原因、反馈事实）和可替换的 `AgentTools`（分析、生成、执行接口）。`run_initial_step()` 接收 `TaskInput`、生成适配器及明确的 `OracleMode`，按分析 → 模型关系/策略规划与生成 → 宿主校验 → 真实执行 → 下一步决策推进，返回 `ControllerResult`。`request.output_dir` 是新的运行工作区；`spec_path` 可读取 UTF-8/BOM 说明，显式 `behavior_specification` 优先。工具错误保留既有类型并向调用者传播；此阶段不将异常包装成最终报告。
+
+`choose_action()` 是不调用 API 的确定性决策函数，利用已校验的模型策略与工具事实。无效候选选择修复；带疑问的候选选择人工确认并阻止执行；收集/导入错误或空测试选择检查生成测试；断言失败保留代码并选择人工确认，E1 不猜测源码责任；超时、不可恢复执行错误或覆盖不可用结束并说明原因。真实全通过且覆盖达到既有 90% 行/80% 分支目标后，还需验证所有已选协作关系都有映射场景和有效目标断言；缺少关键协作场景选择补充。跳过项或不完整结果不能达到完成条件。以上门控不等于对测试断言语义或所有规格行为的完整证明。
+
+`build_action_context()` 只为生成、修复、补充动作准备下一次请求，不实际调用模型。未执行的无效候选携带原代码和校验错误；已执行候选沿用 B3 反馈 Prompt 的真实错误、计数、覆盖和轮次预算。额外控制器数据保留理由、已有模型策略、缺失位置所属函数及静态确认图的传递调用者链，要求模型自主判断补充内部边界或入口协作场景并说明预期依据。递归链使用已访问集合终止；未知调用不冒充确认链。执行预算耗尽时返回停止动作，禁止再构建生成上下文。
+
+`apply_decision()` 重新验证状态契约；`ControllerResult.steps` 仅是本次调用的动作摘要，不冒充 E4 持久化轨迹。返回状态含真实执行和覆盖历史，`artifacts.candidate` 则仍为 C2 原始生成快照。E2 已实现按失败原因选择动作；后续修订执行、全历史记忆、最佳候选比较、双格式报告及轨迹落盘留到 E3–E4/G。当前 CLI 尚未接入控制器。
+
+E1 新增 `tests/test_agent.py` 21 项检查：离线适配器响应配合真实 pytest/coverage 执行，验证分支只覆盖一侧时选择补充、成功首轮不自动重复请求、源码保持不变、无效候选/疑问不执行、动作与状态 JSON 往返、覆盖达标仍拒绝遗漏协作或无效断言、调用链定位、预算和停止门控、说明文件读取及工具接口替换。没有发送真实 LLM 请求，E1 不据此宣称完整多轮 Agent 已验收。
+
+2026-10-01 Windows / Python 3.13.9 回归验证：全套 **349 项**以 `-W error` 通过（含 E1 的 21 项），`compileall`、`pip check` 和 `git diff --check` 通过。
+
+## 14. 按失败原因选择动作（E2）
+
+`ExecutionResult` 增加可选的 `failures` 元组，每项 `FailureObservation` 保存测试 nodeid、阶段、异常类型、原始抛出位置和 `ModuleNotFoundError.name`。字段默认空元组，旧执行快照仍可读取；成功、无测试或未启动结果不得携带失败记录。pytest 插件在 call/setup/teardown 阶段读取原始异常对象，在收集 hook 中解包 pytest `CollectError.__cause__`，不依赖 stdout/stderr 文本推断异常类型。结构化记录无效时沿用 D1 的 `result_error` 保守回退。
+
+`failure_analysis.classify_failures()` 根据原始异常来源分类：测试文件中的 ImportError/NameError/SyntaxError 或错误 subject 导入属于生成问题，可在预算内修复；缺失其他模块或候选校验发现第三方依赖则报告环境/不支持问题，禁止自动安装。源码中发生的名称/运行异常不擅自归因给测试。没有结构化异常的旧失败记录默认需确认，尤其收集失败不再默认进入修复。`ActionDecision.status` 对疑似缺陷和不确定失败返回 `needs_review`，环境终止、预算或无进展结束则根据已有可运行候选区分 `failed` / `partial`。`issues` 包含具体位置及规格证据，应用决策时追加到 `AgentState.issues` 并避免重复，保留原候选和执行数据。
+
+明确规格支持的自动核验采用有限且可解释的规则：当前仅支持单目标函数、单个场景映射、单参数字面量直接调用的相等断言；测试函数体只有该断言，失败位置必须对应此断言，调用输入还要匹配计划中的场景输入。宿主从原始行为说明或 docstring 中读取标题为“输入/预期”或“input/expected”的两列表格，实际输入对应的所有可解析预期必须一致并与断言字面量及类型相同。只有模型标记 `expected_basis=specification` 不足以证明断言正确。冲突表格、未定义输入、映射错误、特征测试、参数化、异常 oracle、一般自然语言或多函数协作预期不满足该核验规则时均返回人工确认；此有限检查不是通用语义证明，也不保证识别任意自然语言冲突。
+
+核验支持的实际失败产生 `suspected_source_defect` 和规格行引用，选择 `request_review` / `suspected_source_defect`，保留失败用例和原预期，不构建后续修复请求。无法确认时选择 `request_review` / `ambiguous_specification`，不声称已确认 Bug。超时直接停止；相邻候选代码及校验错误或实测计数/覆盖缺口相同，且仍需修复或补充时，以 `no_progress` 停止；已经通过完成门控的重复候选仍可正常完成。此检查不以新工作区路径、时间或日志变化作为进展。完整多轮执行、历史总结和更全面的进展指标仍属于 E3。
+
+2026-10-01 新增 `tests/test_failure_analysis.py` 29 项检查。真实 pytest 执行折扣样例的 `calculate_discount(100) == 90` 返回断言失败并定位到第 4 行，宿主读取明确规格表格后报告疑似缺陷，原源码及断言 90 保留；适配器只被请求一次。真实收集/执行验证还覆盖不存在的外部模块、错误函数导入和测试名称错误。其余检查覆盖冲突/不足依据、docstring 表格冲突、特征模式、场景输入与位置不一致、预算和重复无进展门控、问题保存及兼容旧执行结果。仅用离线合成模型响应，无真实 LLM 请求，不把这些结果称为完整多轮 Agent 验收。
+
+E2 最终回归：Windows / Python 3.13.9，全套 **378 项**以 `-W error` 通过，`compileall`、`pip check` 和 `git diff --check` 通过。
+
+## 15. 后续设计章节
 
 反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。

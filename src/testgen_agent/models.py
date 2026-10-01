@@ -483,6 +483,17 @@ class ExecutionKind(StrEnum):
     RESULT_ERROR = "result_error"
 
 
+class FailureObservation(ContractModel):
+    """Structured pytest exception facts, never supplied by generation output."""
+
+    nodeid: Text
+    phase: Literal["collection", "setup", "call", "teardown"]
+    exception_type: Text
+    path: str | None = None
+    line: Line | None = None
+    missing_module: Text | None = None
+
+
 class ExecutionResult(ContractModel):
     """Tool observations. Null counters mean unknown, not an observed zero."""
 
@@ -502,6 +513,7 @@ class ExecutionResult(ContractModel):
     stdout_truncated: StrictBool = False
     stderr_truncated: StrictBool = False
     duration_seconds: Seconds | None = None
+    failures: tuple[FailureObservation, ...] = ()
 
     @model_validator(mode="after")
     def consistent_execution(self) -> Self:
@@ -519,6 +531,8 @@ class ExecutionResult(ContractModel):
             raise ValueError("an unstarted process cannot have an exit code")
         if self.kind == ExecutionKind.RESULT_ERROR and self.exit_code is None:
             raise ValueError("a result-error run must preserve the observed exit code")
+        if self.failures and self.kind in {ExecutionKind.PASSED, ExecutionKind.NO_TESTS, ExecutionKind.LAUNCH_ERROR}:
+            raise ValueError("successful/empty/unstarted runs cannot contain failure observations")
         if self.collected is not None and self.executed is not None and self.executed > self.collected:
             raise ValueError("executed items exceed collected items")
         if self.kind in {ExecutionKind.NO_TESTS, ExecutionKind.LAUNCH_ERROR} and any(

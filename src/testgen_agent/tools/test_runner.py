@@ -319,6 +319,11 @@ def _read_observations(path: Path) -> tuple[dict, str, bool, int | None, str | N
             executed=len(started_calls),
             passed=0, failed=0, errors=len(collection_errors), skipped=0, xfailed=0, xpassed=0,
         )
+        # Missing fields preserve compatibility with pre-E2 checkpoints.
+        counters["failures"] = tuple(
+            report["failure"] for report in (*reports, *collection_errors)
+            if report.get("failure") is not None
+        )
         for phases in grouped.values():
             if any(report["outcome"] == "failed" for phase, report in phases.items() if phase != "call"):
                 counters["errors"] += 1

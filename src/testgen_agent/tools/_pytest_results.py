@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import traceback
 from pathlib import Path
 
 import pytest
@@ -40,8 +41,22 @@ class _Recorder:
             self.data["collection_errors"].append({
                 "nodeid": report.nodeid,
                 "detail": str(report.longrepr),
+                "failure": getattr(report, "testgen_failure", None),
             })
             self.save()
+
+    @pytest.hookimpl(hookwrapper=True, tryfirst=True)
+    def pytest_make_collect_report(self, collector):
+        outcome = yield
+        report = outcome.get_result()
+        call = getattr(report, "call", None)
+        if call is not None and call.excinfo is not None:
+            exception = call.excinfo.value
+            # pytest wraps import/syntax exceptions in CollectError. Retain the
+            # original exception object, not a guess from rendered diagnostics.
+            if isinstance(exception, pytest.Collector.CollectError) and exception.__cause__ is not None:
+                exception = exception.__cause__
+            report.testgen_failure = _exception_failure(report.nodeid, "collection", exception)
 
     @pytest.hookimpl(hookwrapper=True, tryfirst=True)
     def pytest_runtest_call(self, item):
@@ -61,6 +76,9 @@ class _Recorder:
             call.excinfo is None
             or call.excinfo.errisinstance((AssertionError, pytest.fail.Exception))
         )
+        report.testgen_failure = None
+        if call.excinfo is not None:
+            report.testgen_failure = _exception_failure(report.nodeid, report.when, call.excinfo.value)
 
     def pytest_runtest_logreport(self, report) -> None:
         self.data["reports"].append({
@@ -71,6 +89,7 @@ class _Recorder:
             "xfail": hasattr(report, "wasxfail"),
             "location": list(report.location),
             "detail": str(report.longrepr) if report.failed or report.skipped else "",
+            "failure": getattr(report, "testgen_failure", None) if report.failed else None,
         })
         self.save()
 
@@ -79,6 +98,15 @@ class _Recorder:
         self.data["completed"] = True
         self.data["exit_code"] = int(exitstatus)
         self.save()
+
+
+def _exception_failure(nodeid: str, phase: str, exception: BaseException) -> dict:
+    frames = traceback.extract_tb(exception.__traceback__)
+    frame = frames[-1] if frames else None
+    return {"nodeid": nodeid, "phase": phase, "exception_type": type(exception).__name__,
+            "path": exception.filename if isinstance(exception, SyntaxError) else frame.filename if frame else None,
+            "line": exception.lineno if isinstance(exception, SyntaxError) else frame.lineno if frame else None,
+            "missing_module": exception.name if isinstance(exception, ModuleNotFoundError) else None}
 
 
 def pytest_configure(config) -> None:
