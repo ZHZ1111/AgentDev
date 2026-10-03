@@ -35,3 +35,7 @@ tmp/
 # F2 handwritten fixture-validation evidence
 !evaluation/f2/**/coverage.json
 !evaluation/f2/**/*.log
+
+# F3/F4 paired model and defect experiment evidence
+!evaluation/f3_f4/**/coverage.json
+!evaluation/f3_f4/**/*.log

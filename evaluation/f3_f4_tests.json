@@ -1,0 +1,45 @@
+{
+  "stage": "F3/F4 evaluator implementation checks",
+  "date": "2026-10-03",
+  "provenance": "Offline synthetic adapter responses with real local pytest/coverage; not model performance evidence",
+  "network_requests_performed": 0,
+  "live_experiment_status": "awaiting_explicit_DeepSeek_source_specification_disclosure_authorization",
+  "live_experiment_attempt": {
+    "command": ".venv\\Scripts\\python.exe -m testgen_agent.experiment run --live",
+    "outcome": "automatic approval review rejected execution before process launch",
+    "reason": "specific external destination disclosure authorization was not explicit"
+  },
+  "checks": [
+    {
+      "command": ".venv\\Scripts\\python.exe -m pytest tests/test_experiment.py tests/test_benchmark.py -q -W error",
+      "exit_code": 0,
+      "passed": 37,
+      "duration_seconds": 55.85,
+      "scope": "before adding the final archive integration check"
+    },
+    {
+      "command": ".venv\\Scripts\\python.exe -m pytest tests/test_experiment.py -q -W error",
+      "exit_code": 0,
+      "passed": 15,
+      "duration_seconds": 29.36,
+      "scope": "final evaluator implementation, including archive portability and SHA256 audit"
+    },
+    {
+      "command": ".venv\\Scripts\\python.exe -m compileall -q src tests",
+      "exit_code": 0
+    },
+    {
+      "command": ".venv\\Scripts\\python.exe -m pip check",
+      "exit_code": 0,
+      "outcome": "No broken requirements found."
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "new_tests": 15,
+  "current_collection_total": 478,
+  "full_suite_rerun": false,
+  "limitations": "No real F3/F4 model experiment has executed. Offline fixture coverage changes and known-defect detections validate the evaluator only; they are not DeepSeek results."
+}
