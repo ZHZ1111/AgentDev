@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 import json
+from uuid import uuid4
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +30,7 @@ from .tools import (analyze_source, run_tests_with_coverage, SourceAnalysisError
                     SourceReadError, ExecutionWorkspaceError, ExecutionArtifactError)
 from .tools.coverage_mapper import build_coverage_source_hints
 from .tools.coverage_runner import CoverageRunResult
+from .tracing import ObservedGenerationClient, TraceArtifactError, TraceWriter
 
 
 class ActionDecision(ContractModel):
@@ -314,6 +316,8 @@ class AgentRunResult:
     final_test_file: Path | None
     state_file: Path
     summary_file: Path
+    trace_file: Path
+    metadata_file: Path
 
 
 def run_agent(
@@ -322,53 +326,116 @@ def run_agent(
 ) -> AgentRunResult:
     """Run at most three candidate rounds, preserving every observed artifact.
 
-    output_dir must be a fresh workspace. State/summary are E3 snapshots, not
-    E4's step trace or G's Markdown/JSON FinalReport. Artifact-write failures are
+    output_dir must be a fresh workspace. E4 adds an incremental trace and run
+    metadata; G's Markdown/JSON FinalReport remains separate. Artifact-write failures are
     propagated because an unwritten result cannot be reported as saved.
     """
     root = request.output_dir
     if root.exists() or root.is_symlink() or root.is_junction():
         raise FileExistsError("运行工作区已存在，拒绝覆盖。")
     tools = tools or AgentTools()
-    state = AgentState(schema_version="1.1", run_id=root.name, request=request, oracle_mode=oracle_mode)
+    state = AgentState(schema_version="1.1", run_id=uuid4().hex, request=request, oracle_mode=oracle_mode)
+    from .llm_client import DeepSeekClient
+    trace = TraceWriter(root, state.run_id, {
+        "request": request.model_dump(mode="json"), "oracle_mode": oracle_mode,
+        "adapter_config": client.safe_config if isinstance(client, DeepSeekClient) else {
+            "adapter_type": type(client).__name__, "retry_policy": None},
+    })
+    observed = ObservedGenerationClient(client, trace, lambda: state)
+    trace.record(state, "run_started", "创建独立运行工作区，开始读取任务输入。",
+                 inputs={"source_path": str(request.source_path), "spec_path": str(request.spec_path) if request.spec_path else None,
+                         "max_rounds": request.max_rounds, "execution_timeout_seconds": request.execution_timeout_seconds})
+
+    def tool_call(name, function, reason, *, number=0, action=None, inputs=None, summarize=None):
+        trace.record(state, "tool_started", reason, tool=name, round_number=number, action=action, inputs=inputs)
+        try:
+            value = function()
+        except TraceArtifactError:
+            raise
+        except Exception as error:
+            trace.record(state.updated(api_calls=observed.api_calls), "tool_failed", "工具调用失败，保留已有产物。",
+                         tool=name, round_number=number, action=action, result={"error_type": type(error).__name__})
+            raise
+        trace.record(state.updated(api_calls=observed.api_calls), "tool_finished", "工具已返回宿主观察结果。",
+                     tool=name, round_number=number, action=action, result=summarize(value) if summarize else {})
+        return value
+
+    def record_decision(value):
+        trace.record(state, "decision", value.reason, action=value.action,
+                     result={"status": value.status, "stop_reason": value.stop_reason,
+                             "affected_functions": value.feedback.get("affected_functions", []),
+                             "issue_kinds": [issue.kind for issue in value.issues]})
+
+    def staged_summary(value):
+        return {"candidate": str(value.candidate_path.resolve().relative_to(root.resolve())),
+                "plan": str(value.plan_path.resolve().relative_to(root.resolve())),
+                "llm_result": str(value.llm_result_path.resolve().relative_to(root.resolve())),
+                "ready_for_execution": value.ready_for_execution,
+                "validation_error": value.candidate.validation_error,
+                "mapped_tests": len(value.candidate.generated.mappings) if value.candidate.generated else 0}
     steps = []
     artifacts = None
     try:
         if behavior_specification is None and request.spec_path is not None:
-            behavior_specification = request.spec_path.read_text(encoding="utf-8-sig")
+            behavior_specification = tool_call("read_specification", lambda: request.spec_path.read_text(encoding="utf-8-sig"),
+                                               "读取可选行为说明。", inputs={"path": str(request.spec_path)},
+                                               summarize=lambda text: {"characters": len(text)})
         state = state.updated(behavior_specification=behavior_specification)
         steps.append(choose_action(state))
-        state = state.updated(source_info=tools.analyze(request.source_path))
+        record_decision(steps[-1])
+        state = state.updated(source_info=tool_call("analyze_source", lambda: tools.analyze(request.source_path),
+                                                   steps[-1].reason, action=steps[-1].action,
+                                                   inputs={"path": str(request.source_path)},
+                                                   summarize=lambda source: {"functions": [item.name for item in source.functions],
+                                                                             "direct_calls": len(source.direct_calls),
+                                                                             "unresolved_calls": len(source.unresolved_calls)}))
         for number in range(1, request.max_rounds + 1):
             decision = choose_action(state)
             if decision.stop_reason is not None:
                 break
             steps.append(decision)
+            record_decision(decision)
+            observed.round_number, observed.action, observed.reason = number, decision.action, decision.reason
             if number == 1:
-                artifacts = tools.generate(source=state.source_info, behavior_specification=behavior_specification,
-                                           oracle_mode=oracle_mode, workspace=root, client=client)
+                artifacts = tool_call("generate_initial_candidate", lambda: tools.generate(
+                    source=state.source_info, behavior_specification=behavior_specification,
+                    oracle_mode=oracle_mode, workspace=root, client=observed, prepared_run_id=state.run_id),
+                    decision.reason, number=number, action=decision.action,
+                    inputs={"oracle_mode": oracle_mode, "round_number": number}, summarize=staged_summary)
                 result = artifacts.llm_result
             else:
-                result = client.generate_tests(build_action_context(state))
+                context = tool_call("build_action_context", lambda: build_action_context(state),
+                                    "根据历史、缺失覆盖与当前动作构建反馈上下文。", number=number, action=decision.action,
+                                    inputs={"history_rounds": len(state.history), "remaining_rounds": request.max_rounds - state.current_round})
+                result = observed.generate_tests(context)
                 if not isinstance(result, LLMGenerationResult):
                     raise TypeError("generate_tests must return LLMGenerationResult")
                 # Count requests even when staging subsequently fails.
-                state = state.updated(api_calls=state.api_calls + result.attempts,
-                                      token_usage=_add_usage(state.token_usage, result.total_usage, first=False))
-                artifacts = tools.stage_revision(source=state.source_info, llm_result=result,
-                                                  workspace=root, history=state.history, expected_oracle_mode=oracle_mode)
+                state = state.updated(api_calls=observed.api_calls, token_usage=observed.usage)
+                artifacts = tool_call("stage_revision_candidate", lambda: tools.stage_revision(
+                    source=state.source_info, llm_result=result, workspace=root, history=state.history,
+                    expected_oracle_mode=oracle_mode), "校验新候选并保护历史已通过测试，再保存独立轮次快照。",
+                    number=number, action=decision.action, inputs={"round_number": number}, summarize=staged_summary)
             candidate = artifacts.candidate
             if candidate.generated and candidate.generated.plan.oracle_mode != oracle_mode:
                 candidate = candidate.updated(validation_error="oracle_mode: 候选改变了原始预期模式。", test_path=None)
             state = state.updated(current_round=number, history=(*state.history, candidate), next_action=None,
-                                  api_calls=state.api_calls + result.attempts if number == 1 else state.api_calls,
-                                  token_usage=result.total_usage if number == 1 else state.token_usage)
+                                  api_calls=observed.api_calls, token_usage=observed.usage)
             decision = choose_action(state)
             if decision.action == AgentAction.RUN_TESTS:
                 steps.append(decision)
-                run = (tools.execute(artifacts.workspace, timeout=request.execution_timeout_seconds)
-                       if number == 1 else tools.execute(artifacts.workspace, timeout=request.execution_timeout_seconds,
-                                                       round_number=number))
+                record_decision(decision)
+                run = tool_call("run_tests_with_coverage", lambda: (
+                    tools.execute(artifacts.workspace, timeout=request.execution_timeout_seconds) if number == 1 else
+                    tools.execute(artifacts.workspace, timeout=request.execution_timeout_seconds, round_number=number)),
+                    decision.reason, number=number, action=decision.action,
+                    inputs={"test_file": str(candidate.test_path), "timeout_seconds": request.execution_timeout_seconds},
+                    summarize=lambda value: {"execution_kind": value.execution.kind, "all_passed": value.execution.all_passed,
+                                              "collected": value.execution.collected, "passed": value.execution.passed,
+                                              "failed": value.execution.failed, "errors": value.execution.errors,
+                                              "coverage_status": value.coverage.status, "line_percent": value.coverage.line_percent,
+                                              "branch_percent": value.coverage.branch_percent,
+                                              "artifacts": str(value.artifacts.resolve().relative_to(root.resolve()))})
                 candidate = candidate.updated(execution=run.execution, coverage=run.coverage)
                 state = state.updated(history=(*state.history[:-1], candidate))
                 # Repaired generation errors stay in round history but no longer
@@ -380,6 +447,7 @@ def run_agent(
             state = state.updated(best_available_round=select_best_candidate(state.history))
             state = apply_decision(state, decision)
             steps.append(decision)
+            record_decision(decision)
             artifacts.candidate_path.write_text(candidate.canonical_json(indent=2) + "\n", encoding="utf-8")
             (root / "state.json").write_text(state.canonical_json(indent=2) + "\n", encoding="utf-8")
             if decision.stop_reason is not None:
@@ -391,9 +459,11 @@ def run_agent(
                                       stop_reason=StopReason.ROUND_LIMIT_REACHED,
                                       status=TaskStatus.PARTIAL if state.best_available_round else TaskStatus.FAILED)
             state = apply_decision(state, decision)
+            record_decision(decision)
+    except TraceArtifactError:
+        raise
     except (LLMError, OSError, ValueError) as error:
-        if isinstance(error, LLMError):
-            state = state.updated(api_calls=state.api_calls + error.attempts, token_usage=None)
+        state = state.updated(api_calls=observed.api_calls, token_usage=observed.usage)
         detail = str(error) if isinstance(error, (LLMError, SourceReadError, SourceAnalysisError,
                                                  ExecutionWorkspaceError, ExecutionArtifactError)) else type(error).__name__
         issue = Issue(kind="environment_error" if isinstance(error, OSError) else "other",
@@ -405,6 +475,27 @@ def run_agent(
                                   status=TaskStatus.PARTIAL if state.best_available_round else TaskStatus.FAILED)
         state = apply_decision(state, decision)
         steps.append(decision)
+        record_decision(decision)
+    final_path, state_file, summary_file = tool_call(
+        "export_results", lambda: _export_results(root, state, decision, trace),
+        "保存结束状态、真实停止原因与选中候选，保留历史证据。",
+        number=state.current_round, action=decision.action,
+        inputs={"selected_round": state.best_available_round},
+        summarize=lambda paths: {"final_test_file": str(paths[0]) if paths[0] else None,
+                                 "state_file": str(paths[1]), "summary_file": str(paths[2])},
+    )
+    trace.record(state, "run_finished", decision.reason, action=decision.action,
+                 result={"status": decision.status, "stop_reason": state.stop_reason, "selected_round": state.best_available_round,
+                         "final_test_file": str(final_path.relative_to(root)) if final_path else None,
+                         "state_file": "state.json", "summary_file": "summary.json",
+                         "api_calls": state.api_calls, "token_usage": state.token_usage.model_dump() if state.token_usage else None})
+    return AgentRunResult(state=state, decision=decision, steps=tuple(steps), final_test_file=final_path,
+                          state_file=state_file, summary_file=summary_file, trace_file=trace.path,
+                          metadata_file=trace.metadata_path)
+
+
+def _export_results(root: Path, state: AgentState, decision: ActionDecision, trace: TraceWriter):
+    """Export only host-owned files; callers trace I/O failures explicitly."""
     root.mkdir(parents=True, exist_ok=True)
     final_path = None
     if state.best_available_round is not None:
@@ -429,7 +520,7 @@ def run_agent(
                "candidate_rounds": state.current_round,
                "executed_rounds": sum(item.execution is not None for item in state.history),
                "api_calls": state.api_calls, "token_usage": state.token_usage.model_dump() if state.token_usage else None,
+               "trace_file": str(trace.path), "metadata_file": str(trace.metadata_path),
                "unresolved_issues": [item.model_dump(mode="json") for item in state.issues]}
     summary_file.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return AgentRunResult(state=state, decision=decision, steps=tuple(steps), final_test_file=final_path,
-                          state_file=state_file, summary_file=summary_file)
+    return final_path, state_file, summary_file

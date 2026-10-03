@@ -806,12 +806,42 @@ E2 最终回归：Windows / Python 3.13.9，全套 **378 项**以 `-W error` 通
 
 ### 15.4 结束摘要与验收
 
-返回 `AgentRunResult`，含最终状态、真实动作/理由、内存动作摘要、最终测试路径及状态/摘要路径。每轮更新 `candidate.json` 和 `state.json`；结束写 `summary.json` 的状态、真实停止原因、选中轮次、候选/执行轮数、HTTP 尝试及实测用量、未解决问题，并将选中测试导出到工作区根目录 `test_subject.py`。无可用候选则不伪造最终测试。此摘要实现 E3 的停止原因输出，但不是 G 的 `FinalReport` 双格式展示；E4 的逐步 `trace.jsonl` 仍未完成，CLI 也尚未接入。
+返回 `AgentRunResult`，含最终状态、真实动作/理由、内存动作摘要、最终测试路径及状态/摘要路径。每轮更新 `candidate.json` 和 `state.json`；结束写 `summary.json` 的状态、真实停止原因、选中轮次、候选/执行轮数、HTTP 尝试及实测用量、未解决问题，并将选中测试导出到工作区根目录 `test_subject.py`。无可用候选则不伪造最终测试。此摘要实现 E3 的停止原因输出，但不是 G 的 `FinalReport` 双格式展示；E4 的逐步 `trace.jsonl` 已在第 16 节接入，CLI 尚未接入。
 
 E3 新增 `tests/test_agent_loop.py` 34 项验证。离线模型序列配合真实 pytest/coverage，三轮依次补正数、零值、负数分支达到 100% 分支覆盖；验证预算耗尽、无效追加保留旧候选、修复后补齐、保护已通过函数/场景/常量/依赖、局部运行错误中的已通过测试保护、重复代码与无覆盖提升停止、失败缺陷证据保留、API 错误与计数、未知用量、任务隔离、原源码和历史快照不被覆盖。没有发送真实 LLM 请求，结论仅覆盖离线适配器和真实本地工具的多轮集成。
 
 E3 最终回归：Windows / Python 3.13.9，全套 **412 项**以 `-W error` 通过（E3 新增 34 项），`compileall`、`pip check`、`git diff --check` 通过。
 
-## 16. 后续设计章节
+## 16. 可追踪运行与逐步轨迹（E4）
+
+### 16.1 事件契约和增量落盘
+
+`tracing.py` 定义 `TraceEvent`：事件 Schema 版本、独立 run_id、连续序号、UTC 时间、轮次、状态摘要、工具名、动作、输入摘要、结果摘要和简短理由。事件阶段为 `run_started`、`tool_started`、`tool_finished`、`tool_failed`、`decision`、`run_finished`。无工具的控制器决策使用空工具名；轮次 0 表示输入分析或尚未取得首轮候选。工具调用明确记录待执行的轮次，不把模型尚未返回的内容冒充已执行候选。工具完成后的控制决策记录缺失函数、问题类型、下一步动作和停止原因，无模型内部推理过程。
+
+`TraceWriter` 排他创建新工作区、`run.json` 与 `trace.jsonl`，每项事件单独追加、flush、fsync，运行中即可读取已有完整 JSON 行。`run_agent()` 使用 UUID 作为运行标识，工作区仍使用调用者指定的新目录；任何已存在目录都在请求前拒绝覆盖。首轮 C2 落盘新增 `prepared_run_id` 接口，只接受包含 `run.json` / `trace.jsonl` 且 ID 一致的预创建工作区，仍拒绝既有候选或其他文件；普通 C2 调用继续要求全新目录，不开放一般覆盖开关。
+
+工具开始事件在调用前写入，因此首轮模型故障也保留证据。工具异常记录错误类型，随后已有控制器保存停止决策；导出错误保留 `export_results` 的失败事件并向调用者抛出。轨迹自身写入失败使用 `TraceArtifactError` 直接抛出，不递归尝试记录相同错误、不返回伪造成功结果。若进程中断或最终日志落盘失败，事件前缀可能以开始/决策事件结束，缺少 `run_finished` 的日志不能视为完整结束轨迹；多文件产物不承诺原子事务提交。
+
+### 16.2 模型配置、次数和用量来源
+
+`run.json` 保存公开 `TaskInput`、oracle 模式和已知适配器公开配置。实际 DeepSeek 客户端采用既有 `safe_config`（模型、服务地址、超时、输出 token 和重试/格式修复预算），其他替代适配器只记录类型，未知重试策略保持 `null`，不猜测其配置。请求中声明的模型与实际返回模型分别记录，可用于发现配置不一致。
+
+`ObservedGenerationClient` 包装统一生成接口，记录模型请求开始、返回或失败，输入只记录上下文长度。返回记录适配器报告的 attempts、format_repairs、latency、requested/response model 和各已返回 completion 的 purpose/finish/usage；不把成功响应条数当作全部 HTTP 尝试数。暂态故障的尝试数由适配器 attempts 汇总，失败采用 `LLMError.attempts`，不复制原始响应正文。累计计数由观察包装器统一提供，即使首轮模型已返回但落盘失败也能保留。HTTP 尝试的来源显式标为 adapter_reported；手写离线适配器报告的模拟次数不冒充真实网络请求，验收入口另标实际网络数为 0。用量未知或任一轮缺失时保持 `null`，不从字符数估算 token。
+
+### 16.3 文件引用与完整运行结果
+
+轨迹记录分析函数/关系数量、候选校验和映射数、每轮 plan/candidate/LLM 快照位置，以及执行种类、真实计数、覆盖状态/百分比和执行诊断目录。代码、完整工具日志和原始 coverage JSON 保留于 E3 各轮路径，轨迹只保存摘要与引用。`export_results` 单独记录开始/返回/失败；`run_finished` 汇总最终状态、真实理由、选中轮次、请求计数/用量和输出路径。`AgentRunResult` 增加 `trace_file` / `metadata_file`，`summary.json` 同样保存这两个引用。原 `run_initial_step()` 仍是单步开发接口，完整 E4 轨迹由 `run_agent()` 提供。G 的 Markdown/JSON `FinalReport` 尚待集成。
+
+### 16.4 离线复现与实测
+
+`python -m testgen_agent.e4_validation` 在新的 `outputs/e4/<UUID>/` 下创建反馈/缺陷两个独立运行。反馈使用 `validation/e4/source.py` 和手写候选，首轮正数 → 补零值 → 补负数，真实覆盖反馈触发 `add_missing_cases` 后达到目标；缺陷使用公开 discount 源码/规格和输入 100、预期 90 的断言，真实失败触发 `request_review` / `suspected_source_defect`，一轮停止并保留测试。入口逐项核验来源文件不变、轮次/停止原因、连续事件、最终事件和原始测试/coverage 产物。`--output` 可更换输出根目录，不读取 API 配置、不发送请求。
+
+2026-10-01 验收全部通过：反馈轨迹 **38** 项事件、三轮完成；缺陷轨迹 **16** 项事件、一轮后 `needs_review`。原始工作区为 `outputs/e4/8410b3d559774f7d95488bf47fe2f04e/`；提交用精选摘要、两份完整轨迹和公开配置保存在 `evaluation/e4_*`。所有模型响应均为手写合成数据，工具执行和覆盖结果来自真实本地进程，真实网络请求数明确为 **0**。
+
+`tests/test_tracing.py` 新增 **14 项**检查：真实反馈/失败轨迹、初始 API 故障、模型已返回后落盘失败的计数、首次请求前日志已存在、MockTransport 格式修复/公开配置/脱敏、UUID 隔离与拒绝覆盖、真实追加 I/O 失败、导出失败、预创建工作区保护、说明文件失败、相对目录和离线验收入口。没有执行真实 LLM 多轮验收。
+
+E4 最终回归：Windows / Python 3.13.9，全套 **426 项**以 `-W error` 通过（新增 14 项）；`compileall`、`pip check`、`git diff --check` 通过。
+
+## 17. 后续设计章节
 
 反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。

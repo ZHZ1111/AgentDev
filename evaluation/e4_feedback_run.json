@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "run_id": "e32fac486c3a448fbf9ff460ec34c436",
+  "request": {
+    "source_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\validation\\e4\\source.py",
+    "model": {
+      "provider": "deepseek",
+      "model": "offline-e4-fixture",
+      "base_url": "https://example.invalid",
+      "request_timeout_seconds": 60
+    },
+    "spec_path": null,
+    "output_dir": "outputs\\e4\\8410b3d559774f7d95488bf47fe2f04e\\feedback",
+    "max_rounds": 3,
+    "execution_timeout_seconds": 30
+  },
+  "oracle_mode": "specification",
+  "adapter_config": {
+    "adapter_type": "OfflineSequence",
+    "retry_policy": null
+  }
+}

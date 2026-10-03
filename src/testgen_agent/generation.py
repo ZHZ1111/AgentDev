@@ -69,6 +69,7 @@ def generate_initial_candidate(
     oracle_mode: OracleMode,
     workspace: str | Path,
     client: GenerationClient,
+    prepared_run_id: str | None = None,
 ) -> InitialCandidateArtifacts:
     """Request one structured plan/code object, then validate and stage it once."""
 
@@ -82,7 +83,8 @@ def generate_initial_candidate(
     result = client.generate_tests(context)
     if not isinstance(result, LLMGenerationResult):
         raise TypeError("generate_tests must return an LLMGenerationResult")
-    return stage_initial_candidate(source=source, llm_result=result, workspace=workspace, expected_oracle_mode=oracle_mode)
+    return stage_initial_candidate(source=source, llm_result=result, workspace=workspace,
+                                   expected_oracle_mode=oracle_mode, prepared_run_id=prepared_run_id)
 
 
 def stage_initial_candidate(
@@ -91,6 +93,7 @@ def stage_initial_candidate(
     llm_result: LLMGenerationResult,
     workspace: str | Path,
     expected_oracle_mode: OracleMode | None = None,
+    prepared_run_id: str | None = None,
 ) -> InitialCandidateArtifacts:
     """Create fixed host paths and save a valid or safely rejected round-one candidate."""
 
@@ -100,7 +103,16 @@ def stage_initial_candidate(
         raise TypeError("llm_result must be an LLMGenerationResult")
     root = Path(workspace)
     try:
-        root.mkdir(parents=True, exist_ok=False)
+        if prepared_run_id is None:
+            root.mkdir(parents=True, exist_ok=False)
+        else:
+            import json
+            if root.is_symlink() or root.is_junction() or not root.is_dir():
+                raise ValueError("Invalid prepared run workspace")
+            if {item.name for item in root.iterdir()} != {"run.json", "trace.jsonl"}:
+                raise FileExistsError("Prepared workspace contains candidate or unrelated artifacts")
+            if json.loads((root / "run.json").read_text(encoding="utf-8"))["run_id"] != prepared_run_id:
+                raise ValueError("Prepared workspace run ID differs")
         round_dir = root / ROUND_DIRECTORY
         round_dir.mkdir(parents=True, exist_ok=False)
     except FileExistsError:

@@ -2,7 +2,7 @@
 
 课程项目：为单个 Python 文件中的 1–5 个顶层同步纯函数生成并执行 pytest 测试集。设计目标是由 Agent 自动分析函数关系，决定单元测试和协作测试策略，再根据失败及覆盖率反馈进行有限迭代。LLM 服务商选用 DeepSeek。
 
-当前完成 A1/A2/A3/B1/B2/C1/C1a、C2 的离线实现，以及 D1/D2 正式执行与覆盖工具、D3 独立可信度验收和 E1–E3 控制器、失败分类、任务记忆及有限反馈循环；B1 关系契约扩展和 B3 `b3-v4` Prompt 已通过离线验证。`run_agent()` 可生成、校验并执行最多三轮候选，依据真实反馈继续或停止，保留旧测试、选择最佳候选并导出结束摘要。真实 LLM 多轮集成尚未验收，CLI、逐步轨迹和完整报告仍待后续阶段。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
+当前完成 A1/A2/A3/B1/B2/C1/C1a、C2 的离线实现，以及 D1/D2 正式执行与覆盖工具、D3 独立可信度验收和 E1–E4 控制器、失败分类、任务记忆、有限反馈循环及逐步轨迹；B1 关系契约扩展和 B3 `b3-v4` Prompt 已通过离线验证。`run_agent()` 可生成、校验并执行最多三轮候选，依据真实反馈继续或停止，保留旧测试、选择最佳候选并导出结束摘要和轨迹。真实 LLM 多轮集成尚未验收，CLI 和完整报告仍待后续阶段。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
 
 2026-09-27 新增范围：自动判断同文件函数关系，并自主规划测试集。所需关系契约、Prompt、AST 结构与调用证据均已实现；首轮生成/执行可通过 E1 Python 接口连接，完整多轮 CLI 与报告仍未实现。修订任务预算为 58 小时。
 
@@ -170,7 +170,7 @@ print(run.artifacts)
 
 `agent.py` 提供 `run_initial_step(request, client=..., oracle_mode=..., tools=...)`：读取 `TaskInput.source_path` 和可选 `spec_path`，分析源码，调用适配器生成一次候选，校验后执行，返回 `ControllerResult`（状态、下一步动作、理由、动作摘要及原始候选产物）。`request.output_dir` 必须是新的独立工作区；显式传入 `behavior_specification` 可覆盖说明文件内容。`AgentTools` 可替换分析、生成和执行接口，便于离线验证。
 
-`choose_action(state)` 根据真实执行、覆盖及模型已有关系/策略选择动作；`build_action_context(state)` 只准备当前允许的生成/修复/补充上下文，不发送请求。覆盖缺失关联到所属函数和传递调用者链，模型需说明补充单元边界或入口协作行为的依据。测试全通过且覆盖达标仍要检查已选协作关系是否有场景与有效断言；有疑问、断言失败、超时或预算耗尽会阻止无条件继续生成。E2/E3 已接入失败归因、有限修订执行和历史记忆，逐步轨迹仍留到 E4。
+`choose_action(state)` 根据真实执行、覆盖及模型已有关系/策略选择动作；`build_action_context(state)` 只准备当前允许的生成/修复/补充上下文，不发送请求。覆盖缺失关联到所属函数和传递调用者链，模型需说明补充单元边界或入口协作行为的依据。测试全通过且覆盖达标仍要检查已选协作关系是否有场景与有效断言；有疑问、断言失败、超时或预算耗尽会阻止无条件继续生成。E2/E3 已接入失败归因、有限修订执行和历史记忆，E4 已为 `run_agent()` 接入逐步轨迹。
 
 ```powershell
 # 离线适配器 + 真实本地 pytest/coverage，不发送 LLM 请求
@@ -198,7 +198,7 @@ pytest 工具在 `ExecutionResult.failures` 中保留真实异常类型、测试
 
 每轮分别保存到 `rounds/01`、`02`、`03`，工具使用独立覆盖数据库。后续 Prompt 携带原始需求、历史关系/策略/场景、真实错误与覆盖缺口、已通过测试名称、最佳候选及剩余预算。宿主要求旧的已通过测试函数、场景及支持代码保持不变，补充场景另建测试函数；删除或改写会被拒绝。重复候选、新代码但覆盖无提升、规格疑问、疑似缺陷、超时、预算耗尽或不可恢复错误都会结束。
 
-最佳候选优先选全通过且覆盖达标的版本，其次按覆盖可用、分支/行覆盖和通过数比较，同分保留早轮。追加候选无效时保留旧版本；失败缺陷证据始终留在历史与问题中。结束产物为 `state.json`、含真实状态/停止原因的 `summary.json`，以及选中候选的根目录 `test_subject.py`；没有可用候选时不伪造最终测试。`summary.json` 是结束摘要，详细 `trace.jsonl` 和双格式最终报告仍留在 E4/G。
+最佳候选优先选全通过且覆盖达标的版本，其次按覆盖可用、分支/行覆盖和通过数比较，同分保留早轮。追加候选无效时保留旧版本；失败缺陷证据始终留在历史与问题中。结束产物为 `state.json`、含真实状态/停止原因的 `summary.json`，以及选中候选的根目录 `test_subject.py`；没有可用候选时不伪造最终测试。E4 另保存详细 `trace.jsonl`；双格式最终报告仍留在 G。
 
 ```powershell
 # 离线模型序列 + 真实多轮 pytest/coverage，不发送 API 请求
@@ -206,6 +206,21 @@ pytest 工具在 `ExecutionResult.failures` 中保留真实异常类型、测试
 ```
 
 2026-10-01 E3 新增 34 项检查：三轮依次补正数、零值、负数分支并达到 100% 分支覆盖，另验证旧测试保护、无效候选回退、缺陷证据保留、无进展/预算/错误停止、实测用量累计、未知用量和任务隔离。真实 LLM 多轮效果尚未验收，当前 CLI 尚未接入。
+
+## E4 逐步轨迹与可复现验收
+
+`run_agent()` 在首次模型请求前创建独立 UUID、`run.json` 和 `trace.jsonl`。轨迹逐项追加 UTC 时间、轮次、状态、工具开始/完成/失败、输入与结果摘要、控制器动作及理由，引用各轮原始代码、执行日志和 coverage 产物。返回值及 `summary.json` 提供 `trace_file` / `metadata_file`。
+
+公开配置、请求与返回模型、适配器报告的实际尝试次数、格式修复及用量均保留；未知值为 `null`。日志不复制 API Key、请求头或完整 Prompt。已有工作区拒绝覆盖；轨迹写入失败抛出 `TraceArtifactError`，保留已有事件。缺少 `run_finished` 表示轨迹未完整结束，多文件输出不承诺原子提交。
+
+```powershell
+# 手写离线模型响应 + 真实本地 pytest/coverage，网络请求为 0
+.\.venv\Scripts\python.exe -m testgen_agent.e4_validation
+# 专项回归
+.\.venv\Scripts\python.exe -m pytest tests/test_tracing.py -q -W error
+```
+
+每次在新的 `outputs/e4/<UUID>/` 保存两组运行及 `validation.json`；`--output` 可选择输出根目录。2026-10-01 验收通过：反馈案例三轮补齐覆盖，记录 38 个事件；折扣缺陷案例一轮停止、保留断言，记录 16 个事件。精选证据见 [验收摘要](evaluation/e4_validation.json)、[反馈轨迹](evaluation/e4_feedback_trace.jsonl)、[缺陷轨迹](evaluation/e4_defect_trace.jsonl)。E4 新增 14 项检查，全套 **426 项**以 `-W error` 通过。此验收不代表真实 LLM 多轮效果。
 
 ## A3 环境验证
 
@@ -232,6 +247,6 @@ pytest 工具在 `ExecutionResult.failures` 中保留真实异常类型、测试
 - `examples/relationships.py` / `.md`：`checkout → calculate_total` 的确认直接调用、单元与协作策略样例。
 - `examples/independent.py` / `.md`：同文件两个独立函数的单元策略对照，不应编造协作关系。
 
-C2/E3 已能在新工作区保存 `subject.py`、各轮 plan/candidate/LLM 快照、执行结果、覆盖率、任务状态、选中测试和结束摘要；双格式最终报告和逐步轨迹留到后续阶段。具体状态及验收约定见 Design；当前配置检查不会生成这些文件。
+C2/E3/E4 已能在新工作区保存 `subject.py`、各轮 plan/candidate/LLM 快照、执行结果、覆盖率、任务状态、选中测试、结束摘要和逐步轨迹；双格式最终报告留到后续阶段。具体状态及验收约定见 Design；当前配置检查不会生成这些文件。
 
 测试执行只面向本地可信课程样例；后续真实 DeepSeek 请求可能产生费用。仓库不包含真实 Key，使用者自行配置。
