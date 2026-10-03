@@ -27,3 +27,7 @@ outputs/
 .work/
 tmp/
 *.log
+
+# F1 selected raw acceptance evidence (no coverage databases or credentials)
+!evaluation/f1/**/coverage.json
+!evaluation/f1/**/*.log

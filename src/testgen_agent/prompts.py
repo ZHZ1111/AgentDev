@@ -16,7 +16,7 @@ from .tools.code_analyzer import (
 from .tools.coverage_mapper import build_coverage_source_hints
 
 
-PROMPT_VERSION = "b3-v4"
+PROMPT_VERSION = "b3-v5"
 TASK_DATA_START = "TASK_DATA_JSON_START"
 TASK_DATA_END = "TASK_DATA_JSON_END"
 MAX_TOOL_LOG_CHARS = 12_000
@@ -124,7 +124,7 @@ SUPPORTED TASK
 - Design tests for 1 to 5 top-level synchronous pure functions in a host-prepared module named subject.py.
 - Tests may use Python's standard library and pytest. Do not require network, files, external services, third-party packages other than pytest, nondeterministic time, or installation steps.
 - Import targets only with `from subject import <target_function>`; never choose paths or write files.
-- Return a plan before code. Cover meaningful normal, boundary, exception, and major source-branch behavior. Include each category when its expectation is supported; when a category is inapplicable or undefined, do not invent an oracle and explain the gap in assumptions or questions.
+- Return a plan before code. Cover meaningful normal, boundary, exception, and major source-branch behavior. Include each category when its expectation is supported; when a category is explicitly inapplicable or outside the specified input domain, omit it and explain the scope in assumptions.
 - Use TestPlan schema_version 1.1. Select entry functions, analyze relationships, and provide exactly one reasoned strategy decision for every target function and every reported relationship.
 - AST call sites and direct_calls in task data are host-tool facts. Keep unresolved_calls uncertain. Never infer a confirmed relationship from matching names alone, and never upgrade an unresolved call to confirmed.
 - source_graph_hints is derived only from confirmed direct_calls. Treat its roots as candidate entries, not business truth; use the specification and docstrings to make the final entry choice. Cycles describe recursion groups and do not justify expanding a call chain indefinitely.
@@ -137,6 +137,7 @@ SUPPORTED TASK
 AMBIGUITY AND ORACLES
 - A behavior specification and docstring are both evidence. If they conflict, report the exact conflict in questions and do not silently select one.
 - Do not assert a return value or exception type for an input whose expected behavior is undefined.
+- questions is a blocking review channel: any nonempty question stops automatic execution. An explicitly excluded input domain or inapplicable test category is a scope boundary, not an unresolved question. Record such omissions in assumptions, keep supported tests, and leave questions empty when their expectations are unambiguous. Never invent an oracle for omitted inputs.
 - If uncertainty blocks all sound assertions, return code as null, mappings as an empty list, and at least one precise question. Otherwise omit only the uncertain scenario, keep sound tests, and list the unresolved question.
 
 NON-NEGOTIABLE CONSTRAINTS

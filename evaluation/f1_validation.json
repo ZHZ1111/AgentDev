@@ -1,0 +1,404 @@
+{
+  "stage": "F1",
+  "tested_at_utc": "2026-10-03T02:12:01.592687+00:00",
+  "python": "3.13.9",
+  "prompt_version": "b3-v5",
+  "execution_mode": "live",
+  "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f1\\55ddea6bd6114f948442dd99bf209304",
+  "cases": [
+    {
+      "case": "calculation",
+      "run_id": "c1b69aebfd254960a7d454eb40113e2a",
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation",
+      "source_sha256": "4043de06a34f5aa75919fa484db107bf05d5a78f95ac7cadcdd94cac60e429bf",
+      "spec_sha256": "04af68dbe4df5b6270282ed6ccc02e52b344d2d6a033698e3d6cc0df0dbc69ff",
+      "duration_seconds": 12.170002,
+      "status": "completed",
+      "stop_reason": "coverage_target_met",
+      "metrics": {
+        "runnable": true,
+        "all_passed": true,
+        "line_percent": 100.0,
+        "branch_percent": null,
+        "executed_rounds": 1,
+        "api_calls": 1
+      },
+      "token_usage": {
+        "prompt_tokens": 4353,
+        "completion_tokens": 1158,
+        "total_tokens": 5511
+      },
+      "checks": {
+        "state_snapshot_matches": true,
+        "candidate_snapshots_match": true,
+        "summary_matches": true,
+        "selected_test_matches": true,
+        "terminal_trace_matches": true,
+        "round_budget_respected": true,
+        "raw_execution_and_coverage_retained": true,
+        "source_and_spec_unchanged": true,
+        "completed_on_correct_implementation": true,
+        "coverage_target_met": true
+      },
+      "passed": true,
+      "model_responses": [
+        "deepseek-flash"
+      ]
+    },
+    {
+      "case": "relationships",
+      "run_id": "9df8d0ae34694620b610bdbb743a249e",
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships",
+      "source_sha256": "5de320c9eaf8194e0a1b105781dcca0767b261bf13b5ca66b3be8b423dce9049",
+      "spec_sha256": "26cd5b047fc10bc8afe98bbf7ac29cf86abf8cc1182f90dbe114dc83490c24f3",
+      "duration_seconds": 11.593771,
+      "status": "completed",
+      "stop_reason": "coverage_target_met",
+      "metrics": {
+        "runnable": true,
+        "all_passed": true,
+        "line_percent": 100.0,
+        "branch_percent": null,
+        "executed_rounds": 1,
+        "api_calls": 1
+      },
+      "token_usage": {
+        "prompt_tokens": 4670,
+        "completion_tokens": 1130,
+        "total_tokens": 5800
+      },
+      "checks": {
+        "state_snapshot_matches": true,
+        "candidate_snapshots_match": true,
+        "summary_matches": true,
+        "selected_test_matches": true,
+        "terminal_trace_matches": true,
+        "round_budget_respected": true,
+        "raw_execution_and_coverage_retained": true,
+        "source_and_spec_unchanged": true,
+        "completed_on_correct_implementation": true,
+        "coverage_target_met": true,
+        "collaboration_scenario_and_dependency_executed": true
+      },
+      "passed": true,
+      "model_responses": [
+        "deepseek-flash"
+      ]
+    }
+  ],
+  "max_rounds_per_case": 2,
+  "network_http_attempts": 2,
+  "notes": "Fixed public examples only; no reference tests supplied to the model. G2 rendering remains pending.",
+  "adapter_config": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "request_timeout_seconds": 60,
+    "max_tokens": 4096,
+    "max_transient_retries": 1,
+    "max_format_repairs": 1,
+    "max_http_attempts": 3
+  },
+  "status": "passed",
+  "previous_attempts": [
+    {
+      "artifact": "evaluation/f1/network_failure.json",
+      "outcome": "connection failures, no model completion"
+    },
+    {
+      "artifact": "evaluation/f1/pre_fix/validation.json",
+      "outcome": "two real completions blocked by out-of-domain scope notes in questions; no tests executed"
+    }
+  ],
+  "saved_evidence": "evaluation/f1/passed",
+  "artifact_manifest": [
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\report_contract.json",
+      "saved": "evaluation\\f1\\passed\\calculation\\report_contract.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\candidate.json",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\candidate.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\llm_result.json",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\llm_result.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\plan.json",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\plan.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\run.json",
+      "saved": "evaluation\\f1\\passed\\calculation\\run.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\state.json",
+      "saved": "evaluation\\f1\\passed\\calculation\\state.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\subject.py",
+      "saved": "evaluation\\f1\\passed\\calculation\\subject.py"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\summary.json",
+      "saved": "evaluation\\f1\\passed\\calculation\\summary.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\test_subject.py",
+      "saved": "evaluation\\f1\\passed\\calculation\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\trace.jsonl",
+      "saved": "evaluation\\f1\\passed\\calculation\\trace.jsonl"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\report_contract.json",
+      "saved": "evaluation\\f1\\passed\\relationships\\report_contract.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\candidate.json",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\candidate.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\llm_result.json",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\llm_result.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\plan.json",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\plan.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\run.json",
+      "saved": "evaluation\\f1\\passed\\relationships\\run.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\state.json",
+      "saved": "evaluation\\f1\\passed\\relationships\\state.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\subject.py",
+      "saved": "evaluation\\f1\\passed\\relationships\\subject.py"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\summary.json",
+      "saved": "evaluation\\f1\\passed\\relationships\\summary.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\test_subject.py",
+      "saved": "evaluation\\f1\\passed\\relationships\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\trace.jsonl",
+      "saved": "evaluation\\f1\\passed\\relationships\\trace.jsonl"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\validation.json",
+      "saved": "evaluation\\f1\\passed\\validation.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\calculation\\report_contract.json",
+      "saved": "evaluation\\f1\\pre_fix\\calculation\\report_contract.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\calculation\\rounds\\01\\candidate.json",
+      "saved": "evaluation\\f1\\pre_fix\\calculation\\rounds\\01\\candidate.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\calculation\\rounds\\01\\llm_result.json",
+      "saved": "evaluation\\f1\\pre_fix\\calculation\\rounds\\01\\llm_result.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\calculation\\rounds\\01\\plan.json",
+      "saved": "evaluation\\f1\\pre_fix\\calculation\\rounds\\01\\plan.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\calculation\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f1\\pre_fix\\calculation\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\calculation\\run.json",
+      "saved": "evaluation\\f1\\pre_fix\\calculation\\run.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\calculation\\state.json",
+      "saved": "evaluation\\f1\\pre_fix\\calculation\\state.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\calculation\\subject.py",
+      "saved": "evaluation\\f1\\pre_fix\\calculation\\subject.py"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\calculation\\summary.json",
+      "saved": "evaluation\\f1\\pre_fix\\calculation\\summary.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\calculation\\trace.jsonl",
+      "saved": "evaluation\\f1\\pre_fix\\calculation\\trace.jsonl"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\relationships\\report_contract.json",
+      "saved": "evaluation\\f1\\pre_fix\\relationships\\report_contract.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\relationships\\rounds\\01\\candidate.json",
+      "saved": "evaluation\\f1\\pre_fix\\relationships\\rounds\\01\\candidate.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\relationships\\rounds\\01\\llm_result.json",
+      "saved": "evaluation\\f1\\pre_fix\\relationships\\rounds\\01\\llm_result.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\relationships\\rounds\\01\\plan.json",
+      "saved": "evaluation\\f1\\pre_fix\\relationships\\rounds\\01\\plan.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\relationships\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f1\\pre_fix\\relationships\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\relationships\\run.json",
+      "saved": "evaluation\\f1\\pre_fix\\relationships\\run.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\relationships\\state.json",
+      "saved": "evaluation\\f1\\pre_fix\\relationships\\state.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\relationships\\subject.py",
+      "saved": "evaluation\\f1\\pre_fix\\relationships\\subject.py"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\relationships\\summary.json",
+      "saved": "evaluation\\f1\\pre_fix\\relationships\\summary.json"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\relationships\\trace.jsonl",
+      "saved": "evaluation\\f1\\pre_fix\\relationships\\trace.jsonl"
+    },
+    {
+      "source": "outputs\\f1\\50eb7c23f4cb4e09bd96bdea9c61e82a\\validation.json",
+      "saved": "evaluation\\f1\\pre_fix\\validation.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\.coveragerc",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\coverage.json",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\coverage.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\coverage_export.json",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\coverage_result.json",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\coverage_source_hints.json",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\execution.json",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\execution.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\pytest.ini",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\pytest.xml",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\pytest_result.json",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\run_result.json",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\run_result.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\stderr.txt",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\stdout.txt",
+      "saved": "evaluation\\f1\\passed\\calculation\\rounds\\01\\executions\\run-21vd1tz5\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\.coveragerc",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\coverage.json",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\coverage.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\coverage_export.json",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\coverage_result.json",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\coverage_source_hints.json",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\execution.json",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\execution.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\pytest.ini",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\pytest.xml",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\pytest_result.json",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\run_result.json",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\run_result.json"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\stderr.txt",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\stdout.txt",
+      "saved": "evaluation\\f1\\passed\\relationships\\rounds\\01\\executions\\run-sfaeqxn2\\stdout.txt"
+    }
+  ]
+}

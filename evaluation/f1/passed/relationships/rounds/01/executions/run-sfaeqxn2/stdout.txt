@@ -1,0 +1,8 @@
+....                                                                     [100%]
+=================================== PASSES ====================================
+=========================== short test summary info ===========================
+PASSED rounds/01/test_subject.py::test_unit_calculate_total_normal
+PASSED rounds/01/test_subject.py::test_unit_calculate_total_zero
+PASSED rounds/01/test_subject.py::test_collaboration_checkout_normal
+PASSED rounds/01/test_subject.py::test_collaboration_checkout_zero
+4 passed in 0.18s

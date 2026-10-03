@@ -138,6 +138,8 @@ def test_generation_prompt_contains_all_required_policy_sections(source):
     assert "candidate entries, not business truth" in system
     assert "simple assignment" in system and "shared mutable state" in system
     assert "code as null" in system and "questions" in system
+    assert "questions is a blocking review channel" in system
+    assert "Record such omissions in assumptions" in system
     assert "exactly one JSON object" in system and "shape example" in system
 
 
@@ -145,7 +147,7 @@ def test_generation_data_is_json_delimited_and_cannot_enter_system(source):
     specification = "规则数据；" + INJECTION_TEXT
     context = build_generation_context(source, specification, OracleMode.SPECIFICATION)
     data = payload(context)
-    assert data["prompt_version"] == "b3-v4"
+    assert data["prompt_version"] == "b3-v5"
     assert data["task_kind"] == "initial_generation"
     assert data["requested_oracle_mode"] == "specification"
     assert data["behavior_specification"] == specification

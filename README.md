@@ -2,7 +2,7 @@
 
 课程项目：为单个 Python 文件中的 1–5 个顶层同步纯函数生成并执行 pytest 测试集。设计目标是由 Agent 自动分析函数关系，决定单元测试和协作测试策略，再根据失败及覆盖率反馈进行有限迭代。LLM 服务商选用 DeepSeek。
 
-当前完成 A1/A2/A3/B1/B2/C1/C1a、C2 的离线实现，以及 D1/D2 正式执行与覆盖工具、D3 独立可信度验收和 E1–E4 控制器、失败分类、任务记忆、有限反馈循环及逐步轨迹；B1 关系契约扩展和 B3 `b3-v4` Prompt 已通过离线验证。`run_agent()` 可生成、校验并执行最多三轮候选，依据真实反馈继续或停止，保留旧测试、选择最佳候选并导出结束摘要和轨迹。真实 LLM 多轮集成尚未验收，CLI 和完整报告仍待后续阶段。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
+当前完成 A1/A2/A3/B1/B2/C1/C1a、C2 的离线实现，以及 D1/D2 正式执行与覆盖工具、D3 独立可信度验收、E1–E4 控制器/失败分类/任务记忆/反馈循环/逐步轨迹及 F1 自身测试。F1 将 Prompt 修订为 `b3-v5`，两项固定样例已完成真实 API 生成、校验、执行与覆盖验收。`run_agent()` 支持最多三轮候选，依据真实反馈继续或停止，保留旧测试、选择最佳候选并导出结束摘要和轨迹。真实 LLM 多轮效果尚未评测，CLI 和完整报告仍待后续阶段。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
 
 2026-09-27 新增范围：自动判断同文件函数关系，并自主规划测试集。所需关系契约、Prompt、AST 结构与调用证据均已实现；首轮生成/执行可通过 E1 Python 接口连接，完整多轮 CLI 与报告仍未实现。修订任务预算为 58 小时。
 
@@ -221,6 +221,19 @@ pytest 工具在 `ExecutionResult.failures` 中保留真实异常类型、测试
 ```
 
 每次在新的 `outputs/e4/<UUID>/` 保存两组运行及 `validation.json`；`--output` 可选择输出根目录。2026-10-01 验收通过：反馈案例三轮补齐覆盖，记录 38 个事件；折扣缺陷案例一轮停止、保留断言，记录 16 个事件。精选证据见 [验收摘要](evaluation/e4_validation.json)、[反馈轨迹](evaluation/e4_feedback_trace.jsonl)、[缺陷轨迹](evaluation/e4_defect_trace.jsonl)。E4 新增 14 项检查，全套 **426 项**以 `-W error` 通过。此验收不代表真实 LLM 多轮效果。
+
+## F1 自身测试与真实端到端验收
+
+```powershell
+# 自身测试使用 mock 模型；真实执行工具在本地子进程中验证
+.\.venv\Scripts\python.exe -m pytest -q -W error
+# 发送两项固定课程样例，使用现有 DeepSeek 配置，可能产生 API 费用
+.\.venv\Scripts\python.exe -m testgen_agent.f1_validation --live
+```
+
+F1 新增 14 项检查，补齐多层关系位置、真实协作依赖/异常传播、历史与失败候选及报告契约一致性、产物篡改检测、Key 缺失及暂态错误重试计数。自身测试与生成测试分别放在 `tests/` 和独立运行工作区；两种覆盖数据分别统计。完整要求映射与复现步骤见 [F1 验收说明](validation/f1/README.md)。
+
+2026-10-03 两项 `deepseek-flash` 真实验收通过：计算 6 条、协作 4 条测试全部通过，目标行覆盖均为 100%，分支不适用；各一轮/一次 HTTP，合计 11,311 tokens。首次响应暴露明确域外范围被写为阻塞问题，已升级 `b3-v5`，将范围备注记入 assumptions 并保留真正歧义的停止门控。失败和成功产物均保存，见 [F1 精选记录](evaluation/f1_validation.json)。该入口验收现有 `FinalReport` 契约，G2 的报告展示仍待实现；真实多轮与 F2–F4 效果评测尚未执行。
 
 ## A3 环境验证
 

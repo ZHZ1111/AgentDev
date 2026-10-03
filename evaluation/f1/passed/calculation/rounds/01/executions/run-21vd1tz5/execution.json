@@ -1,0 +1,19 @@
+{
+  "kind": "passed",
+  "exit_code": 0,
+  "collected": 6,
+  "executed": 6,
+  "passed": 6,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "xfailed": 0,
+  "xpassed": 0,
+  "stdout": "......                                                                   [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_unit_12x3\r\nPASSED rounds/01/test_subject.py::test_unit_zero_price\r\nPASSED rounds/01/test_subject.py::test_unit_zero_quantity\r\nPASSED rounds/01/test_subject.py::test_unit_zero_both\r\nPASSED rounds/01/test_subject.py::test_unit_identity\r\nPASSED rounds/01/test_subject.py::test_unit_large\r\n6 passed in 0.18s\r\n",
+  "stderr": "",
+  "timed_out": false,
+  "stdout_truncated": false,
+  "stderr_truncated": false,
+  "duration_seconds": 3.885573200066574,
+  "failures": []
+}

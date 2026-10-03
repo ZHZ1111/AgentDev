@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "checks": {
+    "calculation": {
+      "state_snapshot_matches": true,
+      "candidate_snapshots_match": true,
+      "summary_matches": true,
+      "selected_test_matches": true,
+      "terminal_trace_matches": true,
+      "round_budget_respected": true,
+      "raw_execution_and_coverage_retained": true
+    },
+    "relationships": {
+      "state_snapshot_matches": true,
+      "candidate_snapshots_match": true,
+      "summary_matches": true,
+      "selected_test_matches": true,
+      "terminal_trace_matches": true,
+      "round_budget_respected": true,
+      "raw_execution_and_coverage_retained": true
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "run_id": "9df8d0ae34694620b610bdbb743a249e",
+  "request": {
+    "source_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\examples\\relationships.py",
+    "model": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "base_url": "https://api.deepseek.com",
+      "request_timeout_seconds": 60
+    },
+    "spec_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\examples\\relationships.md",
+    "output_dir": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f1\\55ddea6bd6114f948442dd99bf209304\\relationships",
+    "max_rounds": 2,
+    "execution_timeout_seconds": 30
+  },
+  "oracle_mode": "specification",
+  "adapter_config": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "request_timeout_seconds": 60,
+    "max_tokens": 4096,
+    "max_transient_retries": 1,
+    "max_format_repairs": 1,
+    "max_http_attempts": 3
+  }
+}

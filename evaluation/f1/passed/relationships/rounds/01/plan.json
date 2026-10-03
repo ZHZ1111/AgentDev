@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.1",
+  "target_functions": [
+    "calculate_total",
+    "checkout"
+  ],
+  "oracle_mode": "specification",
+  "entry_functions": [
+    "checkout"
+  ],
+  "relationships": [
+    {
+      "relation_id": "rel-checkout-calculate-total",
+      "kind": "direct_call",
+      "involved_functions": [
+        "checkout",
+        "calculate_total"
+      ],
+      "evidence": [
+        {
+          "kind": "source",
+          "detail": "checkout directly calls calculate_total on its return statement",
+          "line": 11,
+          "call_site_ids": [
+            "call:checkout:11:11:11:48"
+          ]
+        },
+        {
+          "kind": "specification",
+          "detail": "the behavior specification states checkout must use the same-file calculate_total to compute and return the same total",
+          "line": null,
+          "call_site_ids": []
+        }
+      ],
+      "confidence": "confirmed",
+      "unresolved_questions": []
+    }
+  ],
+  "strategy": [
+    {
+      "subject_kind": "function",
+      "function_name": "calculate_total",
+      "relationship_id": null,
+      "decision": "unit_test",
+      "reason": "calculate_total is a pure multiplication with an independently specified zero boundary, so direct unit tests fully cover it"
+    },
+    {
+      "subject_kind": "function",
+      "function_name": "checkout",
+      "relationship_id": null,
+      "decision": "unit_test",
+      "reason": "checkout's own entry behavior is only its delegation to calculate_total, which is covered through the confirmed relationship rather than a duplicate standalone unit test"
+    },
+    {
+      "subject_kind": "relationship",
+      "function_name": null,
+      "relationship_id": "rel-checkout-calculate-total",
+      "decision": "collaboration_test",
+      "reason": "checkout's specified behavior is to return the total produced by the real same-file calculate_total, so invoking checkout at real integration points verifies behavior beyond isolated unit cases of calculate_total"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "unit-calculate-total-normal",
+      "target_function": "calculate_total",
+      "category": "normal",
+      "inputs": {
+        "args": [
+          12,
+          3
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 36",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "the behavior specification defines calculate_total(unit_price, quantity) as the product of the two non-negative integers; 12 * 3 == 36"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "calculate_total"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "unit-calculate-total-zero",
+      "target_function": "calculate_total",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          0,
+          5
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 0",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "the behavior specification states both functions return 0 when either parameter is 0; 0 * 5 == 0"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "calculate_total"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "collaboration-checkout-normal",
+      "target_function": "checkout",
+      "category": "normal",
+      "inputs": {
+        "args": [
+          12,
+          3
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 36 by delegating to the real same-file calculate_total",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "the behavior specification defines checkout as the entry that computes and returns the same total as calculate_total; 12 * 3 == 36"
+      },
+      "test_kind": "collaboration",
+      "involved_functions": [
+        "checkout",
+        "calculate_total"
+      ],
+      "relationship_ids": [
+        "rel-checkout-calculate-total"
+      ],
+      "steps": []
+    },
+    {
+      "scenario_id": "collaboration-checkout-zero",
+      "target_function": "checkout",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          12,
+          0
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 0 through the delegated calculation",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "the behavior specification states both functions return 0 when either parameter is 0; checkout(12, 0) yields calculate_total(12, 0) == 0"
+      },
+      "test_kind": "collaboration",
+      "involved_functions": [
+        "checkout",
+        "calculate_total"
+      ],
+      "relationship_ids": [
+        "rel-checkout-calculate-total"
+      ],
+      "steps": []
+    }
+  ]
+}

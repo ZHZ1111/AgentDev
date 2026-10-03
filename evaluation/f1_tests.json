@@ -1,0 +1,29 @@
+{
+  "stage": "F1",
+  "tested_date_asia_shanghai": "2026-10-03",
+  "python": "3.13.9",
+  "current_test_count": 440,
+  "new_f1_tests": 14,
+  "network_requests_in_automatic_tests": 0,
+  "runs": [
+    {
+      "command": ".venv/Scripts/python.exe -m pytest -q -W error",
+      "passed": 439,
+      "failed": 0,
+      "duration_seconds": 547.39,
+      "scope": "Full regression before adding the final multilevel-call check and final prompt/audit revisions."
+    },
+    {
+      "command": ".venv/Scripts/python.exe -m pytest tests/test_f1_acceptance.py tests/test_prompts.py -q -W error",
+      "passed": 35,
+      "failed": 0,
+      "duration_seconds": 99.02,
+      "scope": "Final F1 and prompt revisions, including all 14 new F1 checks."
+    }
+  ],
+  "compileall_passed": true,
+  "pip_check_passed": true,
+  "git_diff_check_passed": true,
+  "live_end_to_end_record": "evaluation/f1_validation.json",
+  "final_live_artifact_audit": "evaluation/f1/final_audit.json"
+}

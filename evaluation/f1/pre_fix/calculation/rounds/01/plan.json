@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.1",
+  "target_functions": [
+    "calculate_total"
+  ],
+  "oracle_mode": "specification",
+  "entry_functions": [
+    "calculate_total"
+  ],
+  "relationships": [],
+  "strategy": [
+    {
+      "subject_kind": "function",
+      "function_name": "calculate_total",
+      "relationship_id": null,
+      "decision": "unit_test",
+      "reason": "single pure function with no call sites or relationships; the specification and docstring independently define its return value, so focused unit tests cover all specified behavior"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "unit-normal-product",
+      "target_function": "calculate_total",
+      "category": "normal",
+      "inputs": {
+        "args": [
+          12,
+          3
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 36",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "verifiable scenario table specifies unit_price=12, quantity=3 -> 36"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "calculate_total"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "unit-boundary-zero-price",
+      "target_function": "calculate_total",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          0,
+          5
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 0",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states zero unit price returns 0; table row 0,5 -> 0"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "calculate_total"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "unit-boundary-zero-quantity",
+      "target_function": "calculate_total",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          12,
+          0
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 0",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states zero quantity returns 0; table row 12,0 -> 0"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "calculate_total"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "unit-boundary-both-zero",
+      "target_function": "calculate_total",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          0,
+          0
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 0",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "table row 0,0 -> 0"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "calculate_total"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "unit-boundary-one",
+      "target_function": "calculate_total",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          1,
+          1
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 1",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "table row 1,1 -> 1; identity boundary for non-negative integers"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "calculate_total"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "unit-boundary-large",
+      "target_function": "calculate_total",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          1000000,
+          1000000
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 1000000000000",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "table row 1000000,1000000 -> 1000000000000; specification states no upper limit on the result"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "calculate_total"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    }
+  ]
+}
