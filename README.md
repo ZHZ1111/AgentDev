@@ -2,7 +2,17 @@
 
 课程项目：为单个 Python 文件中的 1–5 个顶层同步纯函数生成并执行 pytest 测试集。设计目标是由 Agent 自动分析函数关系，决定单元测试和协作测试策略，再根据失败及覆盖率反馈进行有限迭代。LLM 服务商选用 DeepSeek。
 
-当前完成 A1/A2/A3/B1/B2/C1/C1a、C2 的离线实现，以及 D1/D2 正式执行与覆盖工具、D3 独立可信度验收、E1–E4 控制器/失败分类/任务记忆/反馈循环/逐步轨迹、F1 自身测试与 F2 小型评测集。F3/F4 对照与缺陷评测工具已实现，真实评测待外部调用授权。F1 将 Prompt 修订为 `b3-v5`，两项固定样例已完成真实 API 生成、校验、执行与覆盖验收。`run_agent()` 支持最多三轮候选，依据真实反馈继续或停止，保留旧测试、选择最佳候选并导出结束摘要和轨迹。CLI 和完整报告仍待后续阶段。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
+当前完成 A1/A2/A3/B1/B2/C1/C1a、C2 的离线实现，以及 D1/D2 正式执行与覆盖工具、D3 独立可信度验收、E1–E4 控制器/失败分类/任务记忆/反馈循环/逐步轨迹、F1 自身测试与 F2 小型评测集。F3/F4 已完成冻结评测集的真实对照与已知缺陷实验，结果和失败证据已归档。F1 将 Prompt 修订为 `b3-v5`，两项固定样例已完成真实 API 生成、校验、执行与覆盖验收。`run_agent()` 支持最多三轮候选，依据真实反馈继续或停止，保留旧测试、选择最佳候选并导出结束摘要和轨迹。CLI 和完整报告仍待后续阶段。设计与验收记录见 [Design.md](Design.md)，进度见 [TASK_CHECKLIST.md](TASK_CHECKLIST.md)。
+
+## Web 工作台
+
+项目包含一个本地 Web 前端。用户只需填写 Python 源码和行为规格；函数关系、测试策略、候选轮次和停止条件由 Agent 及项目配置处理。页面展示 Agent 的执行轨迹、覆盖率、待复核问题和最终生成的 pytest。Web 层直接复用 `run_agent()`，不会复制控制逻辑。
+
+```powershell
+.\.venv\Scripts\python.exe -m testgen_agent.web
+```
+
+然后打开 `http://127.0.0.1:8765`。也可以在重新执行 editable 安装后使用 `testgen-agent-web`。真实运行会读取当前目录的 `.env` 并调用已配置的 DeepSeek 模型，可能产生费用；页面只应运行可信的本地 Python 代码。运行产物保存在 `outputs/web/`，提交的源码和规格副本保存在 `outputs/web-inputs/`。
 
 2026-09-27 新增范围：自动判断同文件函数关系，并自主规划测试集。所需关系契约、Prompt、AST 结构与调用证据均已实现；首轮生成/执行可通过 E1 Python 接口连接，完整多轮 CLI 与报告仍未实现。修订任务预算为 58 小时。
 
@@ -233,7 +243,7 @@ pytest 工具在 `ExecutionResult.failures` 中保留真实异常类型、测试
 
 F1 新增 14 项检查，补齐多层关系位置、真实协作依赖/异常传播、历史与失败候选及报告契约一致性、产物篡改检测、Key 缺失及暂态错误重试计数。自身测试与生成测试分别放在 `tests/` 和独立运行工作区；两种覆盖数据分别统计。完整要求映射与复现步骤见 [F1 验收说明](validation/f1/README.md)。
 
-2026-10-03 两项 `deepseek-flash` 真实验收通过：计算 6 条、协作 4 条测试全部通过，目标行覆盖均为 100%，分支不适用；各一轮/一次 HTTP，合计 11,311 tokens。首次响应暴露明确域外范围被写为阻塞问题，已升级 `b3-v5`，将范围备注记入 assumptions 并保留真正歧义的停止门控。失败和成功产物均保存，见 [F1 精选记录](evaluation/f1_validation.json)。该入口验收现有 `FinalReport` 契约，G2 的报告展示仍待实现；真实多轮与 F3/F4 效果评测尚未执行。
+2026-10-03 两项 `deepseek-flash` 真实验收通过：计算 6 条、协作 4 条测试全部通过，目标行覆盖均为 100%，分支不适用；各一轮/一次 HTTP，合计 11,311 tokens。首次响应暴露明确域外范围被写为阻塞问题，已升级 `b3-v5`，将范围备注记入 assumptions 并保留真正歧义的停止门控。失败和成功产物均保存，见 [F1 精选记录](evaluation/f1_validation.json)。该入口验收现有 `FinalReport` 契约，G2 的报告展示仍待实现；F3/F4 真实对照已完成，见下节；本次未触发追加反馈，不能据此证明真实多轮优势。
 
 ## F2 小型评测集
 
@@ -246,23 +256,29 @@ F1 新增 14 项检查，补齐多层关系位置、真实协作依赖/异常传
 .\.venv\Scripts\python.exe -m pytest tests/test_benchmark.py tests/test_call_analysis.py tests/test_source_analysis.py -q -W error
 ```
 
-2026-10-03 八个正确任务的 69 条手写预期全部通过，六个错误版本均出现指定行为失败；原文件指纹不变，实际网络请求为 0。隐藏预期和人工评测标注不作为模型输入，四个留出任务未用于调 Prompt。精选记录见 [F2 验收结果](evaluation/f2_validation.json)。这些结果验证样例可用；F3/F4 的模型对照与缺陷检出实验尚未执行。
+2026-10-03 八个正确任务的 69 条手写预期全部通过，六个错误版本均出现指定行为失败；原文件指纹不变，实际网络请求为 0。隐藏预期和人工评测标注不作为模型输入，四个留出任务未用于调 Prompt。精选记录见 [F2 验收结果](evaluation/f2_validation.json)。这些结果验证样例可用；Agent 生成测试的 F3/F4 真实结果见下节，不能用手写检查的结果替代模型效果。
 
 ## F3/F4 公平对照与已知缺陷评测
 
 `experiment.py` 对冻结 F2 v1 的 8 个任务分别生成一次首轮候选。基线复用它执行一轮；反馈方案复用同一响应后最多追加两轮。源码、公开规格、Prompt 版本、软件指纹、配置和预算在运行前固定；隐藏预期、评测标注和错误变体不进入生成或反馈上下文。正确实现复测通过后，字节相同的测试才交给已知错误版本，只有映射到目标函数或已确认调用路径的行为失败计入检出，导入和环境错误不计入。
 
-以下 `run` 会使用已配置的真实 DeepSeek API 并消耗额度；`rebuild` 和 `archive` 仅处理已保存的本地证据，不调用模型。
+以下 `run` 会使用已配置的真实 DeepSeek API 并消耗额度；`rebuild` 和 `archive` 仅处理已保存的本地证据，不调用模型。`recheck-framework` 只对框架错误各做一次本地复测，保留首次结果，不重试行为失败、不调用 API。
 
 ```powershell
 python -m testgen_agent.experiment run --live
 python -m testgen_agent.experiment rebuild --run-dir outputs/f3_f4/<运行ID>
-python -m testgen_agent.experiment archive --run-dir outputs/f3_f4/<运行ID> --output evaluation/f3_f4
+python -m testgen_agent.experiment archive --run-dir outputs/f3_f4/<运行ID> --output evaluation/<新的归档目录>
+# 重建仓库中的已保存真实结果，不需要 API Key
+python -m testgen_agent.experiment rebuild --run-dir evaluation/f3_f4/final
 ```
 
 输出包括逐案例 `cases.csv`、`summary.json`/`summary.md`、共享首轮结果、两种方案的完整控制器轨迹、正确实现复测及错误版本的 pytest/coverage 原始记录。汇总区分开发/留出划分，明确不可用覆盖、无分支任务、未完成及未改善案例；同时报告各方案分摊首轮的次数/token/耗时，以及首轮仅计一次的实际 API 总成本。归档保留可离线重建的证据和 SHA256 索引，排除缓存和覆盖数据库，拒绝覆盖已有目录。
 
-当前只完成离线工具验证，真实 F3/F4 调用被自动审批因外部数据发送授权不明确而阻止，尚无模型效果或缺陷检出率结论。离线合成响应只用于验证评测流程，不能充当真实对照结果。即使真实实验完成，8 个小任务每个单次随机采样也只代表该次运行，不证明覆盖率保证或广泛可靠性。
+2026-10-03 用户授权后使用 `deepseek-flash` / `b3-v5` 跑完 8 个任务。两方案均可运行 6/8、正确实现全通过 5/8；2 个生成结构失败、1 个词首字符任务含错误预期，均保留。没有追加反馈请求，没有观察到迭代提升。行覆盖均值 100% 仅包含 6 个可用任务，分支均值 100% 仅包含 5 个有分支的可用任务；另有 2 个覆盖不可用、1 个无分支，覆盖高不能证明断言正确。
+
+6 个已知变体中，基线检出 4/4 可评测变体，反馈检出 5/5；两组共同可评测的 4 个均检出。分母差异来自均值基线的 Windows 框架错误，旋转两组均无有效测试，不能当作反馈提升或全部 6 个缺陷均检出。修正了 pytest.raises 内部帧的归因漏计，并对两个框架错误各进行一次本地复测，首次错误保留。物理 HTTP 共 11 次，可取得的 token 小计 50,208，另 4 次请求的用量未知，完整用量不填零。详见 [真实评测证据说明](evaluation/f3_f4/README.md)、[最终汇总](evaluation/f3_f4/final/summary.md)、[成本与公平性核对](evaluation/f3_f4/final/acceptance.json) 和 [关系断言复核](evaluation/f3_f4/final/relation_review.json)。
+
+离线合成响应只验证评测流程，不充当真实结果。本次仅 8 个小任务、每个一次随机采样，不证明广泛可靠性；独立函数的结构生成失败也不能写作独立策略验证成功。
 
 ## A3 环境验证
 

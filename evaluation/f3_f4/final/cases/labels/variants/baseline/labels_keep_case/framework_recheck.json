@@ -1,0 +1,8 @@
+{
+  "case_id": "labels",
+  "mode": "baseline",
+  "variant_id": "labels_keep_case",
+  "initial_kind": "internal_error",
+  "reference_recheck_kind": "passed",
+  "rechecked_kind": "assertion_failed"
+}

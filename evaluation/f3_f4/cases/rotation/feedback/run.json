@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "run_id": "3451a72fa0854ad2835cd740490e557b",
+  "request": {
+    "source_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\rotation\\input\\subject.py",
+    "model": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "base_url": "https://api.deepseek.com",
+      "request_timeout_seconds": 60
+    },
+    "spec_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\rotation\\input\\behavior.md",
+    "output_dir": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\rotation\\feedback",
+    "max_rounds": 3,
+    "execution_timeout_seconds": 30
+  },
+  "oracle_mode": "specification",
+  "adapter_config": {
+    "adapter_type": "SharedSeedClient",
+    "retry_policy": null
+  }
+}

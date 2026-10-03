@@ -1,0 +1,48 @@
+{
+  "candidate_all_passed": false,
+  "execution": {
+    "kind": "assertion_failed",
+    "exit_code": 1,
+    "collected": 12,
+    "executed": 12,
+    "passed": 11,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0,
+    "stdout": ".......F....                                                             [100%]\r\n================================== FAILURES ===================================\r\n______________________ test_boundary_high_edges[80-high] ______________________\r\nrounds\\01\\test_subject.py:30: in test_boundary_high_edges\r\n    assert score_band(value) == expected\r\nE   AssertionError: assert 'middle' == 'high'\r\nE     \r\nE     - high\r\nE     + middle\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_normal_low_in_range\r\nPASSED rounds/01/test_subject.py::test_normal_middle_in_range\r\nPASSED rounds/01/test_subject.py::test_normal_high_in_range\r\nPASSED rounds/01/test_subject.py::test_boundary_low_edges[0-low]\r\nPASSED rounds/01/test_subject.py::test_boundary_low_edges[59-low]\r\nPASSED rounds/01/test_subject.py::test_boundary_middle_edges[60-middle]\r\nPASSED rounds/01/test_subject.py::test_boundary_middle_edges[79-middle]\r\nPASSED rounds/01/test_subject.py::test_boundary_high_edges[100-high]\r\nPASSED rounds/01/test_subject.py::test_exception_out_of_range[-1]\r\nPASSED rounds/01/test_subject.py::test_exception_out_of_range[101]\r\nPASSED rounds/01/test_subject.py::test_branch_high_checked_before_middle\r\nFAILED rounds/01/test_subject.py::test_boundary_high_edges[80-high] - Asserti...\r\n1 failed, 11 passed in 0.32s\r\n",
+    "stderr": "rounds/01/test_subject.py::test_boundary_high_edges[80-high] (call, rounds\\01\\test_subject.py:28)\nrounds\\01\\test_subject.py:30: in test_boundary_high_edges\n    assert score_band(value) == expected\nE   AssertionError: assert 'middle' == 'high'\nE     \nE     - high\nE     + middle",
+    "timed_out": false,
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "duration_seconds": 4.137095199897885,
+    "failures": [
+      {
+        "nodeid": "rounds/01/test_subject.py::test_boundary_high_edges[80-high]",
+        "phase": "call",
+        "exception_type": "AssertionError",
+        "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\score\\variants\\baseline\\score_excludes_80\\rounds\\01\\test_subject.py",
+        "line": 30,
+        "missing_module": null
+      }
+    ]
+  },
+  "coverage": {
+    "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\score\\variants\\baseline\\score_excludes_80\\subject.py",
+    "status": "available",
+    "covered_lines": 8,
+    "total_lines": 8,
+    "covered_branches": 6,
+    "total_branches": 6,
+    "missing_lines": [],
+    "missing_branches": [],
+    "error": null
+  },
+  "source_hints": {
+    "status": "available",
+    "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\score\\variants\\baseline\\score_excludes_80\\subject.py",
+    "missing_lines": [],
+    "missing_branches": []
+  }
+}

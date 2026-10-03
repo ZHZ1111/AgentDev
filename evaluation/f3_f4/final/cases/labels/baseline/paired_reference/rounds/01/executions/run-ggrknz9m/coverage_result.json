@@ -1,0 +1,11 @@
+{
+  "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\labels\\baseline\\paired_reference\\subject.py",
+  "status": "available",
+  "covered_lines": 9,
+  "total_lines": 9,
+  "covered_branches": 4,
+  "total_branches": 4,
+  "missing_lines": [],
+  "missing_branches": [],
+  "error": null
+}

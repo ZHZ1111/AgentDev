@@ -1,0 +1,13 @@
+{
+  "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\labels\\variants\\baseline\\labels_keep_case\\subject.py",
+  "status": "available",
+  "covered_lines": 8,
+  "total_lines": 9,
+  "covered_branches": 4,
+  "total_branches": 4,
+  "missing_lines": [
+    14
+  ],
+  "missing_branches": [],
+  "error": null
+}

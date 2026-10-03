@@ -1,0 +1,28 @@
+{
+  "kind": "assertion_failed",
+  "exit_code": 1,
+  "collected": 7,
+  "executed": 7,
+  "passed": 6,
+  "failed": 1,
+  "errors": 0,
+  "skipped": 0,
+  "xfailed": 0,
+  "xpassed": 0,
+  "stdout": ".....F.                                                                  [100%]\r\n================================== FAILURES ===================================\r\n____________________ test_initials_branch_multichar_upper _____________________\r\nrounds\\01\\test_subject.py:25: in test_initials_branch_multichar_upper\r\n    assert initials(\"straße test\") == \"STEST\"\r\nE   AssertionError: assert 'ST' == 'STEST'\r\nE     \r\nE     - STEST\r\nE     + ST\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_initials_normal_basic\r\nPASSED rounds/01/test_subject.py::test_initials_normal_multi_whitespace\r\nPASSED rounds/01/test_subject.py::test_initials_normal_single_word\r\nPASSED rounds/01/test_subject.py::test_initials_boundary_empty\r\nPASSED rounds/01/test_subject.py::test_initials_boundary_all_whitespace\r\nPASSED rounds/01/test_subject.py::test_initials_branch_punctuation_cjk\r\nFAILED rounds/01/test_subject.py::test_initials_branch_multichar_upper - Asse...\r\n1 failed, 6 passed in 0.26s\r\n",
+  "stderr": "rounds/01/test_subject.py::test_initials_branch_multichar_upper (call, rounds\\01\\test_subject.py:24)\nrounds\\01\\test_subject.py:25: in test_initials_branch_multichar_upper\n    assert initials(\"straße test\") == \"STEST\"\nE   AssertionError: assert 'ST' == 'STEST'\nE     \nE     - STEST\nE     + ST",
+  "timed_out": false,
+  "stdout_truncated": false,
+  "stderr_truncated": false,
+  "duration_seconds": 2.5059100000653416,
+  "failures": [
+    {
+      "nodeid": "rounds/01/test_subject.py::test_initials_branch_multichar_upper",
+      "phase": "call",
+      "exception_type": "AssertionError",
+      "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\initials\\feedback\\rounds\\01\\test_subject.py",
+      "line": 25,
+      "missing_module": null
+    }
+  ]
+}

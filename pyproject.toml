@@ -18,9 +18,13 @@ dependencies = [
 
 [project.scripts]
 testgen-agent = "testgen_agent.cli:main"
+testgen-agent-web = "testgen_agent.web:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+testgen_agent = ["web_static/*.html", "web_static/*.css", "web_static/*.js"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

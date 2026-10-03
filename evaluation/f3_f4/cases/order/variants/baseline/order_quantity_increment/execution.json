@@ -1,0 +1,28 @@
+{
+  "kind": "assertion_failed",
+  "exit_code": 1,
+  "collected": 11,
+  "executed": 11,
+  "passed": 10,
+  "failed": 1,
+  "errors": 0,
+  "skipped": 0,
+  "xfailed": 0,
+  "xpassed": 0,
+  "stdout": "........F..                                                              [100%]\r\n================================== FAILURES ===================================\r\n___________________________ test_order_total_normal ___________________________\r\nrounds\\01\\test_subject.py:43: in test_order_total_normal\r\n    assert order_total(4, 6) == 24\r\nE   assert 28 == 24\r\nE    +  where 28 = order_total(4, 6)\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_validate_quantity_normal\r\nPASSED rounds/01/test_subject.py::test_validate_quantity_nonint_typeerror\r\nPASSED rounds/01/test_subject.py::test_validate_quantity_bool_typeerror\r\nPASSED rounds/01/test_subject.py::test_validate_quantity_nonpositive_valueerror\r\nPASSED rounds/01/test_subject.py::test_validate_quantity_negative_valueerror\r\nPASSED rounds/01/test_subject.py::test_subtotal_positive\r\nPASSED rounds/01/test_subject.py::test_subtotal_zero_quantity\r\nPASSED rounds/01/test_subject.py::test_subtotal_zero_unit_price\r\nPASSED rounds/01/test_subject.py::test_order_total_typeerror_propagation\r\nPASSED rounds/01/test_subject.py::test_order_total_valueerror_propagation\r\nFAILED rounds/01/test_subject.py::test_order_total_normal - assert 28 == 24\r\n1 failed, 10 passed in 0.29s\r\n",
+  "stderr": "rounds/01/test_subject.py::test_order_total_normal (call, rounds\\01\\test_subject.py:42)\nrounds\\01\\test_subject.py:43: in test_order_total_normal\n    assert order_total(4, 6) == 24\nE   assert 28 == 24\nE    +  where 28 = order_total(4, 6)",
+  "timed_out": false,
+  "stdout_truncated": false,
+  "stderr_truncated": false,
+  "duration_seconds": 2.460517800063826,
+  "failures": [
+    {
+      "nodeid": "rounds/01/test_subject.py::test_order_total_normal",
+      "phase": "call",
+      "exception_type": "AssertionError",
+      "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\order\\variants\\baseline\\order_quantity_increment\\rounds\\01\\test_subject.py",
+      "line": 43,
+      "missing_module": null
+    }
+  ]
+}

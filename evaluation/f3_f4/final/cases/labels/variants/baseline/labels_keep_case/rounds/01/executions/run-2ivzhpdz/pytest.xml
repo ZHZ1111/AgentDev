@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="8" time="0.143" timestamp="2026-10-03T20:26:56.959357+08:00" hostname="LAPTOP-EBC70KOR"><testcase classname="rounds.01.test_subject" name="test_unit_normalize_mixed" time="0.003"><failure message="AssertionError: assert ['B', 'A', 'a'] == ['b', 'a', 'a']&#10;  &#10;  At index 0 diff: 'B' != 'b'&#10;  Use -v to get more diff">rounds\01\test_subject.py:6: in test_unit_normalize_mixed
+    assert result == ["b", "a", "a"]
+E   AssertionError: assert ['B', 'A', 'a'] == ['b', 'a', 'a']
+E     
+E     At index 0 diff: 'B' != 'b'
+E     Use -v to get more diff</failure></testcase><testcase classname="rounds.01.test_subject" name="test_unit_normalize_empty" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_unit_normalize_all_empty" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_unit_normalize_cjk" time="0.003"><failure message="AssertionError: assert ['中文ABC'] == ['中文abc']&#10;  &#10;  At index 0 diff: '中文ABC' != '中文abc'&#10;  Use -v to get more diff">rounds\01\test_subject.py:18: in test_unit_normalize_cjk
+    assert normalize_labels([" \u4e2d\u6587ABC "]) == ["\u4e2d\u6587abc"]
+E   AssertionError: assert ['中文ABC'] == ['中文abc']
+E     
+E     At index 0 diff: '中文ABC' != '中文abc'
+E     Use -v to get more diff</failure></testcase><testcase classname="rounds.01.test_subject" name="test_unit_format_normal" time="0.002"><failure message="AssertionError: assert 'B, A, a' == 'b, a, a'&#10;  &#10;  - b, a, a&#10;  + B, A, a">rounds\01\test_subject.py:22: in test_unit_format_normal
+    assert format_labels([" B ", "A", "a"]) == "b, a, a"
+E   AssertionError: assert 'B, A, a' == 'b, a, a'
+E     
+E     - b, a, a
+E     + B, A, a</failure></testcase><testcase classname="rounds.01.test_subject" name="test_unit_format_empty" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_unit_format_all_empty_input" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_collab_format_through_normalize" time="0.002"><failure message="AssertionError: assert '中文, X, x' == '中文, x, x'&#10;  &#10;  - 中文, x, x&#10;  + 中文, X, x">rounds\01\test_subject.py:34: in test_collab_format_through_normalize
+    assert format_labels([" \u4e2d\u6587 ", "X", "x"]) == "\u4e2d\u6587, x, x"
+E   AssertionError: assert '中文, X, x' == '中文, x, x'
+E     
+E     - 中文, x, x
+E     + 中文, X, x</failure></testcase></testsuite></testsuites>

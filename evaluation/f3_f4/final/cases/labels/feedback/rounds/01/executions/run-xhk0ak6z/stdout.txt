@@ -1,0 +1,12 @@
+........                                                                 [100%]
+=================================== PASSES ====================================
+=========================== short test summary info ===========================
+PASSED rounds/01/test_subject.py::test_unit_normalize_mixed
+PASSED rounds/01/test_subject.py::test_unit_normalize_empty
+PASSED rounds/01/test_subject.py::test_unit_normalize_all_empty
+PASSED rounds/01/test_subject.py::test_unit_normalize_cjk
+PASSED rounds/01/test_subject.py::test_unit_format_normal
+PASSED rounds/01/test_subject.py::test_unit_format_empty
+PASSED rounds/01/test_subject.py::test_unit_format_all_empty_input
+PASSED rounds/01/test_subject.py::test_collab_format_through_normalize
+8 passed in 0.22s

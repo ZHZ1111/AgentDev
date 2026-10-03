@@ -1,11 +1,14 @@
 """Offline audit fixtures for F3/F4; never reported as real model performance."""
 import json
+from types import SimpleNamespace
 
 import pytest
 
 from testgen_agent import experiment as e, models as m
 from testgen_agent.config import AppConfig
 from testgen_agent.llm_client import LLMError, LLMErrorCode
+from testgen_agent.benchmark import BenchmarkDataset
+from testgen_agent.tools import analyze_source
 from test_generation import llm_result, single_function_generated
 
 
@@ -49,6 +52,11 @@ def test_shared_seed_and_real_feedback_evidence(paired):
     assert report['fairness_all_shared_first_candidates_identical']
     assert report['physical_cost']['http_attempts'] == 2
     assert report['physical_cost']['actual_network_http_attempts'] == 0
+    assert report['physical_cost']['token_usage'] is None
+    assert report['physical_cost']['http_attempts_with_unknown_usage'] == 2
+    assert report['paired_comparable_variants']['evaluable_variants'] == 1
+    assert report['paired_comparable_variants']['baseline_detected'] == 0
+    assert report['paired_comparable_variants']['feedback_detected'] == 1
     assert report['aggregate']['baseline']['credited_http_attempts'] == 1
     assert report['aggregate']['feedback']['credited_http_attempts'] == 2
     b, f = [report['cases'][0]['modes'][mode] for mode in e.MODES]
@@ -212,3 +220,52 @@ def test_first_context_difference_is_rejected():
      {'prompt_tokens': None, 'completion_tokens': 3, 'total_tokens': None})])
 def test_missing_usage_is_not_fabricated(values, expected):
     assert e.usage_sum(values) == expected
+
+
+def test_pytest_raises_internal_frame_is_attributed_only_with_mapped_real_context():
+    dataset = BenchmarkDataset()
+    variant = next(item for item in dataset.manifest.variants if item.variant_id == 'quantity_accepts_zero')
+    source = analyze_source(dataset.path(dataset.case('order').source))
+    candidate = single_function_generated('validate_quantity', code=(
+        'import pytest\nfrom subject import validate_quantity\n'
+        'def test_behavior():\n    with pytest.raises(ValueError):\n        validate_quantity(0)\n'))
+    result = m.ExecutionResult(kind='assertion_failed', exit_code=1, collected=1, executed=1,
+        passed=0, failed=1, errors=0, skipped=0, xfailed=0, xpassed=0,
+        failures=(m.FailureObservation(nodeid='test_subject.py::test_behavior',
+        phase='call', exception_type='Failed', path='C:/env/Lib/site-packages/_pytest/outcomes.py', line=162),))
+    mutant = dataset.path(variant.source).read_text(encoding='utf-8')
+    assert len(e.attributed_failures(result, candidate, source, variant, mutant)) == 1
+    unrelated = candidate.updated(code='import pytest\ndef test_behavior():\n    pytest.fail("framework")\n')
+    assert e.attributed_failures(result, unrelated, source, variant, mutant) == []
+
+
+def test_framework_recheck_does_not_retry_behavior_failures_or_call_model(paired):
+    root, client = paired
+    expected = e.rebuild(root)
+    assert e.recheck_framework_errors(root) == expected
+    saved = json.loads((root/'framework_rechecks.json').read_text(encoding='utf-8'))
+    assert saved['observations'] == [] and saved['network_calls'] == 0
+    assert len(client.contexts) == 2
+
+
+def test_framework_recheck_retains_first_error_and_is_bounded(paired, tmp_path, monkeypatch):
+    original, client = paired
+    root = tmp_path/'saved'
+    e.archive(original, root)
+    directory = root/'cases/mean/variants/baseline/mean_empty_division'
+    execution_file = directory/'execution.json'
+    passed = m.ExecutionResult.model_validate_json(execution_file.read_text(encoding='utf-8'))
+    internal = passed.updated(kind='internal_error', exit_code=3, executed=0, passed=0)
+    execution_file.write_text(internal.canonical_json(), encoding='utf-8')
+    frozen_test = (directory/'rounds/01/test_subject.py').read_bytes()
+    calls = []
+    def execute(path, **kwargs):
+        calls.append(path)
+        return SimpleNamespace(execution=passed)
+    monkeypatch.setattr(e, 'run_tests_with_coverage', execute)
+    e.recheck_framework_errors(root)
+    assert len(calls) == 2  # correct reference first, then the same mutant test set
+    assert m.ExecutionResult.model_validate_json((directory/'initial_execution.json').read_text(encoding='utf-8')).kind == 'internal_error'
+    assert (directory/'rounds/01/test_subject.py').read_bytes() == frozen_test
+    e.recheck_framework_errors(root)
+    assert len(calls) == 2 and len(client.contexts) == 2

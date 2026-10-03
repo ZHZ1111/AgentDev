@@ -1,0 +1,15 @@
+...........                                                              [100%]
+=================================== PASSES ====================================
+=========================== short test summary info ===========================
+PASSED rounds/01/test_subject.py::test_validate_quantity_normal
+PASSED rounds/01/test_subject.py::test_validate_quantity_nonint_typeerror
+PASSED rounds/01/test_subject.py::test_validate_quantity_bool_typeerror
+PASSED rounds/01/test_subject.py::test_validate_quantity_nonpositive_valueerror
+PASSED rounds/01/test_subject.py::test_validate_quantity_negative_valueerror
+PASSED rounds/01/test_subject.py::test_subtotal_positive
+PASSED rounds/01/test_subject.py::test_subtotal_zero_quantity
+PASSED rounds/01/test_subject.py::test_subtotal_zero_unit_price
+PASSED rounds/01/test_subject.py::test_order_total_normal
+PASSED rounds/01/test_subject.py::test_order_total_typeerror_propagation
+PASSED rounds/01/test_subject.py::test_order_total_valueerror_propagation
+11 passed in 0.24s

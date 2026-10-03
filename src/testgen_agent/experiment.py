@@ -104,7 +104,26 @@ def attributed_failures(execution: ExecutionResult, generated, source, variant, 
         if origin == "subject.py":
             if failure.line is None or not changed.lineno <= failure.line <= changed.end_lineno:
                 continue
-        elif origin != "test_subject.py" or failure.exception_type not in {"AssertionError", "Failed"}:
+        elif origin != "test_subject.py":
+            # pytest.raises reports its own outcomes.py as the deepest frame.
+            # Require an actual raises context calling the affected mapped path,
+            # rather than treating arbitrary framework failures as assertions.
+            test_node = next((node for node in ast.parse(generated.code).body
+                              if isinstance(node, ast.FunctionDef) and node.name == name), None)
+            raises_target = test_node is not None and any(
+                isinstance(node, ast.With) and any(
+                    isinstance(item.context_expr, ast.Call)
+                    and isinstance(item.context_expr.func, ast.Attribute)
+                    and isinstance(item.context_expr.func.value, ast.Name)
+                    and item.context_expr.func.value.id == "pytest"
+                    and item.context_expr.func.attr == "raises" for item in node.items)
+                and any(isinstance(call, ast.Call) and isinstance(call.func, ast.Name)
+                        and reaches(call.func.id) for statement in node.body for call in ast.walk(statement))
+                for node in ast.walk(test_node))
+            if not (failure.exception_type == "Failed" and origin == "outcomes.py"
+                    and "_pytest" in Path(failure.path).parts and raises_target):
+                continue
+        elif failure.exception_type not in {"AssertionError", "Failed"}:
             continue
         observations.append({"nodeid": failure.nodeid, "exception_type": failure.exception_type,
             "path": failure.path, "line": failure.line, "scenario_ids": list(mapping.scenario_ids),
@@ -162,13 +181,15 @@ def rebuild(root: Path) -> dict:
     frozen = json.loads((root / "experiment.json").read_text(encoding="utf-8"))
     manifest = DatasetManifest.model_validate_json((root / "dataset_manifest.json").read_text(encoding="utf-8"))
     results = []
-    physical_calls, physical_usage = 0, []
+    physical_calls, unknown_usage_attempts, physical_usage = 0, 0, []
     for case_id in frozen["case_ids"]:
         case = next(item for item in manifest.cases if item.case_id == case_id)
         directory = root / "cases" / case_id
         seed = json.loads((directory / "seed/cost.json").read_text(encoding="utf-8"))
         physical_calls += seed["attempts"]
         physical_usage.append(seed["usage"])
+        if seed["usage"] is None:
+            unknown_usage_attempts += seed["attempts"]
         annotation = CaseAnnotations.model_validate_json((directory / "evaluation/annotations.json").read_text(encoding="utf-8"))
         if digest((directory / "evaluation/annotations.json").read_bytes()) != manifest.sha256[case.annotations]:
             raise ValueError("saved evaluator annotation does not match frozen dataset")
@@ -188,6 +209,7 @@ def rebuild(root: Path) -> dict:
                 raise ValueError("exported tests differ from selected candidate")
             physical_calls += sum(call["attempts"] for call in cost["additional_calls"])
             physical_usage.extend(call["usage"] for call in cost["additional_calls"])
+            unknown_usage_attempts += sum(call["attempts"] for call in cost["additional_calls"] if call["usage"] is None)
             item["modes"][mode] = mode_metrics(state, summary, cost, annotation)
             first = path / "rounds/01/llm_result.json"
             hashes.append(digest(first.read_bytes()) if first.exists() else None)
@@ -245,13 +267,27 @@ def rebuild(root: Path) -> dict:
             "description": "improved" if any((deltas[key] or 0) > 0 for key in ("line_percent", "branch_percent"))
                 else "declined" if any((deltas[key] or 0) < 0 for key in ("line_percent", "branch_percent")) else "no_coverage_change"}
         results.append(item)
+    comparable = []
+    for item in results:
+        feedback = {variant["variant_id"]: variant for variant in item["variants"]["feedback"]}
+        for baseline in item["variants"]["baseline"]:
+            other = feedback[baseline["variant_id"]]
+            if baseline["status"] != "not_evaluable" and other["status"] != "not_evaluable":
+                comparable.append({"variant_id": baseline["variant_id"], "baseline_status": baseline["status"],
+                                   "feedback_status": other["status"]})
     summary = {"stage": "F3/F4", "provenance": frozen["provenance"], "frozen_config": frozen,
         "cases": results, "aggregate": aggregate(results),
         "aggregate_by_split": {split: aggregate([item for item in results if item["split"] == split])
                                for split in ("development", "holdout")},
         "physical_cost": {"http_attempts": physical_calls,
                           "actual_network_http_attempts": physical_calls if frozen["provenance"] == "live" else 0,
-                          "token_usage": usage_sum(physical_usage)},
+                          "token_usage": usage_sum(physical_usage),
+                          "known_token_subtotal": usage_sum([usage for usage in physical_usage if usage is not None]),
+                          "http_attempts_with_unknown_usage": unknown_usage_attempts},
+        "paired_comparable_variants": {"evaluable_variants": len(comparable),
+             "baseline_detected": sum(item["baseline_status"] == "detected" for item in comparable),
+             "feedback_detected": sum(item["feedback_status"] == "detected" for item in comparable),
+             "variants": comparable},
         "fairness_all_shared_first_candidates_identical": all(item["shared_first_candidate_identical"] for item in results),
         "limitations": "Eight small tasks; one stochastic sample each. Coverage is not correctness. Credited mode costs share one physical seed. This is a small known-defect experiment, not a complete mutation system."}
     write_json(root / "summary.json", summary)
@@ -307,7 +343,9 @@ def _write_tables(root, summary):
         usage = item["token_usage"] or {}
         lines.append(f"| {mode} | {usage.get('prompt_tokens')}/{usage.get('completion_tokens')}/{usage.get('total_tokens')} | {item['seconds']:.3f} |")
     lines.extend(["", f"Physical cost (shared seed counted once): {json.dumps(summary['physical_cost'], ensure_ascii=False)}", "",
-                  "Missing measurements are null/None, never zero; branch N/A is excluded from the branch mean. Split aggregates are in summary.json."])
+                  "Known token subtotal is not the complete cost; missing measurements are null/None, never zero. Branch N/A is excluded from the branch mean. Split aggregates are in summary.json.", "",
+                  f"Common evaluable variants: {json.dumps(summary['paired_comparable_variants'], ensure_ascii=False)}", "",
+                  "Unequal F4 denominators can reflect framework failures and must not be interpreted as feedback improvement."])
     lines.extend(["", "| Case | Split | Baseline status/line/branch | Feedback status/line/branch | Change |", "|---|---|---|---|---|"])
     for item in summary["cases"]:
         def label(mode):
@@ -449,6 +487,50 @@ def archive(root: Path, destination: Path) -> dict:
     return index
 
 
+def recheck_framework_errors(root: Path) -> dict:
+    """One local retry of framework errors only; retain the original execution.
+
+    No generation/client call, no source/test changes, no retry of behavior failures.
+    A paired correct reference must pass again before each mutant retry.
+    """
+    root = root.resolve()
+    before = rebuild(root)
+    observations = []
+    for case in before["cases"]:
+        for mode in MODES:
+            directory = root / "cases" / case["case_id"]
+            for variant in case["variants"][mode]:
+                path = directory / "variants" / mode / variant["variant_id"]
+                execution_file = path / "execution.json"
+                if not execution_file.exists() or (path / "framework_recheck.json").exists():
+                    continue
+                initial = ExecutionResult.model_validate_json(execution_file.read_text(encoding="utf-8"))
+                if initial.kind not in {"internal_error", "launch_error", "result_error", "timeout"}:
+                    continue
+                paired_root = directory / mode / "paired_reference"
+                original_tests = (path / "rounds/01/test_subject.py").read_bytes()
+                original_source = (path / "subject.py").read_bytes()
+                if original_tests != (paired_root / "rounds/01/test_subject.py").read_bytes():
+                    raise ValueError("recheck requires the same paired reference tests")
+                reference = run_tests_with_coverage(paired_root, timeout=30)
+                record = {"case_id": case["case_id"], "mode": mode, "variant_id": variant["variant_id"],
+                          "initial_kind": initial.kind, "reference_recheck_kind": reference.execution.kind}
+                if reference.execution.all_passed:
+                    observed = run_tests_with_coverage(path, timeout=30)
+                    if ((path / "subject.py").read_bytes() != original_source
+                            or (path / "rounds/01/test_subject.py").read_bytes() != original_tests):
+                        raise ValueError("recheck changed source or tests")
+                    (path / "initial_execution.json").write_bytes(execution_file.read_bytes())
+                    write_json(execution_file, observed.execution.model_dump(mode="json", exclude_computed_fields=True))
+                    record["rechecked_kind"] = observed.execution.kind
+                write_json(path / "framework_recheck.json", record)
+                observations.append(record)
+    write_json(root / "framework_rechecks.json", {"network_calls": 0, "max_retries_per_framework_error": 1,
+               "policy": "Only framework errors; same frozen source/tests, paired correct reference rechecked first; original observations retained",
+               "observations": observations})
+    return rebuild(root)
+
+
 def main(argv=None):
     for stream in (sys.stdout, sys.stderr):
         if callable(getattr(stream, "reconfigure", None)) and not stream.isatty():
@@ -464,6 +546,8 @@ def main(argv=None):
     copied = sub.add_parser("archive")
     copied.add_argument("--run-dir", type=Path, required=True)
     copied.add_argument("--output", type=Path, required=True)
+    checked = sub.add_parser("recheck-framework")
+    checked.add_argument("--run-dir", type=Path, required=True)
     args = parser.parse_args(argv)
     if args.command == "run":
         root = run_experiment(args.output, config=load_config(), split=args.split)
@@ -471,9 +555,12 @@ def main(argv=None):
     elif args.command == "rebuild":
         summary = rebuild(args.run_dir)
         print(json.dumps(summary["aggregate"], ensure_ascii=False, indent=2))
-    else:
+    elif args.command == "archive":
         index = archive(args.run_dir, args.output)
         print(f"Archived {index['file_count']} evidence files ({index['total_bytes']} bytes)")
+    else:
+        summary = recheck_framework_errors(args.run_dir)
+        print(json.dumps(summary["aggregate"], ensure_ascii=False, indent=2))
     return 0
 
 

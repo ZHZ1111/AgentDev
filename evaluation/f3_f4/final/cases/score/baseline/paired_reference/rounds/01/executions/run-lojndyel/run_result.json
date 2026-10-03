@@ -1,0 +1,39 @@
+{
+  "candidate_all_passed": true,
+  "execution": {
+    "kind": "passed",
+    "exit_code": 0,
+    "collected": 12,
+    "executed": 12,
+    "passed": 12,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0,
+    "stdout": "............                                                             [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_normal_low_in_range\r\nPASSED rounds/01/test_subject.py::test_normal_middle_in_range\r\nPASSED rounds/01/test_subject.py::test_normal_high_in_range\r\nPASSED rounds/01/test_subject.py::test_boundary_low_edges[0-low]\r\nPASSED rounds/01/test_subject.py::test_boundary_low_edges[59-low]\r\nPASSED rounds/01/test_subject.py::test_boundary_middle_edges[60-middle]\r\nPASSED rounds/01/test_subject.py::test_boundary_middle_edges[79-middle]\r\nPASSED rounds/01/test_subject.py::test_boundary_high_edges[80-high]\r\nPASSED rounds/01/test_subject.py::test_boundary_high_edges[100-high]\r\nPASSED rounds/01/test_subject.py::test_exception_out_of_range[-1]\r\nPASSED rounds/01/test_subject.py::test_exception_out_of_range[101]\r\nPASSED rounds/01/test_subject.py::test_branch_high_checked_before_middle\r\n12 passed in 0.25s\r\n",
+    "stderr": "",
+    "timed_out": false,
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "duration_seconds": 2.398432799964212,
+    "failures": []
+  },
+  "coverage": {
+    "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\score\\baseline\\paired_reference\\subject.py",
+    "status": "available",
+    "covered_lines": 8,
+    "total_lines": 8,
+    "covered_branches": 6,
+    "total_branches": 6,
+    "missing_lines": [],
+    "missing_branches": [],
+    "error": null
+  },
+  "source_hints": {
+    "status": "available",
+    "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\score\\baseline\\paired_reference\\subject.py",
+    "missing_lines": [],
+    "missing_branches": []
+  }
+}

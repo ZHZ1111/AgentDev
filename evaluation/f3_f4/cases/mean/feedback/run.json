@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "run_id": "5c9d6144afd04a70ba0f6df9f3532c59",
+  "request": {
+    "source_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\mean\\input\\subject.py",
+    "model": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "base_url": "https://api.deepseek.com",
+      "request_timeout_seconds": 60
+    },
+    "spec_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\mean\\input\\behavior.md",
+    "output_dir": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\mean\\feedback",
+    "max_rounds": 3,
+    "execution_timeout_seconds": 30
+  },
+  "oracle_mode": "specification",
+  "adapter_config": {
+    "adapter_type": "SharedSeedClient",
+    "retry_policy": null
+  }
+}

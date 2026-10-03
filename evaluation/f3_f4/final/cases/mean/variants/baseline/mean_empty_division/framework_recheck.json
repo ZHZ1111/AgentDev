@@ -1,0 +1,8 @@
+{
+  "case_id": "mean",
+  "mode": "baseline",
+  "variant_id": "mean_empty_division",
+  "initial_kind": "internal_error",
+  "reference_recheck_kind": "passed",
+  "rechecked_kind": "internal_error"
+}

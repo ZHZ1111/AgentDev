@@ -1,0 +1,9 @@
+{
+  "attempts": 1,
+  "usage": {
+    "prompt_tokens": 5030,
+    "completion_tokens": 2532,
+    "total_tokens": 7562
+  },
+  "seconds": 8.562882199999876
+}

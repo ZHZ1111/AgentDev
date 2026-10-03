@@ -1,0 +1,19 @@
+{
+  "kind": "passed",
+  "exit_code": 0,
+  "collected": 9,
+  "executed": 9,
+  "passed": 9,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "xfailed": 0,
+  "xpassed": 0,
+  "stdout": ".........                                                                [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_normal_two_elements\r\nPASSED rounds/01/test_subject.py::test_normal_cancelling_mean\r\nPASSED rounds/01/test_subject.py::test_normal_non_integral_mean\r\nPASSED rounds/01/test_subject.py::test_boundary_empty_list\r\nPASSED rounds/01/test_subject.py::test_boundary_single_element\r\nPASSED rounds/01/test_subject.py::test_boundary_max_abs_value\r\nPASSED rounds/01/test_subject.py::test_branch_empty_falsy_taken\r\nPASSED rounds/01/test_subject.py::test_branch_nonempty_falsy_path_not_taken\r\nPASSED rounds/01/test_subject.py::test_no_mutation_of_input\r\n9 passed in 0.22s\r\n",
+  "stderr": "",
+  "timed_out": false,
+  "stdout_truncated": false,
+  "stderr_truncated": false,
+  "duration_seconds": 2.3146235001040623,
+  "failures": []
+}

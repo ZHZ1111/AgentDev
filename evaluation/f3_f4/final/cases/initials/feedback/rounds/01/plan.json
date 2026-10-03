@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.1",
+  "target_functions": [
+    "initials"
+  ],
+  "oracle_mode": "specification",
+  "entry_functions": [
+    "initials"
+  ],
+  "relationships": [],
+  "strategy": [
+    {
+      "subject_kind": "function",
+      "function_name": "initials",
+      "relationship_id": null,
+      "decision": "unit_test",
+      "reason": "initials is the only target and public entry; it has no confirmed same-file calls, so all specified behavior is exercised directly as focused unit cases."
+    }
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "initials-normal-basic",
+      "target_function": "initials",
+      "category": "normal",
+      "inputs": {
+        "args": [
+          "hello world"
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns \"HW\"",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "split by whitespace then upper-cased first characters are concatenated without separator"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "initials"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "initials-normal-multi-whitespace",
+      "target_function": "initials",
+      "category": "normal",
+      "inputs": {
+        "args": [
+          "  foo\tbar\n baz "
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns \"FBB\" because empty tokens produced by whitespace runs are ignored",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "parameterless str.split() splits on any whitespace and ignores empty words"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "initials"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "initials-normal-single-word",
+      "target_function": "initials",
+      "category": "normal",
+      "inputs": {
+        "args": [
+          "python"
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns \"P\"",
+      "expected_basis": {
+        "kind": "docstring",
+        "detail": "take the upper-cased first character of each word and concatenate"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "initials"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "initials-boundary-empty",
+      "target_function": "initials",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          ""
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns \"\"",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "empty string returns \"\""
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "initials"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "initials-boundary-all-whitespace",
+      "target_function": "initials",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          "   \t\n  "
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns \"\"",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "all-whitespace string returns \"\""
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "initials"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "initials-branch-multichar-upper",
+      "target_function": "initials",
+      "category": "branch",
+      "inputs": {
+        "args": [
+          "straße test"
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns \"STEST\" because upper of \"ß\" expands to two characters",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "upper may yield multiple characters, e.g. \"ß\" -> \"SS\", and results are concatenated without separator"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "initials"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "initials-branch-punctuation-cjk",
+      "target_function": "initials",
+      "category": "branch",
+      "inputs": {
+        "args": [
+          "hi, 你好"
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns \"H你\" because punctuation is not stripped and CJK upper follows Python str.upper",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "punctuation is not removed, no extra normalization, and Chinese uses Python str.upper results"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "initials"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    }
+  ]
+}

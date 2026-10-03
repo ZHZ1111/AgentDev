@@ -1,0 +1,17 @@
+﻿case_id,split,mode,status,stop_reason,candidate_rounds,selected_round,collected,passed,line_percent,branch_percent,credited_http_attempts,new_actual_http_attempts,seconds_including_shared_generation,prompt_tokens,completion_tokens,total_tokens
+order,development,baseline,completed,coverage_target_met,1,1,11,11,100.0,100.0,1,0,15.890214100014418,5193,3530,8723
+order,development,feedback,completed,coverage_target_met,1,1,11,11,100.0,100.0,1,0,15.792601299937814,5193,3530,8723
+labels,development,baseline,completed,coverage_target_met,1,1,8,8,100.0,100.0,1,0,13.155646900064312,5030,2532,7562
+labels,development,feedback,completed,coverage_target_met,1,1,8,8,100.0,100.0,1,0,13.253686800017022,5030,2532,7562
+independent,development,baseline,failed,unrecoverable_error,0,,,,,,2,0,13.837044800049625,,,
+independent,development,feedback,failed,unrecoverable_error,0,,,,,,2,0,13.830675500095822,,,
+mean,development,baseline,completed,coverage_target_met,1,1,9,9,100.0,100.0,2,0,17.995372400037013,10667,3839,14506
+mean,development,feedback,completed,coverage_target_met,1,1,9,9,100.0,100.0,2,0,18.0010652000783,10667,3839,14506
+score,holdout,baseline,completed,coverage_target_met,1,1,12,12,100.0,100.0,1,0,11.288578400039114,4413,1904,6317
+score,holdout,feedback,completed,coverage_target_met,1,1,12,12,100.0,100.0,1,0,12.045283900108188,4413,1904,6317
+initials,holdout,baseline,needs_review,ambiguous_specification,1,1,7,6,100.0,,1,0,10.159476400003769,4553,1347,5900
+initials,holdout,feedback,needs_review,ambiguous_specification,1,1,7,6,100.0,,1,0,10.236217599944212,4553,1347,5900
+rotation,holdout,baseline,failed,unrecoverable_error,0,,,,,,2,0,13.04244899994228,,,
+rotation,holdout,feedback,failed,unrecoverable_error,0,,,,,,2,0,13.04094510001596,,,
+packet,holdout,baseline,completed,coverage_target_met,1,1,11,11,100.0,100.0,1,0,11.421945800073445,5206,1994,7200
+packet,holdout,feedback,completed,coverage_target_met,1,1,11,11,100.0,100.0,1,0,11.403546799905598,5206,1994,7200

@@ -1,0 +1,242 @@
+{
+  "schema_version": "1.1",
+  "target_functions": [
+    "safe_mean"
+  ],
+  "oracle_mode": "specification",
+  "entry_functions": [
+    "safe_mean"
+  ],
+  "relationships": [],
+  "strategy": [
+    {
+      "subject_kind": "function",
+      "function_name": "safe_mean",
+      "relationship_id": null,
+      "decision": "unit_test",
+      "reason": "single public pure function with no same-file dependencies; its own boundary (empty list) and documented cases can be verified directly"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "normal-two-elements",
+      "target_function": "safe_mean",
+      "category": "normal",
+      "inputs": {
+        "args": [
+          [
+            1,
+            2
+          ]
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 1.5",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states [1,2] returns 1.5; non-empty list returns sum(values)/len(values)"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "safe_mean"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "normal-cancelling-mean",
+      "target_function": "safe_mean",
+      "category": "normal",
+      "inputs": {
+        "args": [
+          [
+            -2,
+            2
+          ]
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 0.0",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states [-2,2] returns 0.0"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "safe_mean"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "normal-non-integral-mean",
+      "target_function": "safe_mean",
+      "category": "normal",
+      "inputs": {
+        "args": [
+          [
+            2,
+            2,
+            5
+          ]
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 3.0 exactly",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states [2,2,5] returns 3.0"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "safe_mean"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "boundary-empty-list",
+      "target_function": "safe_mean",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          []
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns float 0.0 (and the result is a float, not an int)",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states an empty list returns float 0.0; docstring agrees"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "safe_mean"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "boundary-single-element",
+      "target_function": "safe_mean",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          [
+            7
+          ]
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 7.0, since a single-element mean equals that element",
+      "expected_basis": {
+        "kind": "implementation_assumption",
+        "detail": "non-empty mean is sum/len, so [7] gives 7/1 = 7.0; not an explicitly listed example but directly implied by the stated formula"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "safe_mean"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "boundary-max-abs-value",
+      "target_function": "safe_mean",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          [
+            1000000,
+            -1000000
+          ]
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 0.0, the maximum-magnitude boundary values still produce an exact zero mean",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification allows each item's absolute value up to 1000000 and defines non-empty mean as sum/len; (1000000 + -1000000)/2 = 0.0"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "safe_mean"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "branch-empty-falsy-taken",
+      "target_function": "safe_mean",
+      "category": "branch",
+      "inputs": {
+        "args": [
+          []
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "takes the if not values branch and returns 0.0 rather than dividing by len(values)",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "source line 5 if not values guards the early 0.0 return before the division on line 7, matching the specified empty-list behavior"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "safe_mean"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "branch-nonempty-falsy-path-not-taken",
+      "target_function": "safe_mean",
+      "category": "branch",
+      "inputs": {
+        "args": [
+          [
+            4,
+            6
+          ]
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "the if not values branch is false, so the function returns sum([4,6])/len([4,6]) = 5.0",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification defines the non-empty result as sum(values)/len(values), the line-7 branch taken when the line-5 guard is false"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "safe_mean"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "no-mutation-of-input",
+      "target_function": "safe_mean",
+      "category": "normal",
+      "inputs": {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ]
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 2.0 and leaves the caller's list object unchanged (still [1,2,3], same object identity, same length)",
+      "expected_basis": {
+        "kind": "docstring",
+        "detail": "docstring and specification state the input is not modified; no external side effects"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "safe_mean"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    }
+  ]
+}

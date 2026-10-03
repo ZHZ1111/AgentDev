@@ -1,0 +1,39 @@
+{
+  "candidate_all_passed": true,
+  "execution": {
+    "kind": "passed",
+    "exit_code": 0,
+    "collected": 11,
+    "executed": 11,
+    "passed": 11,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0,
+    "stdout": "...........                                                              [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_validate_quantity_normal\r\nPASSED rounds/01/test_subject.py::test_validate_quantity_nonint_typeerror\r\nPASSED rounds/01/test_subject.py::test_validate_quantity_bool_typeerror\r\nPASSED rounds/01/test_subject.py::test_validate_quantity_nonpositive_valueerror\r\nPASSED rounds/01/test_subject.py::test_validate_quantity_negative_valueerror\r\nPASSED rounds/01/test_subject.py::test_subtotal_positive\r\nPASSED rounds/01/test_subject.py::test_subtotal_zero_quantity\r\nPASSED rounds/01/test_subject.py::test_subtotal_zero_unit_price\r\nPASSED rounds/01/test_subject.py::test_order_total_normal\r\nPASSED rounds/01/test_subject.py::test_order_total_typeerror_propagation\r\nPASSED rounds/01/test_subject.py::test_order_total_valueerror_propagation\r\n11 passed in 0.23s\r\n",
+    "stderr": "",
+    "timed_out": false,
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "duration_seconds": 2.469117800006643,
+    "failures": []
+  },
+  "coverage": {
+    "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\order\\feedback\\paired_reference\\subject.py",
+    "status": "available",
+    "covered_lines": 11,
+    "total_lines": 11,
+    "covered_branches": 4,
+    "total_branches": 4,
+    "missing_lines": [],
+    "missing_branches": [],
+    "error": null
+  },
+  "source_hints": {
+    "status": "available",
+    "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\order\\feedback\\paired_reference\\subject.py",
+    "missing_lines": [],
+    "missing_branches": []
+  }
+}

@@ -1,0 +1,344 @@
+{
+  "number": 1,
+  "generated": {
+    "plan": {
+      "schema_version": "1.1",
+      "target_functions": [
+        "safe_mean"
+      ],
+      "oracle_mode": "specification",
+      "entry_functions": [
+        "safe_mean"
+      ],
+      "relationships": [],
+      "strategy": [
+        {
+          "subject_kind": "function",
+          "function_name": "safe_mean",
+          "relationship_id": null,
+          "decision": "unit_test",
+          "reason": "single public pure function with no same-file dependencies; its own boundary (empty list) and documented cases can be verified directly"
+        }
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "normal-two-elements",
+          "target_function": "safe_mean",
+          "category": "normal",
+          "inputs": {
+            "args": [
+              [
+                1,
+                2
+              ]
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns 1.5",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "specification states [1,2] returns 1.5; non-empty list returns sum(values)/len(values)"
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "safe_mean"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "normal-cancelling-mean",
+          "target_function": "safe_mean",
+          "category": "normal",
+          "inputs": {
+            "args": [
+              [
+                -2,
+                2
+              ]
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns 0.0",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "specification states [-2,2] returns 0.0"
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "safe_mean"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "normal-non-integral-mean",
+          "target_function": "safe_mean",
+          "category": "normal",
+          "inputs": {
+            "args": [
+              [
+                2,
+                2,
+                5
+              ]
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns 3.0 exactly",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "specification states [2,2,5] returns 3.0"
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "safe_mean"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "boundary-empty-list",
+          "target_function": "safe_mean",
+          "category": "boundary",
+          "inputs": {
+            "args": [
+              []
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns float 0.0 (and the result is a float, not an int)",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "specification states an empty list returns float 0.0; docstring agrees"
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "safe_mean"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "boundary-single-element",
+          "target_function": "safe_mean",
+          "category": "boundary",
+          "inputs": {
+            "args": [
+              [
+                7
+              ]
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns 7.0, since a single-element mean equals that element",
+          "expected_basis": {
+            "kind": "implementation_assumption",
+            "detail": "non-empty mean is sum/len, so [7] gives 7/1 = 7.0; not an explicitly listed example but directly implied by the stated formula"
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "safe_mean"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "boundary-max-abs-value",
+          "target_function": "safe_mean",
+          "category": "boundary",
+          "inputs": {
+            "args": [
+              [
+                1000000,
+                -1000000
+              ]
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns 0.0, the maximum-magnitude boundary values still produce an exact zero mean",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "specification allows each item's absolute value up to 1000000 and defines non-empty mean as sum/len; (1000000 + -1000000)/2 = 0.0"
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "safe_mean"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "branch-empty-falsy-taken",
+          "target_function": "safe_mean",
+          "category": "branch",
+          "inputs": {
+            "args": [
+              []
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "takes the if not values branch and returns 0.0 rather than dividing by len(values)",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "source line 5 if not values guards the early 0.0 return before the division on line 7, matching the specified empty-list behavior"
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "safe_mean"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "branch-nonempty-falsy-path-not-taken",
+          "target_function": "safe_mean",
+          "category": "branch",
+          "inputs": {
+            "args": [
+              [
+                4,
+                6
+              ]
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "the if not values branch is false, so the function returns sum([4,6])/len([4,6]) = 5.0",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "specification defines the non-empty result as sum(values)/len(values), the line-7 branch taken when the line-5 guard is false"
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "safe_mean"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "no-mutation-of-input",
+          "target_function": "safe_mean",
+          "category": "normal",
+          "inputs": {
+            "args": [
+              [
+                1,
+                2,
+                3
+              ]
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns 2.0 and leaves the caller's list object unchanged (still [1,2,3], same object identity, same length)",
+          "expected_basis": {
+            "kind": "docstring",
+            "detail": "docstring and specification state the input is not modified; no external side effects"
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "safe_mean"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        }
+      ]
+    },
+    "code": "from subject import safe_mean\n\n\ndef test_normal_two_elements():\n    assert safe_mean([1, 2]) == 1.5\n\n\ndef test_normal_cancelling_mean():\n    assert safe_mean([-2, 2]) == 0.0\n\n\ndef test_normal_non_integral_mean():\n    assert safe_mean([2, 2, 5]) == 3.0\n\n\ndef test_boundary_empty_list():\n    result = safe_mean([])\n    assert result == 0.0\n    assert isinstance(result, float)\n\n\ndef test_boundary_single_element():\n    assert safe_mean([7]) == 7.0\n\n\ndef test_boundary_max_abs_value():\n    assert safe_mean([1000000, -1000000]) == 0.0\n\n\ndef test_branch_empty_falsy_taken():\n    assert safe_mean([]) == 0.0\n\n\ndef test_branch_nonempty_falsy_path_not_taken():\n    assert safe_mean([4, 6]) == 5.0\n\n\ndef test_no_mutation_of_input():\n    values = [1, 2, 3]\n    original_id = id(values)\n    assert safe_mean(values) == 2.0\n    assert values == [1, 2, 3]\n    assert id(values) == original_id\n    assert len(values) == 3\n",
+    "mappings": [
+      {
+        "test_function": "test_normal_two_elements",
+        "scenario_ids": [
+          "normal-two-elements"
+        ]
+      },
+      {
+        "test_function": "test_normal_cancelling_mean",
+        "scenario_ids": [
+          "normal-cancelling-mean"
+        ]
+      },
+      {
+        "test_function": "test_normal_non_integral_mean",
+        "scenario_ids": [
+          "normal-non-integral-mean"
+        ]
+      },
+      {
+        "test_function": "test_boundary_empty_list",
+        "scenario_ids": [
+          "boundary-empty-list"
+        ]
+      },
+      {
+        "test_function": "test_boundary_single_element",
+        "scenario_ids": [
+          "boundary-single-element"
+        ]
+      },
+      {
+        "test_function": "test_boundary_max_abs_value",
+        "scenario_ids": [
+          "boundary-max-abs-value"
+        ]
+      },
+      {
+        "test_function": "test_branch_empty_falsy_taken",
+        "scenario_ids": [
+          "branch-empty-falsy-taken"
+        ]
+      },
+      {
+        "test_function": "test_branch_nonempty_falsy_path_not_taken",
+        "scenario_ids": [
+          "branch-nonempty-falsy-path-not-taken"
+        ]
+      },
+      {
+        "test_function": "test_no_mutation_of_input",
+        "scenario_ids": [
+          "no-mutation-of-input"
+        ]
+      }
+    ],
+    "assumptions": [
+      "Domain is restricted to list[int] with abs(item) <= 1000000 and len <= 100, so out-of-domain inputs (non-list, str, bool elements, floats, None) are not tested; the specification says out-of-domain behavior is undefined.",
+      "No exception category is included: the specification defines no exception for any in-domain input, so no pytest.raises assertion would be evidence-backed.",
+      "No collaboration scenario is included because safe_mean has no confirmed direct calls to same-file functions (only builtins sum/len), so a collaboration test would add no behavior beyond the unit cases.",
+      "The branch scenarios intentionally exercise the same inputs as boundary cases to cover the two control-flow paths; the single if at line 5 is the only source branch.",
+      "boundary-single-element is grounded as an implementation_assumption derived directly from the stated sum/len formula rather than an explicitly listed example."
+    ],
+    "questions": []
+  },
+  "test_path": "rounds\\01\\test_subject.py",
+  "validation_error": null,
+  "execution": {
+    "kind": "passed",
+    "exit_code": 0,
+    "collected": 9,
+    "executed": 9,
+    "passed": 9,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0,
+    "stdout": ".........                                                                [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_normal_two_elements\r\nPASSED rounds/01/test_subject.py::test_normal_cancelling_mean\r\nPASSED rounds/01/test_subject.py::test_normal_non_integral_mean\r\nPASSED rounds/01/test_subject.py::test_boundary_empty_list\r\nPASSED rounds/01/test_subject.py::test_boundary_single_element\r\nPASSED rounds/01/test_subject.py::test_boundary_max_abs_value\r\nPASSED rounds/01/test_subject.py::test_branch_empty_falsy_taken\r\nPASSED rounds/01/test_subject.py::test_branch_nonempty_falsy_path_not_taken\r\nPASSED rounds/01/test_subject.py::test_no_mutation_of_input\r\n9 passed in 0.22s\r\n",
+    "stderr": "",
+    "timed_out": false,
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "duration_seconds": 2.3146235001040623,
+    "failures": []
+  },
+  "coverage": {
+    "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\mean\\baseline\\subject.py",
+    "status": "available",
+    "covered_lines": 4,
+    "total_lines": 4,
+    "covered_branches": 2,
+    "total_branches": 2,
+    "missing_lines": [],
+    "missing_branches": [],
+    "error": null
+  }
+}

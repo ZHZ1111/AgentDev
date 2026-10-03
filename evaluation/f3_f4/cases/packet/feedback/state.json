@@ -1,0 +1,545 @@
+{
+  "schema_version": "1.1",
+  "run_id": "81e98b3f772848189289f46199a6eab2",
+  "request": {
+    "source_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\packet\\input\\subject.py",
+    "model": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "base_url": "https://api.deepseek.com",
+      "request_timeout_seconds": 60
+    },
+    "spec_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\packet\\input\\behavior.md",
+    "output_dir": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\packet\\feedback",
+    "max_rounds": 3,
+    "execution_timeout_seconds": 30
+  },
+  "oracle_mode": "specification",
+  "behavior_specification": "# 报文分类\n- packet 为内置 str，必须含恰好一个 \":\"。缺少或多个冒号抛 ValueError。\n- kind/payload 是该冒号左右的原始字符串，大小写敏感，不做 strip。\n- kind=\"PING\" 且 payload=\"\" 返回 \"heartbeat\"；PING 有载荷抛 ValueError。\n- kind=\"DATA\" 且 payload 非空返回 \"data\"；DATA 空载荷抛 ValueError。空白字符串也是非空载荷。\n- 其他 kind（含空和小写名称）抛 ValueError。不约束异常消息，非 str 行为未定义；无外部副作用。\n\n",
+  "source_info": {
+    "source_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\packet\\input\\subject.py",
+    "source_code": "\"\"\"留出集：多分支报文分类参考实现。\"\"\"\n\ndef classify_packet(packet):\n    \"\"\"仅支持 PING: 或 DATA:非空载荷，其他格式抛 ValueError。\"\"\"\n    if packet.count(\":\") != 1:\n        raise ValueError(\"format\")\n    kind, payload = packet.split(\":\")\n    if kind == \"PING\":\n        if payload:\n            raise ValueError(\"payload\")\n        return \"heartbeat\"\n    if kind == \"DATA\":\n        if not payload:\n            raise ValueError(\"payload\")\n        return \"data\"\n    raise ValueError(\"kind\")\n\n",
+    "functions": [
+      {
+        "name": "classify_packet",
+        "signature": "(packet)",
+        "start_line": 3,
+        "end_line": 16,
+        "docstring": "仅支持 PING: 或 DATA:非空载荷，其他格式抛 ValueError。"
+      }
+    ],
+    "encoding": "utf-8",
+    "imports": [],
+    "branches": [
+      {
+        "kind": "if",
+        "line": 5,
+        "source": "if packet.count(\":\") != 1"
+      },
+      {
+        "kind": "raise",
+        "line": 6,
+        "source": "raise ValueError(\"format\")"
+      },
+      {
+        "kind": "if",
+        "line": 8,
+        "source": "if kind == \"PING\""
+      },
+      {
+        "kind": "if",
+        "line": 9,
+        "source": "if payload"
+      },
+      {
+        "kind": "raise",
+        "line": 10,
+        "source": "raise ValueError(\"payload\")"
+      },
+      {
+        "kind": "if",
+        "line": 12,
+        "source": "if kind == \"DATA\""
+      },
+      {
+        "kind": "if",
+        "line": 13,
+        "source": "if not payload"
+      },
+      {
+        "kind": "raise",
+        "line": 14,
+        "source": "raise ValueError(\"payload\")"
+      },
+      {
+        "kind": "raise",
+        "line": 16,
+        "source": "raise ValueError(\"kind\")"
+      }
+    ],
+    "call_sites": [
+      {
+        "call_id": "call:classify_packet:5:7:5:24",
+        "caller": "classify_packet",
+        "expression": "packet.count(\":\")",
+        "line": 5,
+        "source": "if packet.count(\":\") != 1:",
+        "argument_expressions": [
+          "\":\""
+        ]
+      },
+      {
+        "call_id": "call:classify_packet:6:14:6:34",
+        "caller": "classify_packet",
+        "expression": "ValueError(\"format\")",
+        "line": 6,
+        "source": "raise ValueError(\"format\")",
+        "argument_expressions": [
+          "\"format\""
+        ]
+      },
+      {
+        "call_id": "call:classify_packet:7:20:7:37",
+        "caller": "classify_packet",
+        "expression": "packet.split(\":\")",
+        "line": 7,
+        "source": "kind, payload = packet.split(\":\")",
+        "argument_expressions": [
+          "\":\""
+        ]
+      },
+      {
+        "call_id": "call:classify_packet:10:18:10:39",
+        "caller": "classify_packet",
+        "expression": "ValueError(\"payload\")",
+        "line": 10,
+        "source": "raise ValueError(\"payload\")",
+        "argument_expressions": [
+          "\"payload\""
+        ]
+      },
+      {
+        "call_id": "call:classify_packet:14:18:14:39",
+        "caller": "classify_packet",
+        "expression": "ValueError(\"payload\")",
+        "line": 14,
+        "source": "raise ValueError(\"payload\")",
+        "argument_expressions": [
+          "\"payload\""
+        ]
+      },
+      {
+        "call_id": "call:classify_packet:16:10:16:28",
+        "caller": "classify_packet",
+        "expression": "ValueError(\"kind\")",
+        "line": 16,
+        "source": "raise ValueError(\"kind\")",
+        "argument_expressions": [
+          "\"kind\""
+        ]
+      }
+    ],
+    "direct_calls": [],
+    "unresolved_calls": [
+      {
+        "call_site_id": "call:classify_packet:5:7:5:24",
+        "caller": "classify_packet",
+        "reason": "属性调用的根名称来自局部绑定，无法静态确认"
+      },
+      {
+        "call_site_id": "call:classify_packet:7:20:7:37",
+        "caller": "classify_packet",
+        "reason": "属性调用的根名称来自局部绑定，无法静态确认"
+      }
+    ]
+  },
+  "current_round": 1,
+  "history": [
+    {
+      "number": 1,
+      "generated": {
+        "plan": {
+          "schema_version": "1.1",
+          "target_functions": [
+            "classify_packet"
+          ],
+          "oracle_mode": "specification",
+          "entry_functions": [
+            "classify_packet"
+          ],
+          "relationships": [],
+          "strategy": [
+            {
+              "subject_kind": "function",
+              "function_name": "classify_packet",
+              "relationship_id": null,
+              "decision": "unit_test",
+              "reason": "单一自包含入口函数，无同文件依赖调用（direct_calls 为空，unresolved 仅为 str 内建方法），所有分支行为可直接以单元测试覆盖。"
+            }
+          ],
+          "scenarios": [
+            {
+              "scenario_id": "normal-ping-empty",
+              "target_function": "classify_packet",
+              "category": "normal",
+              "inputs": {
+                "args": [
+                  "PING:"
+                ],
+                "kwargs": {}
+              },
+              "expected_behavior": "返回 \"heartbeat\"",
+              "expected_basis": {
+                "kind": "specification",
+                "detail": "规格：kind=\"PING\" 且 payload=\"\" 返回 \"heartbeat\""
+              },
+              "test_kind": "unit",
+              "involved_functions": [
+                "classify_packet"
+              ],
+              "relationship_ids": [],
+              "steps": []
+            },
+            {
+              "scenario_id": "normal-data-nonempty",
+              "target_function": "classify_packet",
+              "category": "normal",
+              "inputs": {
+                "args": [
+                  "DATA:abc"
+                ],
+                "kwargs": {}
+              },
+              "expected_behavior": "返回 \"data\"",
+              "expected_basis": {
+                "kind": "specification",
+                "detail": "规格：kind=\"DATA\" 且 payload 非空返回 \"data\""
+              },
+              "test_kind": "unit",
+              "involved_functions": [
+                "classify_packet"
+              ],
+              "relationship_ids": [],
+              "steps": []
+            },
+            {
+              "scenario_id": "boundary-data-whitespace-payload",
+              "target_function": "classify_packet",
+              "category": "boundary",
+              "inputs": {
+                "args": [
+                  "DATA: "
+                ],
+                "kwargs": {}
+              },
+              "expected_behavior": "返回 \"data\"，因为空白字符串属于非空载荷",
+              "expected_basis": {
+                "kind": "specification",
+                "detail": "规格：DATA 空载荷抛 ValueError；空白字符串也被视为非空载荷"
+              },
+              "test_kind": "unit",
+              "involved_functions": [
+                "classify_packet"
+              ],
+              "relationship_ids": [],
+              "steps": []
+            },
+            {
+              "scenario_id": "boundary-no-colon",
+              "target_function": "classify_packet",
+              "category": "exception",
+              "inputs": {
+                "args": [
+                  "PING"
+                ],
+                "kwargs": {}
+              },
+              "expected_behavior": "抛 ValueError",
+              "expected_basis": {
+                "kind": "specification",
+                "detail": "规格：packet 必须含恰好一个 \":\"，缺少冒号抛 ValueError"
+              },
+              "test_kind": "unit",
+              "involved_functions": [
+                "classify_packet"
+              ],
+              "relationship_ids": [],
+              "steps": []
+            },
+            {
+              "scenario_id": "exception-multiple-colons",
+              "target_function": "classify_packet",
+              "category": "exception",
+              "inputs": {
+                "args": [
+                  "DATA:a:b"
+                ],
+                "kwargs": {}
+              },
+              "expected_behavior": "抛 ValueError",
+              "expected_basis": {
+                "kind": "specification",
+                "detail": "规格：多个冒号抛 ValueError（count(\":\") != 1）"
+              },
+              "test_kind": "unit",
+              "involved_functions": [
+                "classify_packet"
+              ],
+              "relationship_ids": [],
+              "steps": []
+            },
+            {
+              "scenario_id": "exception-ping-with-payload",
+              "target_function": "classify_packet",
+              "category": "exception",
+              "inputs": {
+                "args": [
+                  "PING:hello"
+                ],
+                "kwargs": {}
+              },
+              "expected_behavior": "抛 ValueError",
+              "expected_basis": {
+                "kind": "specification",
+                "detail": "规格：PING 有载荷抛 ValueError"
+              },
+              "test_kind": "unit",
+              "involved_functions": [
+                "classify_packet"
+              ],
+              "relationship_ids": [],
+              "steps": []
+            },
+            {
+              "scenario_id": "exception-data-empty-payload",
+              "target_function": "classify_packet",
+              "category": "exception",
+              "inputs": {
+                "args": [
+                  "DATA:"
+                ],
+                "kwargs": {}
+              },
+              "expected_behavior": "抛 ValueError",
+              "expected_basis": {
+                "kind": "specification",
+                "detail": "规格：DATA 空载荷抛 ValueError"
+              },
+              "test_kind": "unit",
+              "involved_functions": [
+                "classify_packet"
+              ],
+              "relationship_ids": [],
+              "steps": []
+            },
+            {
+              "scenario_id": "exception-unknown-kind",
+              "target_function": "classify_packet",
+              "category": "exception",
+              "inputs": {
+                "args": [
+                  "ACK:x"
+                ],
+                "kwargs": {}
+              },
+              "expected_behavior": "抛 ValueError",
+              "expected_basis": {
+                "kind": "specification",
+                "detail": "规格：其他 kind 抛 ValueError"
+              },
+              "test_kind": "unit",
+              "involved_functions": [
+                "classify_packet"
+              ],
+              "relationship_ids": [],
+              "steps": []
+            },
+            {
+              "scenario_id": "exception-empty-kind",
+              "target_function": "classify_packet",
+              "category": "exception",
+              "inputs": {
+                "args": [
+                  ":payload"
+                ],
+                "kwargs": {}
+              },
+              "expected_behavior": "抛 ValueError",
+              "expected_basis": {
+                "kind": "specification",
+                "detail": "规格：空 kind 属于其他 kind，抛 ValueError"
+              },
+              "test_kind": "unit",
+              "involved_functions": [
+                "classify_packet"
+              ],
+              "relationship_ids": [],
+              "steps": []
+            },
+            {
+              "scenario_id": "exception-lowercase-kind",
+              "target_function": "classify_packet",
+              "category": "exception",
+              "inputs": {
+                "args": [
+                  "ping:"
+                ],
+                "kwargs": {}
+              },
+              "expected_behavior": "抛 ValueError",
+              "expected_basis": {
+                "kind": "specification",
+                "detail": "规格：大小写敏感，小写名称抛 ValueError（分支：if kind == \"PING\" 不成立且 \"DATA\" 不成立）"
+              },
+              "test_kind": "unit",
+              "involved_functions": [
+                "classify_packet"
+              ],
+              "relationship_ids": [],
+              "steps": []
+            },
+            {
+              "scenario_id": "exception-no-strip",
+              "target_function": "classify_packet",
+              "category": "exception",
+              "inputs": {
+                "args": [
+                  "PING :"
+                ],
+                "kwargs": {}
+              },
+              "expected_behavior": "抛 ValueError，因为 kind 不做 strip",
+              "expected_basis": {
+                "kind": "specification",
+                "detail": "规格：kind/payload 是冒号左右原始字符串，不做 strip；\"PING \" 不等于 \"PING\"，落入其他 kind 抛 ValueError"
+              },
+              "test_kind": "unit",
+              "involved_functions": [
+                "classify_packet"
+              ],
+              "relationship_ids": [],
+              "steps": []
+            }
+          ]
+        },
+        "code": "import pytest\n\nfrom subject import classify_packet\n\n\ndef test_normal_ping_empty():\n    assert classify_packet(\"PING:\") == \"heartbeat\"\n\n\ndef test_normal_data_nonempty():\n    assert classify_packet(\"DATA:abc\") == \"data\"\n\n\ndef test_boundary_data_whitespace_payload():\n    assert classify_packet(\"DATA: \") == \"data\"\n\n\ndef test_boundary_no_colon():\n    with pytest.raises(ValueError):\n        classify_packet(\"PING\")\n\n\ndef test_exception_multiple_colons():\n    with pytest.raises(ValueError):\n        classify_packet(\"DATA:a:b\")\n\n\ndef test_exception_ping_with_payload():\n    with pytest.raises(ValueError):\n        classify_packet(\"PING:hello\")\n\n\ndef test_exception_data_empty_payload():\n    with pytest.raises(ValueError):\n        classify_packet(\"DATA:\")\n\n\ndef test_exception_unknown_kind():\n    with pytest.raises(ValueError):\n        classify_packet(\"ACK:x\")\n\n\ndef test_exception_empty_kind():\n    with pytest.raises(ValueError):\n        classify_packet(\":payload\")\n\n\ndef test_exception_lowercase_kind():\n    with pytest.raises(ValueError):\n        classify_packet(\"ping:\")\n\n\ndef test_exception_no_strip():\n    with pytest.raises(ValueError):\n        classify_packet(\"PING :\")\n",
+        "mappings": [
+          {
+            "test_function": "test_normal_ping_empty",
+            "scenario_ids": [
+              "normal-ping-empty"
+            ]
+          },
+          {
+            "test_function": "test_normal_data_nonempty",
+            "scenario_ids": [
+              "normal-data-nonempty"
+            ]
+          },
+          {
+            "test_function": "test_boundary_data_whitespace_payload",
+            "scenario_ids": [
+              "boundary-data-whitespace-payload"
+            ]
+          },
+          {
+            "test_function": "test_boundary_no_colon",
+            "scenario_ids": [
+              "boundary-no-colon"
+            ]
+          },
+          {
+            "test_function": "test_exception_multiple_colons",
+            "scenario_ids": [
+              "exception-multiple-colons"
+            ]
+          },
+          {
+            "test_function": "test_exception_ping_with_payload",
+            "scenario_ids": [
+              "exception-ping-with-payload"
+            ]
+          },
+          {
+            "test_function": "test_exception_data_empty_payload",
+            "scenario_ids": [
+              "exception-data-empty-payload"
+            ]
+          },
+          {
+            "test_function": "test_exception_unknown_kind",
+            "scenario_ids": [
+              "exception-unknown-kind"
+            ]
+          },
+          {
+            "test_function": "test_exception_empty_kind",
+            "scenario_ids": [
+              "exception-empty-kind"
+            ]
+          },
+          {
+            "test_function": "test_exception_lowercase_kind",
+            "scenario_ids": [
+              "exception-lowercase-kind"
+            ]
+          },
+          {
+            "test_function": "test_exception_no_strip",
+            "scenario_ids": [
+              "exception-no-strip"
+            ]
+          }
+        ],
+        "assumptions": [
+          "规格明确说明非 str 输入行为未定义，因此不为其设计任何断言或异常类型。",
+          "规格说明不约束异常消息，故仅断言 ValueError 类型，不断言消息文本。",
+          "函数无外部副作用，不存在共享状态或数据流关系可测；unresolved_calls 仅为 packet.count 与 packet.split 两个 str 内建方法调用，不构成同文件函数关系，故 relationships 为空。"
+        ],
+        "questions": []
+      },
+      "test_path": "rounds\\01\\test_subject.py",
+      "validation_error": null,
+      "execution": {
+        "kind": "passed",
+        "exit_code": 0,
+        "collected": 11,
+        "executed": 11,
+        "passed": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": "...........                                                              [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_normal_ping_empty\r\nPASSED rounds/01/test_subject.py::test_normal_data_nonempty\r\nPASSED rounds/01/test_subject.py::test_boundary_data_whitespace_payload\r\nPASSED rounds/01/test_subject.py::test_boundary_no_colon\r\nPASSED rounds/01/test_subject.py::test_exception_multiple_colons\r\nPASSED rounds/01/test_subject.py::test_exception_ping_with_payload\r\nPASSED rounds/01/test_subject.py::test_exception_data_empty_payload\r\nPASSED rounds/01/test_subject.py::test_exception_unknown_kind\r\nPASSED rounds/01/test_subject.py::test_exception_empty_kind\r\nPASSED rounds/01/test_subject.py::test_exception_lowercase_kind\r\nPASSED rounds/01/test_subject.py::test_exception_no_strip\r\n11 passed in 0.23s\r\n",
+        "stderr": "",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 2.3965437000151724,
+        "failures": []
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\packet\\feedback\\subject.py",
+        "status": "available",
+        "covered_lines": 13,
+        "total_lines": 13,
+        "covered_branches": 10,
+        "total_branches": 10,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null
+      }
+    }
+  ],
+  "best_available_round": 1,
+  "next_action": "finish",
+  "stop_reason": "coverage_target_met",
+  "issues": [],
+  "api_calls": 1,
+  "token_usage": {
+    "prompt_tokens": 5206,
+    "completion_tokens": 1994,
+    "total_tokens": 7200
+  }
+}

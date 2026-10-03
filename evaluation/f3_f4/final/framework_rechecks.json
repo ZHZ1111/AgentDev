@@ -1,0 +1,23 @@
+{
+  "network_calls": 0,
+  "max_retries_per_framework_error": 1,
+  "policy": "Only framework errors; same frozen source/tests, paired correct reference rechecked first; original observations retained",
+  "observations": [
+    {
+      "case_id": "labels",
+      "mode": "baseline",
+      "variant_id": "labels_keep_case",
+      "initial_kind": "internal_error",
+      "reference_recheck_kind": "passed",
+      "rechecked_kind": "assertion_failed"
+    },
+    {
+      "case_id": "mean",
+      "mode": "baseline",
+      "variant_id": "mean_empty_division",
+      "initial_kind": "internal_error",
+      "reference_recheck_kind": "passed",
+      "rechecked_kind": "internal_error"
+    }
+  ]
+}

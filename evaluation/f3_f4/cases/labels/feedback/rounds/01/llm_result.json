@@ -1,0 +1,352 @@
+{
+  "generated": {
+    "plan": {
+      "schema_version": "1.1",
+      "target_functions": [
+        "normalize_labels",
+        "format_labels"
+      ],
+      "oracle_mode": "specification",
+      "entry_functions": [
+        "normalize_labels",
+        "format_labels"
+      ],
+      "relationships": [
+        {
+          "relation_id": "rel-format-normalize",
+          "kind": "direct_call",
+          "involved_functions": [
+            "format_labels",
+            "normalize_labels"
+          ],
+          "evidence": [
+            {
+              "kind": "source",
+              "detail": "format_labels directly calls normalize_labels on the input labels",
+              "line": 14,
+              "call_site_ids": [
+                "call:format_labels:14:21:14:45"
+              ]
+            },
+            {
+              "kind": "specification",
+              "detail": "The specification states format_labels calls the real normalize_labels and joins its result with \", \".",
+              "line": null,
+              "call_site_ids": []
+            }
+          ],
+          "confidence": "confirmed",
+          "unresolved_questions": []
+        }
+      ],
+      "strategy": [
+        {
+          "subject_kind": "function",
+          "function_name": "normalize_labels",
+          "relationship_id": null,
+          "decision": "unit_test",
+          "reason": "Has independently specified strip/lower/drop-empty/keep-duplicates behavior with loop and if branches worth covering directly."
+        },
+        {
+          "subject_kind": "function",
+          "function_name": "format_labels",
+          "relationship_id": null,
+          "decision": "unit_test",
+          "reason": "Public entry with its own specified joining semantics including the empty-result boundary producing \"\"."
+        },
+        {
+          "subject_kind": "relationship",
+          "function_name": null,
+          "relationship_id": "rel-format-normalize",
+          "decision": "collaboration_test",
+          "reason": "Verifying format_labels through the real normalize_labels checks that normalization output actually flows into the join, which focused unit cases alone cannot confirm."
+        }
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "unit-normalize-mixed",
+          "target_function": "normalize_labels",
+          "category": "normal",
+          "inputs": {
+            "args": [
+              [
+                " B ",
+                "",
+                "A",
+                "a"
+              ]
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns [\"b\", \"a\", \"a\"] preserving original order and duplicates while dropping the empty item",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "Specification example states [\" B \", \"\", \"A\", \"a\"] normalizes to [\"b\", \"a\", \"a\"]."
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "normalize_labels"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "unit-normalize-empty",
+          "target_function": "normalize_labels",
+          "category": "boundary",
+          "inputs": {
+            "args": [
+              []
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns [] for an empty input list",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "Empty results are described; with no items the loop body never runs so the result is empty."
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "normalize_labels"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "unit-normalize-all-empty",
+          "target_function": "normalize_labels",
+          "category": "branch",
+          "inputs": {
+            "args": [
+              [
+                "",
+                "   ",
+                "\t"
+              ]
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns [] because every item becomes an empty string and is dropped by the if branch",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "Specification says processed empty strings are removed, exercising the false branch of the if."
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "normalize_labels"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "unit-normalize-cjk",
+          "target_function": "normalize_labels",
+          "category": "normal",
+          "inputs": {
+            "args": [
+              [
+                " 中文ABC "
+              ]
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns [\" 中文abc\".strip()] i.e. [\"中文abc\"] since strip removes surrounding spaces and lower is applied to the rest",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "Specification states Chinese characters keep their str.lower() result; strip then lower applies per item."
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "normalize_labels"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "unit-format-normal",
+          "target_function": "format_labels",
+          "category": "normal",
+          "inputs": {
+            "args": [
+              [
+                " B ",
+                "A",
+                "a"
+              ]
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns \"b, a, a\" joining normalized labels with \", \"",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "Specification example: [\" B \", \"\", \"A\", \"a\"] displays as \"b, a, a\"; the join separator is \", \"."
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "format_labels"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "unit-format-empty",
+          "target_function": "format_labels",
+          "category": "boundary",
+          "inputs": {
+            "args": [
+              []
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns \"\" for an empty input list",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "Specification states the empty result formats to \"\"."
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "format_labels"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "unit-format-all-empty-input",
+          "target_function": "format_labels",
+          "category": "boundary",
+          "inputs": {
+            "args": [
+              [
+                "",
+                "  "
+              ]
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns \"\" because normalization removes all items",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "Specification says empty results format to \"\", and normalization drops empty strings."
+          },
+          "test_kind": "unit",
+          "involved_functions": [
+            "format_labels"
+          ],
+          "relationship_ids": [],
+          "steps": []
+        },
+        {
+          "scenario_id": "collab-format-through-normalize",
+          "target_function": "format_labels",
+          "category": "normal",
+          "inputs": {
+            "args": [
+              [
+                " 中文 ",
+                "X",
+                "x"
+              ]
+            ],
+            "kwargs": {}
+          },
+          "expected_behavior": "returns \"中文, x, x\" showing that real normalize_labels output is what format_labels joins",
+          "expected_basis": {
+            "kind": "specification",
+            "detail": "Specification requires format_labels to call the real normalize_labels and join its result with \", \"."
+          },
+          "test_kind": "collaboration",
+          "involved_functions": [
+            "format_labels",
+            "normalize_labels"
+          ],
+          "relationship_ids": [
+            "rel-format-normalize"
+          ],
+          "steps": []
+        }
+      ]
+    },
+    "code": "from subject import format_labels, normalize_labels\n\n\ndef test_unit_normalize_mixed():\n    result = normalize_labels([\" B \", \"\", \"A\", \"a\"])\n    assert result == [\"b\", \"a\", \"a\"]\n\n\ndef test_unit_normalize_empty():\n    assert normalize_labels([]) == []\n\n\ndef test_unit_normalize_all_empty():\n    assert normalize_labels([\"\", \"   \", \"\\t\"]) == []\n\n\ndef test_unit_normalize_cjk():\n    assert normalize_labels([\" \\u4e2d\\u6587ABC \"]) == [\"\\u4e2d\\u6587abc\"]\n\n\ndef test_unit_format_normal():\n    assert format_labels([\" B \", \"A\", \"a\"]) == \"b, a, a\"\n\n\ndef test_unit_format_empty():\n    assert format_labels([]) == \"\"\n\n\ndef test_unit_format_all_empty_input():\n    assert format_labels([\"\", \"  \"]) == \"\"\n\n\ndef test_collab_format_through_normalize():\n    assert format_labels([\" \\u4e2d\\u6587 \", \"X\", \"x\"]) == \"\\u4e2d\\u6587, x, x\"\n",
+    "mappings": [
+      {
+        "test_function": "test_unit_normalize_mixed",
+        "scenario_ids": [
+          "unit-normalize-mixed"
+        ]
+      },
+      {
+        "test_function": "test_unit_normalize_empty",
+        "scenario_ids": [
+          "unit-normalize-empty"
+        ]
+      },
+      {
+        "test_function": "test_unit_normalize_all_empty",
+        "scenario_ids": [
+          "unit-normalize-all-empty"
+        ]
+      },
+      {
+        "test_function": "test_unit_normalize_cjk",
+        "scenario_ids": [
+          "unit-normalize-cjk"
+        ]
+      },
+      {
+        "test_function": "test_unit_format_normal",
+        "scenario_ids": [
+          "unit-format-normal"
+        ]
+      },
+      {
+        "test_function": "test_unit_format_empty",
+        "scenario_ids": [
+          "unit-format-empty"
+        ]
+      },
+      {
+        "test_function": "test_unit_format_all_empty_input",
+        "scenario_ids": [
+          "unit-format-all-empty-input"
+        ]
+      },
+      {
+        "test_function": "test_collab_format_through_normalize",
+        "scenario_ids": [
+          "collab-format-through-normalize"
+        ]
+      }
+    ],
+    "assumptions": [
+      "Only the documented input domain list[str] of built-in str is tested; out-of-domain inputs (None, non-list, nested lists) are excluded per the specification.",
+      "The specification explicitly excludes out-of-domain exception testing, so no exception scenarios are included.",
+      "str.lower() semantics for CJK characters are used as the oracle for the CJK scenarios.",
+      "normalize_labels does not mutate its input; this is stated in the specification but is not asserted separately to avoid duplicating equivalent behavior checks."
+    ],
+    "questions": []
+  },
+  "provider": "deepseek",
+  "requested_model": "deepseek-flash",
+  "response_model": "deepseek-flash",
+  "attempts": 1,
+  "format_repairs": 0,
+  "latency_seconds": 8.555,
+  "calls": [
+    {
+      "purpose": "generation",
+      "response_id": "618f035b-64ba-4740-ac3d-3bf0c4efe99b",
+      "response_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 5030,
+        "completion_tokens": 2532,
+        "total_tokens": 7562
+      }
+    }
+  ],
+  "total_usage": {
+    "prompt_tokens": 5030,
+    "completion_tokens": 2532,
+    "total_tokens": 7562
+  }
+}

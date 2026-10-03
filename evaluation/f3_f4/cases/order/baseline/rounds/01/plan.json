@@ -1,0 +1,387 @@
+{
+  "schema_version": "1.1",
+  "target_functions": [
+    "validate_quantity",
+    "subtotal",
+    "order_total"
+  ],
+  "oracle_mode": "specification",
+  "entry_functions": [
+    "order_total"
+  ],
+  "relationships": [
+    {
+      "relation_id": "rel-order_total-validate_quantity",
+      "kind": "direct_call",
+      "involved_functions": [
+        "order_total",
+        "validate_quantity"
+      ],
+      "evidence": [
+        {
+          "kind": "source",
+          "detail": "order_total directly calls validate_quantity at line 17",
+          "line": 17,
+          "call_site_ids": [
+            "call:order_total:17:14:17:41"
+          ]
+        }
+      ],
+      "confidence": "confirmed",
+      "unresolved_questions": []
+    },
+    {
+      "relation_id": "rel-order_total-subtotal",
+      "kind": "direct_call",
+      "involved_functions": [
+        "order_total",
+        "subtotal"
+      ],
+      "evidence": [
+        {
+          "kind": "source",
+          "detail": "order_total directly calls subtotal at line 18",
+          "line": 18,
+          "call_site_ids": [
+            "call:order_total:18:11:18:40"
+          ]
+        }
+      ],
+      "confidence": "confirmed",
+      "unresolved_questions": []
+    },
+    {
+      "relation_id": "rel-validated-quantity-flow",
+      "kind": "data_flow",
+      "involved_functions": [
+        "order_total",
+        "validate_quantity",
+        "subtotal"
+      ],
+      "evidence": [
+        {
+          "kind": "source",
+          "detail": "checked = validate_quantity(quantity) then subtotal(unit_price, checked) passes the validated value to subtotal",
+          "line": 18,
+          "call_site_ids": [
+            "call:order_total:17:14:17:41",
+            "call:order_total:18:11:18:40"
+          ]
+        },
+        {
+          "kind": "specification",
+          "detail": "order_total uses validate_quantity's returned quantity to call subtotal",
+          "line": null,
+          "call_site_ids": []
+        }
+      ],
+      "confidence": "confirmed",
+      "unresolved_questions": []
+    }
+  ],
+  "strategy": [
+    {
+      "subject_kind": "function",
+      "function_name": "validate_quantity",
+      "relationship_id": null,
+      "decision": "unit_test",
+      "reason": "validate_quantity has independently specified branches (bool/non-int TypeError, non-positive ValueError, positive return) requiring focused tests"
+    },
+    {
+      "subject_kind": "function",
+      "function_name": "subtotal",
+      "relationship_id": null,
+      "decision": "unit_test",
+      "reason": "subtotal has an independently specified boundary case (zero operand yields 0) and general product behavior"
+    },
+    {
+      "subject_kind": "function",
+      "function_name": "order_total",
+      "relationship_id": null,
+      "decision": "unit_test",
+      "reason": "order_total is the public entry; its own behavior of propagating validate_quantity's exceptions unchanged is specified and testable directly"
+    },
+    {
+      "subject_kind": "relationship",
+      "function_name": null,
+      "relationship_id": "rel-order_total-validate_quantity",
+      "decision": "collaboration_test",
+      "reason": "verifies that order_total's rejection of invalid quantity comes from the real validate_quantity and its exception type is preserved"
+    },
+    {
+      "subject_kind": "relationship",
+      "function_name": null,
+      "relationship_id": "rel-order_total-subtotal",
+      "decision": "collaboration_test",
+      "reason": "verifies that order_total's numeric result is produced through the real subtotal call"
+    },
+    {
+      "subject_kind": "relationship",
+      "function_name": null,
+      "relationship_id": "rel-validated-quantity-flow",
+      "decision": "not_selected",
+      "reason": "the data flow from validate_quantity's return into subtotal is already exercised by the collaboration tests for the two direct calls; a separate scenario would duplicate equivalent behavior"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "validate-quantity-normal",
+      "target_function": "validate_quantity",
+      "category": "normal",
+      "inputs": {
+        "args": [
+          5
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns the original positive int 5",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states validate_quantity returns the positive integer quantity unchanged"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "validate_quantity"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "validate-quantity-nonint-typeerror",
+      "target_function": "validate_quantity",
+      "category": "exception",
+      "inputs": {
+        "args": [
+          2.5
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "raises TypeError",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states non-int input raises TypeError (bool is not a valid quantity)"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "validate_quantity"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "validate-quantity-bool-typeerror",
+      "target_function": "validate_quantity",
+      "category": "exception",
+      "inputs": {
+        "args": [
+          true
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "raises TypeError because bool is not an accepted quantity type",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states only built-in int is accepted and bool is not a valid quantity"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "validate_quantity"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "validate-quantity-nonpositive-valueerror",
+      "target_function": "validate_quantity",
+      "category": "exception",
+      "inputs": {
+        "args": [
+          0
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "raises ValueError",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states int less than or equal to 0 raises ValueError"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "validate_quantity"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "validate-quantity-negative-valueerror",
+      "target_function": "validate_quantity",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          -1
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "raises ValueError",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states int less than or equal to 0 raises ValueError"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "validate_quantity"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "subtotal-positive",
+      "target_function": "subtotal",
+      "category": "normal",
+      "inputs": {
+        "args": [
+          7,
+          3
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 21",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states subtotal returns the product of unit_price and quantity in the valid domain"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "subtotal"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "subtotal-zero-quantity",
+      "target_function": "subtotal",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          7,
+          0
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 0",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states subtotal returns 0 when quantity or unit_price is 0"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "subtotal"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "subtotal-zero-unit-price",
+      "target_function": "subtotal",
+      "category": "boundary",
+      "inputs": {
+        "args": [
+          0,
+          9
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 0",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states subtotal returns 0 when quantity or unit_price is 0"
+      },
+      "test_kind": "unit",
+      "involved_functions": [
+        "subtotal"
+      ],
+      "relationship_ids": [],
+      "steps": []
+    },
+    {
+      "scenario_id": "order-total-normal",
+      "target_function": "order_total",
+      "category": "normal",
+      "inputs": {
+        "args": [
+          4,
+          6
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "returns 24",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states order_total returns the product after validating quantity"
+      },
+      "test_kind": "collaboration",
+      "involved_functions": [
+        "order_total",
+        "validate_quantity",
+        "subtotal"
+      ],
+      "relationship_ids": [
+        "rel-order_total-validate_quantity",
+        "rel-order_total-subtotal"
+      ],
+      "steps": []
+    },
+    {
+      "scenario_id": "order-total-typeerror-propagation",
+      "target_function": "order_total",
+      "category": "exception",
+      "inputs": {
+        "args": [
+          4,
+          2.5
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "raises TypeError propagated unchanged from validate_quantity",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states order_total propagates TypeError from validate_quantity without catching or converting"
+      },
+      "test_kind": "collaboration",
+      "involved_functions": [
+        "order_total",
+        "validate_quantity"
+      ],
+      "relationship_ids": [
+        "rel-order_total-validate_quantity"
+      ],
+      "steps": []
+    },
+    {
+      "scenario_id": "order-total-valueerror-propagation",
+      "target_function": "order_total",
+      "category": "exception",
+      "inputs": {
+        "args": [
+          4,
+          0
+        ],
+        "kwargs": {}
+      },
+      "expected_behavior": "raises ValueError propagated unchanged from validate_quantity",
+      "expected_basis": {
+        "kind": "specification",
+        "detail": "specification states order_total propagates ValueError from validate_quantity without catching or converting"
+      },
+      "test_kind": "collaboration",
+      "involved_functions": [
+        "order_total",
+        "validate_quantity"
+      ],
+      "relationship_ids": [
+        "rel-order_total-validate_quantity"
+      ],
+      "steps": []
+    }
+  ]
+}

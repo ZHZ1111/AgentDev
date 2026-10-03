@@ -1,0 +1,36 @@
+{
+  "kind": "execution_error",
+  "exit_code": 1,
+  "collected": 9,
+  "executed": 9,
+  "passed": 7,
+  "failed": 0,
+  "errors": 2,
+  "skipped": 0,
+  "xfailed": 0,
+  "xpassed": 0,
+  "stdout": "...F..F..                                                                [100%]\r\n================================== FAILURES ===================================\r\n__________________________ test_boundary_empty_list ___________________________\r\nrounds\\01\\test_subject.py:17: in test_boundary_empty_list\r\n    result = safe_mean([])\r\n             ^^^^^^^^^^^^^\r\nsubject.py:5: in safe_mean\r\n    return sum(values) / len(values)\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\r\nE   ZeroDivisionError: division by zero\r\n________________________ test_branch_empty_falsy_taken ________________________\r\nrounds\\01\\test_subject.py:31: in test_branch_empty_falsy_taken\r\n    assert safe_mean([]) == 0.0\r\n           ^^^^^^^^^^^^^\r\nsubject.py:5: in safe_mean\r\n    return sum(values) / len(values)\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\r\nE   ZeroDivisionError: division by zero\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_normal_two_elements\r\nPASSED rounds/01/test_subject.py::test_normal_cancelling_mean\r\nPASSED rounds/01/test_subject.py::test_normal_non_integral_mean\r\nPASSED rounds/01/test_subject.py::test_boundary_single_element\r\nPASSED rounds/01/test_subject.py::test_boundary_max_abs_value\r\nPASSED rounds/01/test_subject.py::test_branch_nonempty_falsy_path_not_taken\r\nPASSED rounds/01/test_subject.py::test_no_mutation_of_input\r\nFAILED rounds/01/test_subject.py::test_boundary_empty_list - ZeroDivisionErro...\r\nFAILED rounds/01/test_subject.py::test_branch_empty_falsy_taken - ZeroDivisio...\r\n2 failed, 7 passed in 0.32s\r\n",
+  "stderr": "rounds/01/test_subject.py::test_boundary_empty_list (call, rounds\\01\\test_subject.py:16)\nrounds\\01\\test_subject.py:17: in test_boundary_empty_list\n    result = safe_mean([])\n             ^^^^^^^^^^^^^\nsubject.py:5: in safe_mean\n    return sum(values) / len(values)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   ZeroDivisionError: division by zero\n\nrounds/01/test_subject.py::test_branch_empty_falsy_taken (call, rounds\\01\\test_subject.py:30)\nrounds\\01\\test_subject.py:31: in test_branch_empty_falsy_taken\n    assert safe_mean([]) == 0.0\n           ^^^^^^^^^^^^^\nsubject.py:5: in safe_mean\n    return sum(values) / len(values)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   ZeroDivisionError: division by zero",
+  "timed_out": false,
+  "stdout_truncated": false,
+  "stderr_truncated": false,
+  "duration_seconds": 2.7431549000320956,
+  "failures": [
+    {
+      "nodeid": "rounds/01/test_subject.py::test_boundary_empty_list",
+      "phase": "call",
+      "exception_type": "ZeroDivisionError",
+      "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\mean\\variants\\feedback\\mean_empty_division\\subject.py",
+      "line": 5,
+      "missing_module": null
+    },
+    {
+      "nodeid": "rounds/01/test_subject.py::test_branch_empty_falsy_taken",
+      "phase": "call",
+      "exception_type": "ZeroDivisionError",
+      "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\mean\\variants\\feedback\\mean_empty_division\\subject.py",
+      "line": 5,
+      "missing_module": null
+    }
+  ]
+}
