@@ -1,0 +1,89 @@
+{
+  "provenance": "handwritten expectations; not computed from the reference implementation",
+  "scenarios": [
+    {
+      "scenario_id": "initials_empty",
+      "function": "initials",
+      "args": [
+        ""
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": "",
+        "python_type": "str"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "initials_whitespace",
+      "function": "initials",
+      "args": [
+        " \t\n"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": "",
+        "python_type": "str"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "initials_words",
+      "function": "initials",
+      "args": [
+        "alice Bob carol"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": "ABC",
+        "python_type": "str"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "initials_unicode",
+      "function": "initials",
+      "args": [
+        "你好 世界"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": "你世",
+        "python_type": "str"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "initials_expansion",
+      "function": "initials",
+      "args": [
+        "ßeta alpha"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": "SSA",
+        "python_type": "str"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "initials_punctuation",
+      "function": "initials",
+      "args": [
+        "_name bob"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": "_B",
+        "python_type": "str"
+      },
+      "test_kind": "unit"
+    }
+  ]
+}

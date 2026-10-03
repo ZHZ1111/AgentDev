@@ -1,0 +1,106 @@
+{
+  "source_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\benchmarks\\f2\\v1\\development\\labels.py",
+  "source_code": "\"\"\"标签规范化与展示参考实现。\"\"\"\n\ndef normalize_labels(labels):\n    \"\"\"依次 strip/lower，删除空项；保留顺序及重复。\"\"\"\n    result = []\n    for label in labels:\n        normalized = label.strip().lower()\n        if normalized:\n            result.append(normalized)\n    return result\n\ndef format_labels(labels):\n    \"\"\"用英文逗号加一个空格拼接真实规范化结果。\"\"\"\n    return \", \".join(normalize_labels(labels))\n\n",
+  "functions": [
+    {
+      "name": "normalize_labels",
+      "signature": "(labels)",
+      "start_line": 3,
+      "end_line": 10,
+      "docstring": "依次 strip/lower，删除空项；保留顺序及重复。"
+    },
+    {
+      "name": "format_labels",
+      "signature": "(labels)",
+      "start_line": 12,
+      "end_line": 14,
+      "docstring": "用英文逗号加一个空格拼接真实规范化结果。"
+    }
+  ],
+  "encoding": "utf-8",
+  "imports": [],
+  "branches": [
+    {
+      "kind": "loop",
+      "line": 6,
+      "source": "for label in labels"
+    },
+    {
+      "kind": "if",
+      "line": 8,
+      "source": "if normalized"
+    }
+  ],
+  "call_sites": [
+    {
+      "call_id": "call:normalize_labels:7:21:7:42",
+      "caller": "normalize_labels",
+      "expression": "label.strip().lower()",
+      "line": 7,
+      "source": "normalized = label.strip().lower()",
+      "argument_expressions": []
+    },
+    {
+      "call_id": "call:normalize_labels:7:21:7:34",
+      "caller": "normalize_labels",
+      "expression": "label.strip()",
+      "line": 7,
+      "source": "normalized = label.strip().lower()",
+      "argument_expressions": []
+    },
+    {
+      "call_id": "call:normalize_labels:9:12:9:37",
+      "caller": "normalize_labels",
+      "expression": "result.append(normalized)",
+      "line": 9,
+      "source": "result.append(normalized)",
+      "argument_expressions": [
+        "normalized"
+      ]
+    },
+    {
+      "call_id": "call:format_labels:14:11:14:46",
+      "caller": "format_labels",
+      "expression": "\", \".join(normalize_labels(labels))",
+      "line": 14,
+      "source": "return \", \".join(normalize_labels(labels))",
+      "argument_expressions": [
+        "normalize_labels(labels)"
+      ]
+    },
+    {
+      "call_id": "call:format_labels:14:21:14:45",
+      "caller": "format_labels",
+      "expression": "normalize_labels(labels)",
+      "line": 14,
+      "source": "return \", \".join(normalize_labels(labels))",
+      "argument_expressions": [
+        "labels"
+      ]
+    }
+  ],
+  "direct_calls": [
+    {
+      "call_site_id": "call:format_labels:14:21:14:45",
+      "caller": "format_labels",
+      "callee": "normalize_labels"
+    }
+  ],
+  "unresolved_calls": [
+    {
+      "call_site_id": "call:normalize_labels:7:21:7:42",
+      "caller": "normalize_labels",
+      "reason": "属性调用可能依赖对象运行时类型，无法静态确认"
+    },
+    {
+      "call_site_id": "call:normalize_labels:7:21:7:34",
+      "caller": "normalize_labels",
+      "reason": "属性调用的根名称来自局部绑定，无法静态确认"
+    },
+    {
+      "call_site_id": "call:normalize_labels:9:12:9:37",
+      "caller": "normalize_labels",
+      "reason": "属性调用的根名称来自局部绑定，无法静态确认"
+    }
+  ]
+}

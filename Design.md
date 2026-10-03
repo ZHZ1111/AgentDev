@@ -854,10 +854,28 @@ F1 复用此前各阶段的关键逻辑测试，并增加 `test_f1_acceptance.py
 
 修订后两项各一轮、一次真实 HTTP 请求完成：计算 6 条测试全通过，目标行 2/2；协作 4 条测试全通过，目标行 4/4；均无分支，分支覆盖为 null。使用 deepseek-flash，成功批次实测 11,311 tokens、各耗时约 12 秒。执行/代码/覆盖来自实际模型响应与本地工具，原文件未改，所有验收检查通过。网络不可达批次失败同样保留，HTTP 尝试不能解释为远端已收到请求，未知用量不估算。精选摘要和复制文件映射为 `evaluation/f1_validation.json`，完整选定产物位于 `evaluation/f1/passed/` 与 `pre_fix/`；仅保留公开数据，不含密钥或认证头。复现与测试映射见 `validation/f1/README.md`。
 
-两项真实验收覆盖正确实现的单轮集成；未宣称真实多轮效果、缺陷检出率或广泛模型可靠性。F2–F4、G 的 CLI/报告展示仍按后续阶段实施。
+两项真实验收覆盖正确实现的单轮集成；未宣称真实多轮效果、缺陷检出率或广泛模型可靠性。F2 评测集见第 18 节，F3/F4、G 的 CLI/报告展示仍按后续阶段实施。
 
 F1 回归：初次全套 439 项以 `-W error` 通过；最终 F1/Prompt 35 项以同参数通过（包括全部 14 项新增 F1 检查），新增多层调用检查后当前共 440 项。`compileall`、`pip check`、`git diff --check` 通过。最终真实运行再次核对候选、状态、摘要、选中代码和终止事件，全部一致，结果保存在 `evaluation/f1/final_audit.json`。
 
-## 18. 后续设计章节
+## 18. 冻结小型评测集（F2）
+
+新增 `benchmarks/f2/v1/`，8 个任务、12 个顶层同步纯函数。四类各 3 个：数字边界（subtotal/clamp_int/score_band）、字符串（normalize_labels/format_labels/initials）、列表（compact_runs/safe_mean/rotate_left）、异常与多分支（validate_quantity/order_total/classify_packet）。开发 4 个任务含 8 函数，留出 4 个单函数任务各占一类。所有案例为新增手写样例，不扩展既有演示案例以迎合当前 Prompt。
+
+同文件订单链是 order_total→validate_quantity/subtotal，明确校验返回值进入计价及异常传播；标签链是 format_labels→normalize_labels，明确去空、规范化、顺序与重复值进入展示。独立对照的 clamp_int/compact_runs 没有确认边和组合规格。标注存于独立 annotations 文件，含确认边的行/表达式、合理入口、关键组合行为的手写场景引用；不会把无法绑定的字符串/列表方法升级为确认边。
+
+源码的相邻公开规格给出输入域、值/异常及副作用约定。oracles 中 69 条手写字面量预期在执行前确定，不由参考实现生成答案；同时核验返回类型、输入不变和需要的新列表。留出集仅在本地校验参考实现和预期，F2 不调用模型、不改 b3-v5；F3 必须先冻结开发集所选设置，再评测留出集，不能依据留出结果调 Prompt。
+
+6 个已知错误版本分别影响 validate_quantity/order_total/normalize_labels/safe_mean/score_band/rotate_left，每份完整源码仅改变一个声明函数。订单入口多传一件数量破坏函数间数据衔接，保留组件单元行为正确；数量 0 错误接受破坏入口异常传播。其他覆盖遗漏大小写转换、遗漏空列表分支、80 分边界和错误旋转方向。每个变体有手写见证与允许的失败异常类型；这不是自动变异测试框架。
+
+`benchmark.py` 定义版本化 manifest、案例、预期和标注契约，验证四类/划分/目标一致性及 38 份文件的 SHA256。`public_input()` 仅返回 SourceInfo 和公开说明，模型上下文不含隐藏预期/标注/错误描述。测试验证三类开发任务的 Prompt 不泄露手写场景/变体 ID。F3 的工具可显式读取评测元数据，生成路径仍只使用源码/规格。
+
+`f2_validation.py` 排他创建 UUID 工作区，先核验每个参考实现的真实 pytest/coverage 与全部手写预期、关系位置，再将字节相同的手写测试交给相应错误版本。只接受指定 witness 的真实 call 失败及已声明异常，不把语法/导入/环境问题作为错误可用证据；末尾重新核对全部文件指纹。原测试/源码/命令/日志/XML/coverage 原始 JSON 与结构化结果分别保存，覆盖只统计各 subject.py，不混入 Agent 文件。该工具不调用控制器或模型，不生成或评价 LLM 测试。
+
+2026-10-03 实测全部通过：8 个参考任务 69 项预期全通过；6 个变体分别产生 2/1/4/1/1/3 个错误见证，其中 mean 为空输入导致的目标内 ZeroDivisionError，其余为断言失败。数据衔接版本组件单元全通过、入口协作见证失败。参考任务目标行全部覆盖，有分支任务也覆盖全部分支；initials 无分支显示不适用。这些覆盖率来自手写参考检查，不能写作 Agent 生成测试覆盖率。精选证据 `evaluation/f2_validation.json` 及 `evaluation/f2/`，完整任务表与复现入口见 `benchmarks/f2/v1/README.md`。F3/F4 的对照、检出实验仍待执行。
+
+F2 新增 23 项自身检查；配合源码与关系回归共 69 项以 `-W error` 通过，最终 F2 专项 23 项再次通过，含错误返回类型、列表别名及输入修改的预期检查。当前测试集共 463 项，未宣称本阶段重跑全套。`compileall`、`pip check`、`git diff --check` 通过；自动验证命令/结果见 `evaluation/f2_tests.json`。
+
+## 19. 后续设计章节
 
 反馈决策与实验结果将随对应阶段补充，均写入本文件。没有实际验证的内容不得填写为已实现或实测结果。

@@ -1,0 +1,12 @@
+........                                                                 [100%]
+=================================== PASSES ====================================
+=========================== short test summary info ===========================
+PASSED rounds/01/test_subject.py::test_score_negative
+PASSED rounds/01/test_subject.py::test_score_zero
+PASSED rounds/01/test_subject.py::test_score_59
+PASSED rounds/01/test_subject.py::test_score_60
+PASSED rounds/01/test_subject.py::test_score_79
+PASSED rounds/01/test_subject.py::test_score_80
+PASSED rounds/01/test_subject.py::test_score_100
+PASSED rounds/01/test_subject.py::test_score_above
+8 passed in 0.30s

@@ -1,0 +1,188 @@
+{
+  "provenance": "handwritten expectations; not computed from the reference implementation",
+  "scenarios": [
+    {
+      "scenario_id": "quantity_one",
+      "function": "validate_quantity",
+      "args": [
+        1
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": 1,
+        "python_type": "int"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "quantity_many",
+      "function": "validate_quantity",
+      "args": [
+        5
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": 5,
+        "python_type": "int"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "quantity_zero",
+      "function": "validate_quantity",
+      "args": [
+        0
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "raises",
+        "exception": "ValueError"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "quantity_negative",
+      "function": "validate_quantity",
+      "args": [
+        -1
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "raises",
+        "exception": "ValueError"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "quantity_bool",
+      "function": "validate_quantity",
+      "args": [
+        true
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "raises",
+        "exception": "TypeError"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "quantity_text",
+      "function": "validate_quantity",
+      "args": [
+        "2"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "raises",
+        "exception": "TypeError"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "subtotal_normal",
+      "function": "subtotal",
+      "args": [
+        12,
+        3
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": 36,
+        "python_type": "int"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "subtotal_zero_price",
+      "function": "subtotal",
+      "args": [
+        0,
+        5
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": 0,
+        "python_type": "int"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "subtotal_zero_quantity",
+      "function": "subtotal",
+      "args": [
+        12,
+        0
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": 0,
+        "python_type": "int"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "order_valid",
+      "function": "order_total",
+      "args": [
+        12,
+        3
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": 36,
+        "python_type": "int"
+      },
+      "test_kind": "collaboration"
+    },
+    {
+      "scenario_id": "order_zero_price",
+      "function": "order_total",
+      "args": [
+        0,
+        3
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": 0,
+        "python_type": "int"
+      },
+      "test_kind": "collaboration"
+    },
+    {
+      "scenario_id": "order_zero",
+      "function": "order_total",
+      "args": [
+        12,
+        0
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "raises",
+        "exception": "ValueError"
+      },
+      "test_kind": "collaboration"
+    },
+    {
+      "scenario_id": "order_bad_type",
+      "function": "order_total",
+      "args": [
+        10,
+        "2"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "raises",
+        "exception": "TypeError"
+      },
+      "test_kind": "collaboration"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="8" time="0.159" timestamp="2026-10-03T10:35:59.353700+08:00" hostname="LAPTOP-EBC70KOR"><testcase classname="rounds.01.test_subject" name="test_rotate_empty" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_rotate_empty_many" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_rotate_single" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_rotate_zero" time="0.001" /><testcase classname="rounds.01.test_subject" name="test_rotate_one" time="0.002"><failure message="assert [3, 1, 2] == [2, 3, 1]&#10;  &#10;  At index 0 diff: 3 != 2&#10;  Use -v to get more diff">rounds\01\test_subject.py:51: in test_rotate_one
+    assert actual == [2, 3, 1]
+E   assert [3, 1, 2] == [2, 3, 1]
+E     
+E     At index 0 diff: 3 != 2
+E     Use -v to get more diff</failure></testcase><testcase classname="rounds.01.test_subject" name="test_rotate_multiple" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_rotate_large" time="0.002"><failure message="assert [3, 1, 2] == [2, 3, 1]&#10;  &#10;  At index 0 diff: 3 != 2&#10;  Use -v to get more diff">rounds\01\test_subject.py:71: in test_rotate_large
+    assert actual == [2, 3, 1]
+E   assert [3, 1, 2] == [2, 3, 1]
+E     
+E     At index 0 diff: 3 != 2
+E     Use -v to get more diff</failure></testcase><testcase classname="rounds.01.test_subject" name="test_rotate_duplicates" time="0.002"><failure message="assert [1, 2, 1] == [2, 1, 1]&#10;  &#10;  At index 0 diff: 1 != 2&#10;  Use -v to get more diff">rounds\01\test_subject.py:81: in test_rotate_duplicates
+    assert actual == [2, 1, 1]
+E   assert [1, 2, 1] == [2, 1, 1]
+E     
+E     At index 0 diff: 1 != 2
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

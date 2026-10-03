@@ -1,0 +1,1866 @@
+{
+  "stage": "F2",
+  "dataset_id": "f2-v1",
+  "split": "all",
+  "tested_at_utc": "2026-10-03T02:35:01.481335+00:00",
+  "python": "3.13.9",
+  "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253",
+  "network_requests": 0,
+  "provenance": "Handwritten fixture/oracle validation with real pytest/coverage; not LLM-generated test evaluation.",
+  "references": [
+    {
+      "case_id": "order",
+      "split": "development",
+      "function_count": 3,
+      "oracle_count": 13,
+      "checks": {
+        "functions_match_annotation": true,
+        "confirmed_edges_and_locations_match": true,
+        "entries_belong_to_source": true,
+        "combined_behavior_references_valid": true,
+        "collaboration_targets_are_entries": true,
+        "independent_control_has_no_edges_or_workflow": true,
+        "variants_reference_real_oracles": true,
+        "reference_all_passed": true,
+        "every_oracle_collected": true,
+        "target_coverage_available": true
+      },
+      "passed": true,
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order",
+      "artifacts": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6",
+      "test_sha256": "a6b607906a53445e8481bf57c434f2065308f8c5ddb8141fd4cae04777380cda",
+      "execution": {
+        "kind": "passed",
+        "exit_code": 0,
+        "collected": 13,
+        "executed": 13,
+        "passed": 13,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": ".............                                                            [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_quantity_one\r\nPASSED rounds/01/test_subject.py::test_quantity_many\r\nPASSED rounds/01/test_subject.py::test_quantity_zero\r\nPASSED rounds/01/test_subject.py::test_quantity_negative\r\nPASSED rounds/01/test_subject.py::test_quantity_bool\r\nPASSED rounds/01/test_subject.py::test_quantity_text\r\nPASSED rounds/01/test_subject.py::test_subtotal_normal\r\nPASSED rounds/01/test_subject.py::test_subtotal_zero_price\r\nPASSED rounds/01/test_subject.py::test_subtotal_zero_quantity\r\nPASSED rounds/01/test_subject.py::test_order_valid\r\nPASSED rounds/01/test_subject.py::test_order_zero_price\r\nPASSED rounds/01/test_subject.py::test_order_zero\r\nPASSED rounds/01/test_subject.py::test_order_bad_type\r\n13 passed in 0.34s\r\n",
+        "stderr": "",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 1.8313021999783814,
+        "failures": [],
+        "runnable": true,
+        "all_passed": true
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\subject.py",
+        "status": "available",
+        "covered_lines": 11,
+        "total_lines": 11,
+        "covered_branches": 4,
+        "total_branches": 4,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null,
+        "line_percent": 100.0,
+        "branch_percent": 100.0,
+        "meets_target": true
+      }
+    },
+    {
+      "case_id": "labels",
+      "split": "development",
+      "function_count": 2,
+      "oracle_count": 7,
+      "checks": {
+        "functions_match_annotation": true,
+        "confirmed_edges_and_locations_match": true,
+        "entries_belong_to_source": true,
+        "combined_behavior_references_valid": true,
+        "collaboration_targets_are_entries": true,
+        "independent_control_has_no_edges_or_workflow": true,
+        "variants_reference_real_oracles": true,
+        "reference_all_passed": true,
+        "every_oracle_collected": true,
+        "target_coverage_available": true
+      },
+      "passed": true,
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels",
+      "artifacts": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5",
+      "test_sha256": "10fc5495f0c825bfabf0767983faa40dd90d89183756ea4a2d3d8f12684cc25f",
+      "execution": {
+        "kind": "passed",
+        "exit_code": 0,
+        "collected": 7,
+        "executed": 7,
+        "passed": 7,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": ".......                                                                  [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_labels_empty\r\nPASSED rounds/01/test_subject.py::test_labels_mixed\r\nPASSED rounds/01/test_subject.py::test_labels_unicode\r\nPASSED rounds/01/test_subject.py::test_labels_whitespace\r\nPASSED rounds/01/test_subject.py::test_formatted_order\r\nPASSED rounds/01/test_subject.py::test_formatted_empty\r\nPASSED rounds/01/test_subject.py::test_formatted_unicode\r\n7 passed in 0.30s\r\n",
+        "stderr": "",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 1.8740860000252724,
+        "failures": [],
+        "runnable": true,
+        "all_passed": true
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\subject.py",
+        "status": "available",
+        "covered_lines": 9,
+        "total_lines": 9,
+        "covered_branches": 4,
+        "total_branches": 4,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null,
+        "line_percent": 100.0,
+        "branch_percent": 100.0,
+        "meets_target": true
+      }
+    },
+    {
+      "case_id": "independent",
+      "split": "development",
+      "function_count": 2,
+      "oracle_count": 11,
+      "checks": {
+        "functions_match_annotation": true,
+        "confirmed_edges_and_locations_match": true,
+        "entries_belong_to_source": true,
+        "combined_behavior_references_valid": true,
+        "collaboration_targets_are_entries": true,
+        "independent_control_has_no_edges_or_workflow": true,
+        "variants_reference_real_oracles": true,
+        "reference_all_passed": true,
+        "every_oracle_collected": true,
+        "target_coverage_available": true
+      },
+      "passed": true,
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent",
+      "artifacts": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5",
+      "test_sha256": "2a0a201418eeaf9919a20aaa87a79076d8444788a03fc5383c8fa95bb7ec62d9",
+      "execution": {
+        "kind": "passed",
+        "exit_code": 0,
+        "collected": 11,
+        "executed": 11,
+        "passed": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": "...........                                                              [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_clamp_below\r\nPASSED rounds/01/test_subject.py::test_clamp_lower\r\nPASSED rounds/01/test_subject.py::test_clamp_inside\r\nPASSED rounds/01/test_subject.py::test_clamp_upper\r\nPASSED rounds/01/test_subject.py::test_clamp_above\r\nPASSED rounds/01/test_subject.py::test_clamp_single\r\nPASSED rounds/01/test_subject.py::test_compact_empty\r\nPASSED rounds/01/test_subject.py::test_compact_single\r\nPASSED rounds/01/test_subject.py::test_compact_adjacent\r\nPASSED rounds/01/test_subject.py::test_compact_nonadjacent\r\nPASSED rounds/01/test_subject.py::test_compact_negative\r\n11 passed in 0.34s\r\n",
+        "stderr": "",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 1.9552370000164956,
+        "failures": [],
+        "runnable": true,
+        "all_passed": true
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\subject.py",
+        "status": "available",
+        "covered_lines": 12,
+        "total_lines": 12,
+        "covered_branches": 8,
+        "total_branches": 8,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null,
+        "line_percent": 100.0,
+        "branch_percent": 100.0,
+        "meets_target": true
+      }
+    },
+    {
+      "case_id": "mean",
+      "split": "development",
+      "function_count": 1,
+      "oracle_count": 5,
+      "checks": {
+        "functions_match_annotation": true,
+        "confirmed_edges_and_locations_match": true,
+        "entries_belong_to_source": true,
+        "combined_behavior_references_valid": true,
+        "collaboration_targets_are_entries": true,
+        "independent_control_has_no_edges_or_workflow": true,
+        "variants_reference_real_oracles": true,
+        "reference_all_passed": true,
+        "every_oracle_collected": true,
+        "target_coverage_available": true
+      },
+      "passed": true,
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean",
+      "artifacts": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv",
+      "test_sha256": "35275dd6a4dc79891c82e209d735fdb738476e89a57b8add6187552c205f8297",
+      "execution": {
+        "kind": "passed",
+        "exit_code": 0,
+        "collected": 5,
+        "executed": 5,
+        "passed": 5,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": ".....                                                                    [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_mean_empty\r\nPASSED rounds/01/test_subject.py::test_mean_zero\r\nPASSED rounds/01/test_subject.py::test_mean_fraction\r\nPASSED rounds/01/test_subject.py::test_mean_signed\r\nPASSED rounds/01/test_subject.py::test_mean_duplicates\r\n5 passed in 0.27s\r\n",
+        "stderr": "",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 1.834539799951017,
+        "failures": [],
+        "runnable": true,
+        "all_passed": true
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\subject.py",
+        "status": "available",
+        "covered_lines": 4,
+        "total_lines": 4,
+        "covered_branches": 2,
+        "total_branches": 2,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null,
+        "line_percent": 100.0,
+        "branch_percent": 100.0,
+        "meets_target": true
+      }
+    },
+    {
+      "case_id": "score",
+      "split": "holdout",
+      "function_count": 1,
+      "oracle_count": 8,
+      "checks": {
+        "functions_match_annotation": true,
+        "confirmed_edges_and_locations_match": true,
+        "entries_belong_to_source": true,
+        "combined_behavior_references_valid": true,
+        "collaboration_targets_are_entries": true,
+        "independent_control_has_no_edges_or_workflow": true,
+        "variants_reference_real_oracles": true,
+        "reference_all_passed": true,
+        "every_oracle_collected": true,
+        "target_coverage_available": true
+      },
+      "passed": true,
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score",
+      "artifacts": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo",
+      "test_sha256": "d503f157f05272efde9929e6676314c6e08c6389580ab99678730fe54754bec0",
+      "execution": {
+        "kind": "passed",
+        "exit_code": 0,
+        "collected": 8,
+        "executed": 8,
+        "passed": 8,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": "........                                                                 [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_score_negative\r\nPASSED rounds/01/test_subject.py::test_score_zero\r\nPASSED rounds/01/test_subject.py::test_score_59\r\nPASSED rounds/01/test_subject.py::test_score_60\r\nPASSED rounds/01/test_subject.py::test_score_79\r\nPASSED rounds/01/test_subject.py::test_score_80\r\nPASSED rounds/01/test_subject.py::test_score_100\r\nPASSED rounds/01/test_subject.py::test_score_above\r\n8 passed in 0.30s\r\n",
+        "stderr": "",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 1.864173100097105,
+        "failures": [],
+        "runnable": true,
+        "all_passed": true
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\subject.py",
+        "status": "available",
+        "covered_lines": 8,
+        "total_lines": 8,
+        "covered_branches": 6,
+        "total_branches": 6,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null,
+        "line_percent": 100.0,
+        "branch_percent": 100.0,
+        "meets_target": true
+      }
+    },
+    {
+      "case_id": "initials",
+      "split": "holdout",
+      "function_count": 1,
+      "oracle_count": 6,
+      "checks": {
+        "functions_match_annotation": true,
+        "confirmed_edges_and_locations_match": true,
+        "entries_belong_to_source": true,
+        "combined_behavior_references_valid": true,
+        "collaboration_targets_are_entries": true,
+        "independent_control_has_no_edges_or_workflow": true,
+        "variants_reference_real_oracles": true,
+        "reference_all_passed": true,
+        "every_oracle_collected": true,
+        "target_coverage_available": true
+      },
+      "passed": true,
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials",
+      "artifacts": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9",
+      "test_sha256": "1146186260e37902a5726ba397f7a2905045ccae4b71c5e2150c623ceda431c8",
+      "execution": {
+        "kind": "passed",
+        "exit_code": 0,
+        "collected": 6,
+        "executed": 6,
+        "passed": 6,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": "......                                                                   [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_initials_empty\r\nPASSED rounds/01/test_subject.py::test_initials_whitespace\r\nPASSED rounds/01/test_subject.py::test_initials_words\r\nPASSED rounds/01/test_subject.py::test_initials_unicode\r\nPASSED rounds/01/test_subject.py::test_initials_expansion\r\nPASSED rounds/01/test_subject.py::test_initials_punctuation\r\n6 passed in 0.32s\r\n",
+        "stderr": "",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 1.932736200047657,
+        "failures": [],
+        "runnable": true,
+        "all_passed": true
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\subject.py",
+        "status": "available",
+        "covered_lines": 2,
+        "total_lines": 2,
+        "covered_branches": 0,
+        "total_branches": 0,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null,
+        "line_percent": 100.0,
+        "branch_percent": null,
+        "meets_target": true
+      }
+    },
+    {
+      "case_id": "rotation",
+      "split": "holdout",
+      "function_count": 1,
+      "oracle_count": 8,
+      "checks": {
+        "functions_match_annotation": true,
+        "confirmed_edges_and_locations_match": true,
+        "entries_belong_to_source": true,
+        "combined_behavior_references_valid": true,
+        "collaboration_targets_are_entries": true,
+        "independent_control_has_no_edges_or_workflow": true,
+        "variants_reference_real_oracles": true,
+        "reference_all_passed": true,
+        "every_oracle_collected": true,
+        "target_coverage_available": true
+      },
+      "passed": true,
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation",
+      "artifacts": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap",
+      "test_sha256": "8bf09f46d91551ecbb16490da24c06216dff50a42f9cfcc6c400f531269820f4",
+      "execution": {
+        "kind": "passed",
+        "exit_code": 0,
+        "collected": 8,
+        "executed": 8,
+        "passed": 8,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": "........                                                                 [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_rotate_empty\r\nPASSED rounds/01/test_subject.py::test_rotate_empty_many\r\nPASSED rounds/01/test_subject.py::test_rotate_single\r\nPASSED rounds/01/test_subject.py::test_rotate_zero\r\nPASSED rounds/01/test_subject.py::test_rotate_one\r\nPASSED rounds/01/test_subject.py::test_rotate_multiple\r\nPASSED rounds/01/test_subject.py::test_rotate_large\r\nPASSED rounds/01/test_subject.py::test_rotate_duplicates\r\n8 passed in 0.32s\r\n",
+        "stderr": "",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 1.8672042000107467,
+        "failures": [],
+        "runnable": true,
+        "all_passed": true
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\subject.py",
+        "status": "available",
+        "covered_lines": 5,
+        "total_lines": 5,
+        "covered_branches": 2,
+        "total_branches": 2,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null,
+        "line_percent": 100.0,
+        "branch_percent": 100.0,
+        "meets_target": true
+      }
+    },
+    {
+      "case_id": "packet",
+      "split": "holdout",
+      "function_count": 1,
+      "oracle_count": 11,
+      "checks": {
+        "functions_match_annotation": true,
+        "confirmed_edges_and_locations_match": true,
+        "entries_belong_to_source": true,
+        "combined_behavior_references_valid": true,
+        "collaboration_targets_are_entries": true,
+        "independent_control_has_no_edges_or_workflow": true,
+        "variants_reference_real_oracles": true,
+        "reference_all_passed": true,
+        "every_oracle_collected": true,
+        "target_coverage_available": true
+      },
+      "passed": true,
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet",
+      "artifacts": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5",
+      "test_sha256": "d439575f9cc3237dde21eaa9244fc1939621866ea689ccf51b76223bb8a4da24",
+      "execution": {
+        "kind": "passed",
+        "exit_code": 0,
+        "collected": 11,
+        "executed": 11,
+        "passed": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": "...........                                                              [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_packet_ping\r\nPASSED rounds/01/test_subject.py::test_packet_data\r\nPASSED rounds/01/test_subject.py::test_packet_unicode\r\nPASSED rounds/01/test_subject.py::test_packet_space\r\nPASSED rounds/01/test_subject.py::test_packet_no_colon\r\nPASSED rounds/01/test_subject.py::test_packet_many_colons\r\nPASSED rounds/01/test_subject.py::test_packet_ping_payload\r\nPASSED rounds/01/test_subject.py::test_packet_empty_data\r\nPASSED rounds/01/test_subject.py::test_packet_unknown\r\nPASSED rounds/01/test_subject.py::test_packet_case\r\nPASSED rounds/01/test_subject.py::test_packet_empty_kind\r\n11 passed in 0.34s\r\n",
+        "stderr": "",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 1.9099685999099165,
+        "failures": [],
+        "runnable": true,
+        "all_passed": true
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\subject.py",
+        "status": "available",
+        "covered_lines": 13,
+        "total_lines": 13,
+        "covered_branches": 10,
+        "total_branches": 10,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null,
+        "line_percent": 100.0,
+        "branch_percent": 100.0,
+        "meets_target": true
+      }
+    }
+  ],
+  "variants": [
+    {
+      "variant_id": "quantity_accepts_zero",
+      "case_id": "order",
+      "affected_function": "validate_quantity",
+      "kind": "boundary",
+      "description": "零数量被错误接受，入口不再传播规格要求的 ValueError。",
+      "witnesses": [
+        "quantity_zero",
+        "order_zero"
+      ],
+      "checks": {
+        "baseline_valid": true,
+        "only_declared_function_changed": true,
+        "same_handwritten_tests": true,
+        "same_collection_count": true,
+        "every_declared_witness_failed_for_known_behavior": true,
+        "not_import_or_environment_failure": true
+      },
+      "passed": true,
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero",
+      "artifacts": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r",
+      "test_sha256": "a6b607906a53445e8481bf57c434f2065308f8c5ddb8141fd4cae04777380cda",
+      "execution": {
+        "kind": "assertion_failed",
+        "exit_code": 1,
+        "collected": 13,
+        "executed": 13,
+        "passed": 11,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": "..F........F.                                                            [100%]\r\n================================== FAILURES ===================================\r\n_____________________________ test_quantity_zero ______________________________\r\nrounds\\01\\test_subject.py:28: in test_quantity_zero\r\n    with pytest.raises(ValueError):\r\n         ^^^^^^^^^^^^^^^^^^^^^^^^^\r\nE   Failed: DID NOT RAISE ValueError\r\n_______________________________ test_order_zero _______________________________\r\nrounds\\01\\test_subject.py:105: in test_order_zero\r\n    with pytest.raises(ValueError):\r\n         ^^^^^^^^^^^^^^^^^^^^^^^^^\r\nE   Failed: DID NOT RAISE ValueError\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_quantity_one\r\nPASSED rounds/01/test_subject.py::test_quantity_many\r\nPASSED rounds/01/test_subject.py::test_quantity_negative\r\nPASSED rounds/01/test_subject.py::test_quantity_bool\r\nPASSED rounds/01/test_subject.py::test_quantity_text\r\nPASSED rounds/01/test_subject.py::test_subtotal_normal\r\nPASSED rounds/01/test_subject.py::test_subtotal_zero_price\r\nPASSED rounds/01/test_subject.py::test_subtotal_zero_quantity\r\nPASSED rounds/01/test_subject.py::test_order_valid\r\nPASSED rounds/01/test_subject.py::test_order_zero_price\r\nPASSED rounds/01/test_subject.py::test_order_bad_type\r\nFAILED rounds/01/test_subject.py::test_quantity_zero - Failed: DID NOT RAISE ...\r\nFAILED rounds/01/test_subject.py::test_order_zero - Failed: DID NOT RAISE Val...\r\n2 failed, 11 passed in 0.40s\r\n",
+        "stderr": "rounds/01/test_subject.py::test_quantity_zero (call, rounds\\01\\test_subject.py:24)\nrounds\\01\\test_subject.py:28: in test_quantity_zero\n    with pytest.raises(ValueError):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE ValueError\n\nrounds/01/test_subject.py::test_order_zero (call, rounds\\01\\test_subject.py:101)\nrounds\\01\\test_subject.py:105: in test_order_zero\n    with pytest.raises(ValueError):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE ValueError",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 1.99267740000505,
+        "failures": [
+          {
+            "nodeid": "rounds/01/test_subject.py::test_quantity_zero",
+            "phase": "call",
+            "exception_type": "Failed",
+            "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\.venv\\Lib\\site-packages\\_pytest\\outcomes.py",
+            "line": 162,
+            "missing_module": null
+          },
+          {
+            "nodeid": "rounds/01/test_subject.py::test_order_zero",
+            "phase": "call",
+            "exception_type": "Failed",
+            "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\.venv\\Lib\\site-packages\\_pytest\\outcomes.py",
+            "line": 162,
+            "missing_module": null
+          }
+        ],
+        "runnable": true,
+        "all_passed": false
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\subject.py",
+        "status": "available",
+        "covered_lines": 11,
+        "total_lines": 11,
+        "covered_branches": 4,
+        "total_branches": 4,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null,
+        "line_percent": 100.0,
+        "branch_percent": 100.0,
+        "meets_target": true
+      }
+    },
+    {
+      "variant_id": "order_quantity_increment",
+      "case_id": "order",
+      "affected_function": "order_total",
+      "kind": "data_flow",
+      "description": "入口向计价传递多一件的数量；两个组件的单元行为保持正确，协作结果错误。",
+      "witnesses": [
+        "order_valid"
+      ],
+      "checks": {
+        "baseline_valid": true,
+        "only_declared_function_changed": true,
+        "same_handwritten_tests": true,
+        "same_collection_count": true,
+        "every_declared_witness_failed_for_known_behavior": true,
+        "not_import_or_environment_failure": true,
+        "component_units_pass_while_collaboration_fails": true
+      },
+      "passed": true,
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment",
+      "artifacts": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp",
+      "test_sha256": "a6b607906a53445e8481bf57c434f2065308f8c5ddb8141fd4cae04777380cda",
+      "execution": {
+        "kind": "assertion_failed",
+        "exit_code": 1,
+        "collected": 13,
+        "executed": 13,
+        "passed": 12,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": ".........F...                                                            [100%]\r\n================================== FAILURES ===================================\r\n______________________________ test_order_valid _______________________________\r\nrounds\\01\\test_subject.py:88: in test_order_valid\r\n    assert actual == 36\r\nE   assert 48 == 36\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_quantity_one\r\nPASSED rounds/01/test_subject.py::test_quantity_many\r\nPASSED rounds/01/test_subject.py::test_quantity_zero\r\nPASSED rounds/01/test_subject.py::test_quantity_negative\r\nPASSED rounds/01/test_subject.py::test_quantity_bool\r\nPASSED rounds/01/test_subject.py::test_quantity_text\r\nPASSED rounds/01/test_subject.py::test_subtotal_normal\r\nPASSED rounds/01/test_subject.py::test_subtotal_zero_price\r\nPASSED rounds/01/test_subject.py::test_subtotal_zero_quantity\r\nPASSED rounds/01/test_subject.py::test_order_zero_price\r\nPASSED rounds/01/test_subject.py::test_order_zero\r\nPASSED rounds/01/test_subject.py::test_order_bad_type\r\nFAILED rounds/01/test_subject.py::test_order_valid - assert 48 == 36\r\n1 failed, 12 passed in 0.42s\r\n",
+        "stderr": "rounds/01/test_subject.py::test_order_valid (call, rounds\\01\\test_subject.py:83)\nrounds\\01\\test_subject.py:88: in test_order_valid\n    assert actual == 36\nE   assert 48 == 36",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 1.9980845999671146,
+        "failures": [
+          {
+            "nodeid": "rounds/01/test_subject.py::test_order_valid",
+            "phase": "call",
+            "exception_type": "AssertionError",
+            "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\test_subject.py",
+            "line": 88,
+            "missing_module": null
+          }
+        ],
+        "runnable": true,
+        "all_passed": false
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\subject.py",
+        "status": "available",
+        "covered_lines": 11,
+        "total_lines": 11,
+        "covered_branches": 4,
+        "total_branches": 4,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null,
+        "line_percent": 100.0,
+        "branch_percent": 100.0,
+        "meets_target": true
+      }
+    },
+    {
+      "variant_id": "labels_keep_case",
+      "case_id": "labels",
+      "affected_function": "normalize_labels",
+      "kind": "normalization",
+      "description": "遗漏 lower，规范化及展示错误保留大写。",
+      "witnesses": [
+        "labels_mixed",
+        "formatted_order"
+      ],
+      "checks": {
+        "baseline_valid": true,
+        "only_declared_function_changed": true,
+        "same_handwritten_tests": true,
+        "same_collection_count": true,
+        "every_declared_witness_failed_for_known_behavior": true,
+        "not_import_or_environment_failure": true
+      },
+      "passed": true,
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case",
+      "artifacts": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m",
+      "test_sha256": "10fc5495f0c825bfabf0767983faa40dd90d89183756ea4a2d3d8f12684cc25f",
+      "execution": {
+        "kind": "assertion_failed",
+        "exit_code": 1,
+        "collected": 7,
+        "executed": 7,
+        "passed": 3,
+        "failed": 4,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": ".FF.F.F                                                                  [100%]\r\n================================== FAILURES ===================================\r\n______________________________ test_labels_mixed ______________________________\r\nrounds\\01\\test_subject.py:21: in test_labels_mixed\r\n    assert actual == ['a', 'b']\r\nE   AssertionError: assert ['A', 'b'] == ['a', 'b']\r\nE     \r\nE     At index 0 diff: 'A' != 'a'\r\nE     Use -v to get more diff\r\n_____________________________ test_labels_unicode _____________________________\r\nrounds\\01\\test_subject.py:31: in test_labels_unicode\r\n    assert actual == ['中文', 'a', 'a']\r\nE   AssertionError: assert ['中文', 'A', 'a'] == ['中文', 'a', 'a']\r\nE     \r\nE     At index 1 diff: 'A' != 'a'\r\nE     Use -v to get more diff\r\n____________________________ test_formatted_order _____________________________\r\nrounds\\01\\test_subject.py:51: in test_formatted_order\r\n    assert actual == 'b, a, a'\r\nE   AssertionError: assert 'B, A, a' == 'b, a, a'\r\nE     \r\nE     - b, a, a\r\nE     + B, A, a\r\n___________________________ test_formatted_unicode ____________________________\r\nrounds\\01\\test_subject.py:69: in test_formatted_unicode\r\n    assert actual == '中文, x'\r\nE   AssertionError: assert '中文, X' == '中文, x'\r\nE     \r\nE     - 中文, x\r\nE     ?     ^\r\nE     + 中文, X\r\nE     ?     ^\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_labels_empty\r\nPASSED rounds/01/test_subject.py::test_labels_whitespace\r\nPASSED rounds/01/test_subject.py::test_formatted_empty\r\nFAILED rounds/01/test_subject.py::test_labels_mixed - AssertionError: assert ...\r\nFAILED rounds/01/test_subject.py::test_labels_unicode - AssertionError: asser...\r\nFAILED rounds/01/test_subject.py::test_formatted_order - AssertionError: asse...\r\nFAILED rounds/01/test_subject.py::test_formatted_unicode - AssertionError: as...\r\n4 failed, 3 passed in 0.38s\r\n",
+        "stderr": "rounds/01/test_subject.py::test_labels_mixed (call, rounds\\01\\test_subject.py:16)\nrounds\\01\\test_subject.py:21: in test_labels_mixed\n    assert actual == ['a', 'b']\nE   AssertionError: assert ['A', 'b'] == ['a', 'b']\nE     \nE     At index 0 diff: 'A' != 'a'\nE     Use -v to get more diff\n\nrounds/01/test_subject.py::test_labels_unicode (call, rounds\\01\\test_subject.py:26)\nrounds\\01\\test_subject.py:31: in test_labels_unicode\n    assert actual == ['中文', 'a', 'a']\nE   AssertionError: assert ['中文', 'A', 'a'] == ['中文', 'a', 'a']\nE     \nE     At index 1 diff: 'A' != 'a'\nE     Use -v to get more diff\n\nrounds/01/test_subject.py::test_formatted_order (call, rounds\\01\\test_subject.py:46)\nrounds\\01\\test_subject.py:51: in test_formatted_order\n    assert actual == 'b, a, a'\nE   AssertionError: assert 'B, A, a' == 'b, a, a'\nE     \nE     - b, a, a\nE     + B, A, a\n\nrounds/01/test_subject.py::test_formatted_unicode (call, rounds\\01\\test_subject.py:64)\nrounds\\01\\test_subject.py:69: in test_formatted_unicode\n    assert actual == '中文, x'\nE   AssertionError: assert '中文, X' == '中文, x'\nE     \nE     - 中文, x\nE     ?     ^\nE     + 中文, X\nE     ?     ^",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 1.9207387999631464,
+        "failures": [
+          {
+            "nodeid": "rounds/01/test_subject.py::test_labels_mixed",
+            "phase": "call",
+            "exception_type": "AssertionError",
+            "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\test_subject.py",
+            "line": 21,
+            "missing_module": null
+          },
+          {
+            "nodeid": "rounds/01/test_subject.py::test_labels_unicode",
+            "phase": "call",
+            "exception_type": "AssertionError",
+            "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\test_subject.py",
+            "line": 31,
+            "missing_module": null
+          },
+          {
+            "nodeid": "rounds/01/test_subject.py::test_formatted_order",
+            "phase": "call",
+            "exception_type": "AssertionError",
+            "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\test_subject.py",
+            "line": 51,
+            "missing_module": null
+          },
+          {
+            "nodeid": "rounds/01/test_subject.py::test_formatted_unicode",
+            "phase": "call",
+            "exception_type": "AssertionError",
+            "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\test_subject.py",
+            "line": 69,
+            "missing_module": null
+          }
+        ],
+        "runnable": true,
+        "all_passed": false
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\subject.py",
+        "status": "available",
+        "covered_lines": 9,
+        "total_lines": 9,
+        "covered_branches": 4,
+        "total_branches": 4,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null,
+        "line_percent": 100.0,
+        "branch_percent": 100.0,
+        "meets_target": true
+      }
+    },
+    {
+      "variant_id": "mean_empty_division",
+      "case_id": "mean",
+      "affected_function": "safe_mean",
+      "kind": "empty_branch",
+      "description": "遗漏空列表分支，空输入产生 ZeroDivisionError。",
+      "witnesses": [
+        "mean_empty"
+      ],
+      "checks": {
+        "baseline_valid": true,
+        "only_declared_function_changed": true,
+        "same_handwritten_tests": true,
+        "same_collection_count": true,
+        "every_declared_witness_failed_for_known_behavior": true,
+        "not_import_or_environment_failure": true
+      },
+      "passed": true,
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division",
+      "artifacts": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt",
+      "test_sha256": "35275dd6a4dc79891c82e209d735fdb738476e89a57b8add6187552c205f8297",
+      "execution": {
+        "kind": "execution_error",
+        "exit_code": 1,
+        "collected": 5,
+        "executed": 5,
+        "passed": 4,
+        "failed": 0,
+        "errors": 1,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": "F....                                                                    [100%]\r\n================================== FAILURES ===================================\r\n_______________________________ test_mean_empty _______________________________\r\nrounds\\01\\test_subject.py:10: in test_mean_empty\r\n    actual = safe_mean(*args, **kwargs)\r\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\r\nsubject.py:5: in safe_mean\r\n    return sum(values) / len(values)\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\r\nE   ZeroDivisionError: division by zero\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_mean_zero\r\nPASSED rounds/01/test_subject.py::test_mean_fraction\r\nPASSED rounds/01/test_subject.py::test_mean_signed\r\nPASSED rounds/01/test_subject.py::test_mean_duplicates\r\nFAILED rounds/01/test_subject.py::test_mean_empty - ZeroDivisionError: divisi...\r\n1 failed, 4 passed in 0.35s\r\n",
+        "stderr": "rounds/01/test_subject.py::test_mean_empty (call, rounds\\01\\test_subject.py:6)\nrounds\\01\\test_subject.py:10: in test_mean_empty\n    actual = safe_mean(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\nsubject.py:5: in safe_mean\n    return sum(values) / len(values)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   ZeroDivisionError: division by zero",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 1.9400852000107989,
+        "failures": [
+          {
+            "nodeid": "rounds/01/test_subject.py::test_mean_empty",
+            "phase": "call",
+            "exception_type": "ZeroDivisionError",
+            "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\subject.py",
+            "line": 5,
+            "missing_module": null
+          }
+        ],
+        "runnable": false,
+        "all_passed": false
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\subject.py",
+        "status": "available",
+        "covered_lines": 2,
+        "total_lines": 2,
+        "covered_branches": 0,
+        "total_branches": 0,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null,
+        "line_percent": 100.0,
+        "branch_percent": null,
+        "meets_target": true
+      }
+    },
+    {
+      "variant_id": "score_excludes_80",
+      "case_id": "score",
+      "affected_function": "score_band",
+      "kind": "boundary",
+      "description": "80 分错误进入 middle 档。",
+      "witnesses": [
+        "score_80"
+      ],
+      "checks": {
+        "baseline_valid": true,
+        "only_declared_function_changed": true,
+        "same_handwritten_tests": true,
+        "same_collection_count": true,
+        "every_declared_witness_failed_for_known_behavior": true,
+        "not_import_or_environment_failure": true
+      },
+      "passed": true,
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80",
+      "artifacts": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm",
+      "test_sha256": "d503f157f05272efde9929e6676314c6e08c6389580ab99678730fe54754bec0",
+      "execution": {
+        "kind": "assertion_failed",
+        "exit_code": 1,
+        "collected": 8,
+        "executed": 8,
+        "passed": 7,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": ".....F..                                                                 [100%]\r\n================================== FAILURES ===================================\r\n________________________________ test_score_80 ________________________________\r\nrounds\\01\\test_subject.py:55: in test_score_80\r\n    assert actual == 'high'\r\nE   AssertionError: assert 'middle' == 'high'\r\nE     \r\nE     - high\r\nE     + middle\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_score_negative\r\nPASSED rounds/01/test_subject.py::test_score_zero\r\nPASSED rounds/01/test_subject.py::test_score_59\r\nPASSED rounds/01/test_subject.py::test_score_60\r\nPASSED rounds/01/test_subject.py::test_score_79\r\nPASSED rounds/01/test_subject.py::test_score_100\r\nPASSED rounds/01/test_subject.py::test_score_above\r\nFAILED rounds/01/test_subject.py::test_score_80 - AssertionError: assert 'mid...\r\n1 failed, 7 passed in 0.36s\r\n",
+        "stderr": "rounds/01/test_subject.py::test_score_80 (call, rounds\\01\\test_subject.py:50)\nrounds\\01\\test_subject.py:55: in test_score_80\n    assert actual == 'high'\nE   AssertionError: assert 'middle' == 'high'\nE     \nE     - high\nE     + middle",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 1.9827059999806806,
+        "failures": [
+          {
+            "nodeid": "rounds/01/test_subject.py::test_score_80",
+            "phase": "call",
+            "exception_type": "AssertionError",
+            "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\test_subject.py",
+            "line": 55,
+            "missing_module": null
+          }
+        ],
+        "runnable": true,
+        "all_passed": false
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\subject.py",
+        "status": "available",
+        "covered_lines": 8,
+        "total_lines": 8,
+        "covered_branches": 6,
+        "total_branches": 6,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null,
+        "line_percent": 100.0,
+        "branch_percent": 100.0,
+        "meets_target": true
+      }
+    },
+    {
+      "variant_id": "rotation_wrong_direction",
+      "case_id": "rotation",
+      "affected_function": "rotate_left",
+      "kind": "data_flow",
+      "description": "左旋误写为右旋，长度大于二时可观察。",
+      "witnesses": [
+        "rotate_one",
+        "rotate_large",
+        "rotate_duplicates"
+      ],
+      "checks": {
+        "baseline_valid": true,
+        "only_declared_function_changed": true,
+        "same_handwritten_tests": true,
+        "same_collection_count": true,
+        "every_declared_witness_failed_for_known_behavior": true,
+        "not_import_or_environment_failure": true
+      },
+      "passed": true,
+      "workspace": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction",
+      "artifacts": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1",
+      "test_sha256": "8bf09f46d91551ecbb16490da24c06216dff50a42f9cfcc6c400f531269820f4",
+      "execution": {
+        "kind": "assertion_failed",
+        "exit_code": 1,
+        "collected": 8,
+        "executed": 8,
+        "passed": 5,
+        "failed": 3,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "stdout": "....F.FF                                                                 [100%]\r\n================================== FAILURES ===================================\r\n_______________________________ test_rotate_one _______________________________\r\nrounds\\01\\test_subject.py:51: in test_rotate_one\r\n    assert actual == [2, 3, 1]\r\nE   assert [3, 1, 2] == [2, 3, 1]\r\nE     \r\nE     At index 0 diff: 3 != 2\r\nE     Use -v to get more diff\r\n______________________________ test_rotate_large ______________________________\r\nrounds\\01\\test_subject.py:71: in test_rotate_large\r\n    assert actual == [2, 3, 1]\r\nE   assert [3, 1, 2] == [2, 3, 1]\r\nE     \r\nE     At index 0 diff: 3 != 2\r\nE     Use -v to get more diff\r\n___________________________ test_rotate_duplicates ____________________________\r\nrounds\\01\\test_subject.py:81: in test_rotate_duplicates\r\n    assert actual == [2, 1, 1]\r\nE   assert [1, 2, 1] == [2, 1, 1]\r\nE     \r\nE     At index 0 diff: 1 != 2\r\nE     Use -v to get more diff\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_rotate_empty\r\nPASSED rounds/01/test_subject.py::test_rotate_empty_many\r\nPASSED rounds/01/test_subject.py::test_rotate_single\r\nPASSED rounds/01/test_subject.py::test_rotate_zero\r\nPASSED rounds/01/test_subject.py::test_rotate_multiple\r\nFAILED rounds/01/test_subject.py::test_rotate_one - assert [3, 1, 2] == [2, 3...\r\nFAILED rounds/01/test_subject.py::test_rotate_large - assert [3, 1, 2] == [2,...\r\nFAILED rounds/01/test_subject.py::test_rotate_duplicates - assert [1, 2, 1] =...\r\n3 failed, 5 passed in 0.38s\r\n",
+        "stderr": "rounds/01/test_subject.py::test_rotate_one (call, rounds\\01\\test_subject.py:46)\nrounds\\01\\test_subject.py:51: in test_rotate_one\n    assert actual == [2, 3, 1]\nE   assert [3, 1, 2] == [2, 3, 1]\nE     \nE     At index 0 diff: 3 != 2\nE     Use -v to get more diff\n\nrounds/01/test_subject.py::test_rotate_large (call, rounds\\01\\test_subject.py:66)\nrounds\\01\\test_subject.py:71: in test_rotate_large\n    assert actual == [2, 3, 1]\nE   assert [3, 1, 2] == [2, 3, 1]\nE     \nE     At index 0 diff: 3 != 2\nE     Use -v to get more diff\n\nrounds/01/test_subject.py::test_rotate_duplicates (call, rounds\\01\\test_subject.py:76)\nrounds\\01\\test_subject.py:81: in test_rotate_duplicates\n    assert actual == [2, 1, 1]\nE   assert [1, 2, 1] == [2, 1, 1]\nE     \nE     At index 0 diff: 1 != 2\nE     Use -v to get more diff",
+        "timed_out": false,
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "duration_seconds": 1.9692429000278935,
+        "failures": [
+          {
+            "nodeid": "rounds/01/test_subject.py::test_rotate_one",
+            "phase": "call",
+            "exception_type": "AssertionError",
+            "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\test_subject.py",
+            "line": 51,
+            "missing_module": null
+          },
+          {
+            "nodeid": "rounds/01/test_subject.py::test_rotate_large",
+            "phase": "call",
+            "exception_type": "AssertionError",
+            "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\test_subject.py",
+            "line": 71,
+            "missing_module": null
+          },
+          {
+            "nodeid": "rounds/01/test_subject.py::test_rotate_duplicates",
+            "phase": "call",
+            "exception_type": "AssertionError",
+            "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\test_subject.py",
+            "line": 81,
+            "missing_module": null
+          }
+        ],
+        "runnable": true,
+        "all_passed": false
+      },
+      "coverage": {
+        "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\subject.py",
+        "status": "available",
+        "covered_lines": 5,
+        "total_lines": 5,
+        "covered_branches": 2,
+        "total_branches": 2,
+        "missing_lines": [],
+        "missing_branches": [],
+        "error": null,
+        "line_percent": 100.0,
+        "branch_percent": 100.0,
+        "meets_target": true
+      }
+    }
+  ],
+  "fixtures_unchanged": true,
+  "status": "passed",
+  "counts": {
+    "tasks": 8,
+    "functions": 12,
+    "handwritten_oracles": 69,
+    "known_variants": 6
+  },
+  "saved_evidence": "evaluation/f2",
+  "artifact_manifest": [
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\manifest.json",
+      "saved": "evaluation\\f2\\manifest.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\.coveragerc",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\coverage.json",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\coverage.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\coverage_export.json",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\coverage_result.json",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\coverage_source_hints.json",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\execution.json",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\execution.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\pytest.ini",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\pytest.xml",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\pytest_result.json",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\run_result.json",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\run_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\stderr.txt",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\stdout.txt",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\executions\\run-_gpikod5\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f2\\references\\independent\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\source_analysis.json",
+      "saved": "evaluation\\f2\\references\\independent\\source_analysis.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\independent\\subject.py",
+      "saved": "evaluation\\f2\\references\\independent\\subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\.coveragerc",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\coverage.json",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\coverage.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\coverage_export.json",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\coverage_result.json",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\coverage_source_hints.json",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\execution.json",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\execution.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\pytest.ini",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\pytest.xml",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\pytest_result.json",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\run_result.json",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\run_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\stderr.txt",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\stdout.txt",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\executions\\run-sh_0til9\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f2\\references\\initials\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\source_analysis.json",
+      "saved": "evaluation\\f2\\references\\initials\\source_analysis.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\initials\\subject.py",
+      "saved": "evaluation\\f2\\references\\initials\\subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\.coveragerc",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\coverage.json",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\coverage.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\coverage_export.json",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\coverage_result.json",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\coverage_source_hints.json",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\execution.json",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\execution.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\pytest.ini",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\pytest.xml",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\pytest_result.json",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\run_result.json",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\run_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\stderr.txt",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\stdout.txt",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\executions\\run-3lt7etn5\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f2\\references\\labels\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\source_analysis.json",
+      "saved": "evaluation\\f2\\references\\labels\\source_analysis.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\labels\\subject.py",
+      "saved": "evaluation\\f2\\references\\labels\\subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\.coveragerc",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\coverage.json",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\coverage.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\coverage_export.json",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\coverage_result.json",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\coverage_source_hints.json",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\execution.json",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\execution.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\pytest.ini",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\pytest.xml",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\pytest_result.json",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\run_result.json",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\run_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\stderr.txt",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\stdout.txt",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\executions\\run-t66v3dsv\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f2\\references\\mean\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\source_analysis.json",
+      "saved": "evaluation\\f2\\references\\mean\\source_analysis.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\mean\\subject.py",
+      "saved": "evaluation\\f2\\references\\mean\\subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\.coveragerc",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\coverage.json",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\coverage.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\coverage_export.json",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\coverage_result.json",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\coverage_source_hints.json",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\execution.json",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\execution.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\pytest.ini",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\pytest.xml",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\pytest_result.json",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\run_result.json",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\run_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\stderr.txt",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\stdout.txt",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\executions\\run-zpnirtg6\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f2\\references\\order\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\source_analysis.json",
+      "saved": "evaluation\\f2\\references\\order\\source_analysis.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\order\\subject.py",
+      "saved": "evaluation\\f2\\references\\order\\subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\.coveragerc",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\coverage.json",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\coverage.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\coverage_export.json",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\coverage_result.json",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\coverage_source_hints.json",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\execution.json",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\execution.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\pytest.ini",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\pytest.xml",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\pytest_result.json",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\run_result.json",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\run_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\stderr.txt",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\stdout.txt",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\executions\\run-2xyfj4p5\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f2\\references\\packet\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\source_analysis.json",
+      "saved": "evaluation\\f2\\references\\packet\\source_analysis.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\packet\\subject.py",
+      "saved": "evaluation\\f2\\references\\packet\\subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\.coveragerc",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\coverage.json",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\coverage.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\coverage_export.json",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\coverage_result.json",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\coverage_source_hints.json",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\execution.json",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\execution.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\pytest.ini",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\pytest.xml",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\pytest_result.json",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\run_result.json",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\run_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\stderr.txt",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\stdout.txt",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\executions\\run-fnn2qwap\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f2\\references\\rotation\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\source_analysis.json",
+      "saved": "evaluation\\f2\\references\\rotation\\source_analysis.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\rotation\\subject.py",
+      "saved": "evaluation\\f2\\references\\rotation\\subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\.coveragerc",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\coverage.json",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\coverage.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\coverage_export.json",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\coverage_result.json",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\coverage_source_hints.json",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\execution.json",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\execution.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\pytest.ini",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\pytest.xml",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\pytest_result.json",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\run_result.json",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\run_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\stderr.txt",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\stdout.txt",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\executions\\run-dweobnlo\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f2\\references\\score\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\source_analysis.json",
+      "saved": "evaluation\\f2\\references\\score\\source_analysis.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\references\\score\\subject.py",
+      "saved": "evaluation\\f2\\references\\score\\subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\validation.json",
+      "saved": "evaluation\\f2\\validation.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\.coveragerc",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\coverage.json",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\coverage.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\coverage_export.json",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\coverage_result.json",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\coverage_source_hints.json",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\execution.json",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\execution.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\pytest.ini",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\pytest.xml",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\pytest_result.json",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\run_result.json",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\run_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\stderr.txt",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\stdout.txt",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\executions\\run-v7vpx52m\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\labels_keep_case\\subject.py",
+      "saved": "evaluation\\f2\\variants\\labels_keep_case\\subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\.coveragerc",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\coverage.json",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\coverage.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\coverage_export.json",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\coverage_result.json",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\coverage_source_hints.json",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\execution.json",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\execution.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\pytest.ini",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\pytest.xml",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\pytest_result.json",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\run_result.json",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\run_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\stderr.txt",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\stdout.txt",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\executions\\run-7easqjqt\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\mean_empty_division\\subject.py",
+      "saved": "evaluation\\f2\\variants\\mean_empty_division\\subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\.coveragerc",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\coverage.json",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\coverage.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\coverage_export.json",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\coverage_result.json",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\coverage_source_hints.json",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\execution.json",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\execution.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\pytest.ini",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\pytest.xml",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\pytest_result.json",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\run_result.json",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\run_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\stderr.txt",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\stdout.txt",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\executions\\run-55g440zp\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\order_quantity_increment\\subject.py",
+      "saved": "evaluation\\f2\\variants\\order_quantity_increment\\subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\.coveragerc",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\coverage.json",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\coverage.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\coverage_export.json",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\coverage_result.json",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\coverage_source_hints.json",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\execution.json",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\execution.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\pytest.ini",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\pytest.xml",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\pytest_result.json",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\run_result.json",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\run_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\stderr.txt",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\stdout.txt",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\executions\\run-6pd6hv7r\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\quantity_accepts_zero\\subject.py",
+      "saved": "evaluation\\f2\\variants\\quantity_accepts_zero\\subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\.coveragerc",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\coverage.json",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\coverage.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\coverage_export.json",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\coverage_result.json",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\coverage_source_hints.json",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\execution.json",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\execution.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\pytest.ini",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\pytest.xml",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\pytest_result.json",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\run_result.json",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\run_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\stderr.txt",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\stdout.txt",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\executions\\run-sog5jka1\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\rotation_wrong_direction\\subject.py",
+      "saved": "evaluation\\f2\\variants\\rotation_wrong_direction\\subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\.coveragerc",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\.coveragerc"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\coverage.json",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\coverage.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\coverage_export.json",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\coverage_export.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\coverage_export.stderr.txt",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\coverage_export.stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\coverage_export.stdout.txt",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\coverage_export.stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\coverage_result.json",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\coverage_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\coverage_source_hints.json",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\coverage_source_hints.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\execution.json",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\execution.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\pytest.ini",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\pytest.ini"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\pytest.xml",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\pytest.xml"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\pytest_result.json",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\pytest_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\run_result.json",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\run_result.json"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\stderr.txt",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\stderr.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\stdout.txt",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\stdout.txt"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\test_subject.py",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\rounds\\01\\test_subject.py"
+    },
+    {
+      "source": "outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\subject.py",
+      "saved": "evaluation\\f2\\variants\\score_excludes_80\\subject.py"
+    }
+  ]
+}

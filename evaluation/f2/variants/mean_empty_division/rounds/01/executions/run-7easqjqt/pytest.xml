@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="5" time="0.114" timestamp="2026-10-03T10:35:50.808758+08:00" hostname="LAPTOP-EBC70KOR"><testcase classname="rounds.01.test_subject" name="test_mean_empty" time="0.002"><failure message="ZeroDivisionError: division by zero">rounds\01\test_subject.py:10: in test_mean_empty
+    actual = safe_mean(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+subject.py:5: in safe_mean
+    return sum(values) / len(values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ZeroDivisionError: division by zero</failure></testcase><testcase classname="rounds.01.test_subject" name="test_mean_zero" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_mean_fraction" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_mean_signed" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_mean_duplicates" time="0.002" /></testsuite></testsuites>

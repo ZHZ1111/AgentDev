@@ -1,0 +1,137 @@
+{
+  "source_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\benchmarks\\f2\\v1\\holdout\\packet.py",
+  "source_code": "\"\"\"留出集：多分支报文分类参考实现。\"\"\"\n\ndef classify_packet(packet):\n    \"\"\"仅支持 PING: 或 DATA:非空载荷，其他格式抛 ValueError。\"\"\"\n    if packet.count(\":\") != 1:\n        raise ValueError(\"format\")\n    kind, payload = packet.split(\":\")\n    if kind == \"PING\":\n        if payload:\n            raise ValueError(\"payload\")\n        return \"heartbeat\"\n    if kind == \"DATA\":\n        if not payload:\n            raise ValueError(\"payload\")\n        return \"data\"\n    raise ValueError(\"kind\")\n\n",
+  "functions": [
+    {
+      "name": "classify_packet",
+      "signature": "(packet)",
+      "start_line": 3,
+      "end_line": 16,
+      "docstring": "仅支持 PING: 或 DATA:非空载荷，其他格式抛 ValueError。"
+    }
+  ],
+  "encoding": "utf-8",
+  "imports": [],
+  "branches": [
+    {
+      "kind": "if",
+      "line": 5,
+      "source": "if packet.count(\":\") != 1"
+    },
+    {
+      "kind": "raise",
+      "line": 6,
+      "source": "raise ValueError(\"format\")"
+    },
+    {
+      "kind": "if",
+      "line": 8,
+      "source": "if kind == \"PING\""
+    },
+    {
+      "kind": "if",
+      "line": 9,
+      "source": "if payload"
+    },
+    {
+      "kind": "raise",
+      "line": 10,
+      "source": "raise ValueError(\"payload\")"
+    },
+    {
+      "kind": "if",
+      "line": 12,
+      "source": "if kind == \"DATA\""
+    },
+    {
+      "kind": "if",
+      "line": 13,
+      "source": "if not payload"
+    },
+    {
+      "kind": "raise",
+      "line": 14,
+      "source": "raise ValueError(\"payload\")"
+    },
+    {
+      "kind": "raise",
+      "line": 16,
+      "source": "raise ValueError(\"kind\")"
+    }
+  ],
+  "call_sites": [
+    {
+      "call_id": "call:classify_packet:5:7:5:24",
+      "caller": "classify_packet",
+      "expression": "packet.count(\":\")",
+      "line": 5,
+      "source": "if packet.count(\":\") != 1:",
+      "argument_expressions": [
+        "\":\""
+      ]
+    },
+    {
+      "call_id": "call:classify_packet:6:14:6:34",
+      "caller": "classify_packet",
+      "expression": "ValueError(\"format\")",
+      "line": 6,
+      "source": "raise ValueError(\"format\")",
+      "argument_expressions": [
+        "\"format\""
+      ]
+    },
+    {
+      "call_id": "call:classify_packet:7:20:7:37",
+      "caller": "classify_packet",
+      "expression": "packet.split(\":\")",
+      "line": 7,
+      "source": "kind, payload = packet.split(\":\")",
+      "argument_expressions": [
+        "\":\""
+      ]
+    },
+    {
+      "call_id": "call:classify_packet:10:18:10:39",
+      "caller": "classify_packet",
+      "expression": "ValueError(\"payload\")",
+      "line": 10,
+      "source": "raise ValueError(\"payload\")",
+      "argument_expressions": [
+        "\"payload\""
+      ]
+    },
+    {
+      "call_id": "call:classify_packet:14:18:14:39",
+      "caller": "classify_packet",
+      "expression": "ValueError(\"payload\")",
+      "line": 14,
+      "source": "raise ValueError(\"payload\")",
+      "argument_expressions": [
+        "\"payload\""
+      ]
+    },
+    {
+      "call_id": "call:classify_packet:16:10:16:28",
+      "caller": "classify_packet",
+      "expression": "ValueError(\"kind\")",
+      "line": 16,
+      "source": "raise ValueError(\"kind\")",
+      "argument_expressions": [
+        "\"kind\""
+      ]
+    }
+  ],
+  "direct_calls": [],
+  "unresolved_calls": [
+    {
+      "call_site_id": "call:classify_packet:5:7:5:24",
+      "caller": "classify_packet",
+      "reason": "属性调用的根名称来自局部绑定，无法静态确认"
+    },
+    {
+      "call_site_id": "call:classify_packet:7:20:7:37",
+      "caller": "classify_packet",
+      "reason": "属性调用的根名称来自局部绑定，无法静态确认"
+    }
+  ]
+}

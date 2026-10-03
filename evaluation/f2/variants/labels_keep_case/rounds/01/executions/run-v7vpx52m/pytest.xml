@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="7" time="0.147" timestamp="2026-10-03T10:35:46.384500+08:00" hostname="LAPTOP-EBC70KOR"><testcase classname="rounds.01.test_subject" name="test_labels_empty" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_labels_mixed" time="0.002"><failure message="AssertionError: assert ['A', 'b'] == ['a', 'b']&#10;  &#10;  At index 0 diff: 'A' != 'a'&#10;  Use -v to get more diff">rounds\01\test_subject.py:21: in test_labels_mixed
+    assert actual == ['a', 'b']
+E   AssertionError: assert ['A', 'b'] == ['a', 'b']
+E     
+E     At index 0 diff: 'A' != 'a'
+E     Use -v to get more diff</failure></testcase><testcase classname="rounds.01.test_subject" name="test_labels_unicode" time="0.003"><failure message="AssertionError: assert ['中文', 'A', 'a'] == ['中文', 'a', 'a']&#10;  &#10;  At index 1 diff: 'A' != 'a'&#10;  Use -v to get more diff">rounds\01\test_subject.py:31: in test_labels_unicode
+    assert actual == ['中文', 'a', 'a']
+E   AssertionError: assert ['中文', 'A', 'a'] == ['中文', 'a', 'a']
+E     
+E     At index 1 diff: 'A' != 'a'
+E     Use -v to get more diff</failure></testcase><testcase classname="rounds.01.test_subject" name="test_labels_whitespace" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_formatted_order" time="0.002"><failure message="AssertionError: assert 'B, A, a' == 'b, a, a'&#10;  &#10;  - b, a, a&#10;  + B, A, a">rounds\01\test_subject.py:51: in test_formatted_order
+    assert actual == 'b, a, a'
+E   AssertionError: assert 'B, A, a' == 'b, a, a'
+E     
+E     - b, a, a
+E     + B, A, a</failure></testcase><testcase classname="rounds.01.test_subject" name="test_formatted_empty" time="0.001" /><testcase classname="rounds.01.test_subject" name="test_formatted_unicode" time="0.003"><failure message="AssertionError: assert '中文, X' == '中文, x'&#10;  &#10;  - 中文, x&#10;  ?     ^&#10;  + 中文, X&#10;  ?     ^">rounds\01\test_subject.py:69: in test_formatted_unicode
+    assert actual == '中文, x'
+E   AssertionError: assert '中文, X' == '中文, x'
+E     
+E     - 中文, x
+E     ?     ^
+E     + 中文, X
+E     ?     ^</failure></testcase></testsuite></testsuites>

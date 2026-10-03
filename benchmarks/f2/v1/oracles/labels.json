@@ -1,0 +1,133 @@
+{
+  "provenance": "handwritten expectations; not computed from the reference implementation",
+  "scenarios": [
+    {
+      "scenario_id": "labels_empty",
+      "function": "normalize_labels",
+      "args": [
+        []
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": [],
+        "python_type": "list",
+        "fresh_result": true
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "labels_mixed",
+      "function": "normalize_labels",
+      "args": [
+        [
+          " A ",
+          "",
+          "b"
+        ]
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": [
+          "a",
+          "b"
+        ],
+        "python_type": "list",
+        "fresh_result": true
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "labels_unicode",
+      "function": "normalize_labels",
+      "args": [
+        [
+          " 中文 ",
+          "A",
+          "a"
+        ]
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": [
+          "中文",
+          "a",
+          "a"
+        ],
+        "python_type": "list",
+        "fresh_result": true
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "labels_whitespace",
+      "function": "normalize_labels",
+      "args": [
+        [
+          " ",
+          "\t"
+        ]
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": [],
+        "python_type": "list",
+        "fresh_result": true
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "formatted_order",
+      "function": "format_labels",
+      "args": [
+        [
+          " B ",
+          "",
+          "A",
+          "a"
+        ]
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": "b, a, a",
+        "python_type": "str"
+      },
+      "test_kind": "collaboration"
+    },
+    {
+      "scenario_id": "formatted_empty",
+      "function": "format_labels",
+      "args": [
+        []
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": "",
+        "python_type": "str"
+      },
+      "test_kind": "collaboration"
+    },
+    {
+      "scenario_id": "formatted_unicode",
+      "function": "format_labels",
+      "args": [
+        [
+          " 中文 ",
+          "X"
+        ]
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": "中文, x",
+        "python_type": "str"
+      },
+      "test_kind": "collaboration"
+    }
+  ]
+}

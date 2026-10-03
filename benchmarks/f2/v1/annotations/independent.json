@@ -1,0 +1,11 @@
+{
+  "provenance": "human-authored evaluation annotations; never part of model task input",
+  "confirmed_edges": [],
+  "reasonable_entries": [
+    "clamp_int",
+    "compact_runs"
+  ],
+  "combined_behaviors": [],
+  "independent_control": true
+}
+

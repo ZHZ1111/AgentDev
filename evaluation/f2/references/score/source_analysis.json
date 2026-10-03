@@ -1,0 +1,51 @@
+{
+  "source_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\benchmarks\\f2\\v1\\holdout\\score.py",
+  "source_code": "\"\"\"留出集：分数边界参考实现。\"\"\"\n\ndef score_band(score):\n    \"\"\"0..100 分分为 low/middle/high；范围外抛 ValueError。\"\"\"\n    if score < 0 or score > 100:\n        raise ValueError(\"score\")\n    if score >= 80:\n        return \"high\"\n    if score >= 60:\n        return \"middle\"\n    return \"low\"\n\n",
+  "functions": [
+    {
+      "name": "score_band",
+      "signature": "(score)",
+      "start_line": 3,
+      "end_line": 11,
+      "docstring": "0..100 分分为 low/middle/high；范围外抛 ValueError。"
+    }
+  ],
+  "encoding": "utf-8",
+  "imports": [],
+  "branches": [
+    {
+      "kind": "if",
+      "line": 5,
+      "source": "if score < 0 or score > 100"
+    },
+    {
+      "kind": "raise",
+      "line": 6,
+      "source": "raise ValueError(\"score\")"
+    },
+    {
+      "kind": "if",
+      "line": 7,
+      "source": "if score >= 80"
+    },
+    {
+      "kind": "if",
+      "line": 9,
+      "source": "if score >= 60"
+    }
+  ],
+  "call_sites": [
+    {
+      "call_id": "call:score_band:6:14:6:33",
+      "caller": "score_band",
+      "expression": "ValueError(\"score\")",
+      "line": 6,
+      "source": "raise ValueError(\"score\")",
+      "argument_expressions": [
+        "\"score\""
+      ]
+    }
+  ],
+  "direct_calls": [],
+  "unresolved_calls": []
+}

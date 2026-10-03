@@ -31,3 +31,7 @@ tmp/
 # F1 selected raw acceptance evidence (no coverage databases or credentials)
 !evaluation/f1/**/coverage.json
 !evaluation/f1/**/*.log
+
+# F2 handwritten fixture-validation evidence
+!evaluation/f2/**/coverage.json
+!evaluation/f2/**/*.log

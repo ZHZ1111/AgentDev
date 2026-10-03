@@ -1,0 +1,117 @@
+{
+  "source_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\benchmarks\\f2\\v1\\development\\order.py",
+  "source_code": "\"\"\"订单协作参考实现；输入与异常约定见相邻规格。\"\"\"\n\ndef validate_quantity(quantity):\n    \"\"\"只接受正整数，排除 bool；返回原数量。\"\"\"\n    if type(quantity) is not int:\n        raise TypeError(\"quantity\")\n    if quantity <= 0:\n        raise ValueError(\"quantity\")\n    return quantity\n\ndef subtotal(unit_price, quantity):\n    \"\"\"有效域内返回非负整数单价乘数量。\"\"\"\n    return unit_price * quantity\n\ndef order_total(unit_price, quantity):\n    \"\"\"校验数量，再将校验结果交给计价；异常原样传播。\"\"\"\n    checked = validate_quantity(quantity)\n    return subtotal(unit_price, checked)\n\n",
+  "functions": [
+    {
+      "name": "validate_quantity",
+      "signature": "(quantity)",
+      "start_line": 3,
+      "end_line": 9,
+      "docstring": "只接受正整数，排除 bool；返回原数量。"
+    },
+    {
+      "name": "subtotal",
+      "signature": "(unit_price, quantity)",
+      "start_line": 11,
+      "end_line": 13,
+      "docstring": "有效域内返回非负整数单价乘数量。"
+    },
+    {
+      "name": "order_total",
+      "signature": "(unit_price, quantity)",
+      "start_line": 15,
+      "end_line": 18,
+      "docstring": "校验数量，再将校验结果交给计价；异常原样传播。"
+    }
+  ],
+  "encoding": "utf-8",
+  "imports": [],
+  "branches": [
+    {
+      "kind": "if",
+      "line": 5,
+      "source": "if type(quantity) is not int"
+    },
+    {
+      "kind": "raise",
+      "line": 6,
+      "source": "raise TypeError(\"quantity\")"
+    },
+    {
+      "kind": "if",
+      "line": 7,
+      "source": "if quantity <= 0"
+    },
+    {
+      "kind": "raise",
+      "line": 8,
+      "source": "raise ValueError(\"quantity\")"
+    }
+  ],
+  "call_sites": [
+    {
+      "call_id": "call:validate_quantity:5:7:5:21",
+      "caller": "validate_quantity",
+      "expression": "type(quantity)",
+      "line": 5,
+      "source": "if type(quantity) is not int:",
+      "argument_expressions": [
+        "quantity"
+      ]
+    },
+    {
+      "call_id": "call:validate_quantity:6:14:6:35",
+      "caller": "validate_quantity",
+      "expression": "TypeError(\"quantity\")",
+      "line": 6,
+      "source": "raise TypeError(\"quantity\")",
+      "argument_expressions": [
+        "\"quantity\""
+      ]
+    },
+    {
+      "call_id": "call:validate_quantity:8:14:8:36",
+      "caller": "validate_quantity",
+      "expression": "ValueError(\"quantity\")",
+      "line": 8,
+      "source": "raise ValueError(\"quantity\")",
+      "argument_expressions": [
+        "\"quantity\""
+      ]
+    },
+    {
+      "call_id": "call:order_total:17:14:17:41",
+      "caller": "order_total",
+      "expression": "validate_quantity(quantity)",
+      "line": 17,
+      "source": "checked = validate_quantity(quantity)",
+      "argument_expressions": [
+        "quantity"
+      ]
+    },
+    {
+      "call_id": "call:order_total:18:11:18:40",
+      "caller": "order_total",
+      "expression": "subtotal(unit_price, checked)",
+      "line": 18,
+      "source": "return subtotal(unit_price, checked)",
+      "argument_expressions": [
+        "unit_price",
+        "checked"
+      ]
+    }
+  ],
+  "direct_calls": [
+    {
+      "call_site_id": "call:order_total:17:14:17:41",
+      "caller": "order_total",
+      "callee": "validate_quantity"
+    },
+    {
+      "call_site_id": "call:order_total:18:11:18:40",
+      "caller": "order_total",
+      "callee": "subtotal"
+    }
+  ],
+  "unresolved_calls": []
+}

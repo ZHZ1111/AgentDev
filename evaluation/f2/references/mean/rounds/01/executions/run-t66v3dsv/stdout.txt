@@ -1,0 +1,9 @@
+.....                                                                    [100%]
+=================================== PASSES ====================================
+=========================== short test summary info ===========================
+PASSED rounds/01/test_subject.py::test_mean_empty
+PASSED rounds/01/test_subject.py::test_mean_zero
+PASSED rounds/01/test_subject.py::test_mean_fraction
+PASSED rounds/01/test_subject.py::test_mean_signed
+PASSED rounds/01/test_subject.py::test_mean_duplicates
+5 passed in 0.27s

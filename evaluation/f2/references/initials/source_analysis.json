@@ -1,0 +1,57 @@
+{
+  "source_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\benchmarks\\f2\\v1\\holdout\\initials.py",
+  "source_code": "\"\"\"留出集：词首字符参考实现。\"\"\"\n\ndef initials(text):\n    \"\"\"以任意空白分词，取每词首字符的 upper 结果拼接。\"\"\"\n    return \"\".join(word[0].upper() for word in text.split())\n\n",
+  "functions": [
+    {
+      "name": "initials",
+      "signature": "(text)",
+      "start_line": 3,
+      "end_line": 5,
+      "docstring": "以任意空白分词，取每词首字符的 upper 结果拼接。"
+    }
+  ],
+  "encoding": "utf-8",
+  "imports": [],
+  "branches": [],
+  "call_sites": [
+    {
+      "call_id": "call:initials:5:11:5:60",
+      "caller": "initials",
+      "expression": "\"\".join(word[0].upper() for word in text.split())",
+      "line": 5,
+      "source": "return \"\".join(word[0].upper() for word in text.split())",
+      "argument_expressions": [
+        "(word[0].upper() for word in text.split())"
+      ]
+    },
+    {
+      "call_id": "call:initials:5:47:5:59",
+      "caller": "initials",
+      "expression": "text.split()",
+      "line": 5,
+      "source": "return \"\".join(word[0].upper() for word in text.split())",
+      "argument_expressions": []
+    },
+    {
+      "call_id": "call:initials:5:19:5:34",
+      "caller": "initials",
+      "expression": "word[0].upper()",
+      "line": 5,
+      "source": "return \"\".join(word[0].upper() for word in text.split())",
+      "argument_expressions": []
+    }
+  ],
+  "direct_calls": [],
+  "unresolved_calls": [
+    {
+      "call_site_id": "call:initials:5:47:5:59",
+      "caller": "initials",
+      "reason": "属性调用的根名称来自局部绑定，无法静态确认"
+    },
+    {
+      "call_site_id": "call:initials:5:19:5:34",
+      "caller": "initials",
+      "reason": "属性调用可能依赖对象运行时类型，无法静态确认"
+    }
+  ]
+}

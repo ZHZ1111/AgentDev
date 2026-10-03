@@ -1,0 +1,28 @@
+..F........F.                                                            [100%]
+================================== FAILURES ===================================
+_____________________________ test_quantity_zero ______________________________
+rounds\01\test_subject.py:28: in test_quantity_zero
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+_______________________________ test_order_zero _______________________________
+rounds\01\test_subject.py:105: in test_order_zero
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+=================================== PASSES ====================================
+=========================== short test summary info ===========================
+PASSED rounds/01/test_subject.py::test_quantity_one
+PASSED rounds/01/test_subject.py::test_quantity_many
+PASSED rounds/01/test_subject.py::test_quantity_negative
+PASSED rounds/01/test_subject.py::test_quantity_bool
+PASSED rounds/01/test_subject.py::test_quantity_text
+PASSED rounds/01/test_subject.py::test_subtotal_normal
+PASSED rounds/01/test_subject.py::test_subtotal_zero_price
+PASSED rounds/01/test_subject.py::test_subtotal_zero_quantity
+PASSED rounds/01/test_subject.py::test_order_valid
+PASSED rounds/01/test_subject.py::test_order_zero_price
+PASSED rounds/01/test_subject.py::test_order_bad_type
+FAILED rounds/01/test_subject.py::test_quantity_zero - Failed: DID NOT RAISE ...
+FAILED rounds/01/test_subject.py::test_order_zero - Failed: DID NOT RAISE Val...
+2 failed, 11 passed in 0.40s

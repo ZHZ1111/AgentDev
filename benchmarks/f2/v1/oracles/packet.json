@@ -1,0 +1,152 @@
+{
+  "provenance": "handwritten expectations; not computed from the reference implementation",
+  "scenarios": [
+    {
+      "scenario_id": "packet_ping",
+      "function": "classify_packet",
+      "args": [
+        "PING:"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": "heartbeat",
+        "python_type": "str"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "packet_data",
+      "function": "classify_packet",
+      "args": [
+        "DATA:x"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": "data",
+        "python_type": "str"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "packet_unicode",
+      "function": "classify_packet",
+      "args": [
+        "DATA:你好"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": "data",
+        "python_type": "str"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "packet_space",
+      "function": "classify_packet",
+      "args": [
+        "DATA: "
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "returns",
+        "value": "data",
+        "python_type": "str"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "packet_no_colon",
+      "function": "classify_packet",
+      "args": [
+        "PING"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "raises",
+        "exception": "ValueError"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "packet_many_colons",
+      "function": "classify_packet",
+      "args": [
+        "DATA:a:b"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "raises",
+        "exception": "ValueError"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "packet_ping_payload",
+      "function": "classify_packet",
+      "args": [
+        "PING:x"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "raises",
+        "exception": "ValueError"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "packet_empty_data",
+      "function": "classify_packet",
+      "args": [
+        "DATA:"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "raises",
+        "exception": "ValueError"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "packet_unknown",
+      "function": "classify_packet",
+      "args": [
+        "OTHER:x"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "raises",
+        "exception": "ValueError"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "packet_case",
+      "function": "classify_packet",
+      "args": [
+        "ping:"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "raises",
+        "exception": "ValueError"
+      },
+      "test_kind": "unit"
+    },
+    {
+      "scenario_id": "packet_empty_kind",
+      "function": "classify_packet",
+      "args": [
+        ":x"
+      ],
+      "kwargs": {},
+      "expectation": {
+        "kind": "raises",
+        "exception": "ValueError"
+      },
+      "test_kind": "unit"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "source_path": "E:\\File-Document\\SE\\hw1\\AgentDev\\benchmarks\\f2\\v1\\development\\independent.py",
+  "source_code": "\"\"\"同文件独立函数对照，不构造两者的组合流程。\"\"\"\n\ndef clamp_int(value, lower, upper):\n    \"\"\"把整数限制到闭区间 [lower, upper]。\"\"\"\n    if value < lower:\n        return lower\n    if value > upper:\n        return upper\n    return value\n\ndef compact_runs(values):\n    \"\"\"仅压缩连续相等项，不做全局去重。\"\"\"\n    result = []\n    for value in values:\n        if not result or result[-1] != value:\n            result.append(value)\n    return result\n\n",
+  "functions": [
+    {
+      "name": "clamp_int",
+      "signature": "(value, lower, upper)",
+      "start_line": 3,
+      "end_line": 9,
+      "docstring": "把整数限制到闭区间 [lower, upper]。"
+    },
+    {
+      "name": "compact_runs",
+      "signature": "(values)",
+      "start_line": 11,
+      "end_line": 17,
+      "docstring": "仅压缩连续相等项，不做全局去重。"
+    }
+  ],
+  "encoding": "utf-8",
+  "imports": [],
+  "branches": [
+    {
+      "kind": "if",
+      "line": 5,
+      "source": "if value < lower"
+    },
+    {
+      "kind": "if",
+      "line": 7,
+      "source": "if value > upper"
+    },
+    {
+      "kind": "loop",
+      "line": 14,
+      "source": "for value in values"
+    },
+    {
+      "kind": "if",
+      "line": 15,
+      "source": "if not result or result[-1] != value"
+    }
+  ],
+  "call_sites": [
+    {
+      "call_id": "call:compact_runs:16:12:16:32",
+      "caller": "compact_runs",
+      "expression": "result.append(value)",
+      "line": 16,
+      "source": "result.append(value)",
+      "argument_expressions": [
+        "value"
+      ]
+    }
+  ],
+  "direct_calls": [],
+  "unresolved_calls": [
+    {
+      "call_site_id": "call:compact_runs:16:12:16:32",
+      "caller": "compact_runs",
+      "reason": "属性调用的根名称来自局部绑定，无法静态确认"
+    }
+  ]
+}

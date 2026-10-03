@@ -1,0 +1,10 @@
+{
+  "exit_code": 0,
+  "timed_out": false,
+  "error": null,
+  "duration_seconds": 2.374171100091189,
+  "stdout": "",
+  "stderr": "Wrote JSON report to E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\rounds\\01\\executions\\run-e31dd6pm\\coverage.json\r\n",
+  "stdout_truncated": false,
+  "stderr_truncated": false
+}

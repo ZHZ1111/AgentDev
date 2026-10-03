@@ -1,0 +1,19 @@
+{
+  "kind": "passed",
+  "exit_code": 0,
+  "collected": 11,
+  "executed": 11,
+  "passed": 11,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "xfailed": 0,
+  "xpassed": 0,
+  "stdout": "...........                                                              [100%]\r\n=================================== PASSES ====================================\r\n=========================== short test summary info ===========================\r\nPASSED rounds/01/test_subject.py::test_packet_ping\r\nPASSED rounds/01/test_subject.py::test_packet_data\r\nPASSED rounds/01/test_subject.py::test_packet_unicode\r\nPASSED rounds/01/test_subject.py::test_packet_space\r\nPASSED rounds/01/test_subject.py::test_packet_no_colon\r\nPASSED rounds/01/test_subject.py::test_packet_many_colons\r\nPASSED rounds/01/test_subject.py::test_packet_ping_payload\r\nPASSED rounds/01/test_subject.py::test_packet_empty_data\r\nPASSED rounds/01/test_subject.py::test_packet_unknown\r\nPASSED rounds/01/test_subject.py::test_packet_case\r\nPASSED rounds/01/test_subject.py::test_packet_empty_kind\r\n11 passed in 0.34s\r\n",
+  "stderr": "",
+  "timed_out": false,
+  "stdout_truncated": false,
+  "stderr_truncated": false,
+  "duration_seconds": 1.9099685999099165,
+  "failures": []
+}

@@ -1,0 +1,10 @@
+......                                                                   [100%]
+=================================== PASSES ====================================
+=========================== short test summary info ===========================
+PASSED rounds/01/test_subject.py::test_initials_empty
+PASSED rounds/01/test_subject.py::test_initials_whitespace
+PASSED rounds/01/test_subject.py::test_initials_words
+PASSED rounds/01/test_subject.py::test_initials_unicode
+PASSED rounds/01/test_subject.py::test_initials_expansion
+PASSED rounds/01/test_subject.py::test_initials_punctuation
+6 passed in 0.32s

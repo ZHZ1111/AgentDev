@@ -1,0 +1,11 @@
+{
+  "target_file": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f2\\ec6fa97254ca4c1ab37baaf6fa917253\\variants\\score_excludes_80\\subject.py",
+  "status": "available",
+  "covered_lines": 8,
+  "total_lines": 8,
+  "covered_branches": 6,
+  "total_branches": 6,
+  "missing_lines": [],
+  "missing_branches": [],
+  "error": null
+}
