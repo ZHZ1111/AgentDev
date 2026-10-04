@@ -1,0 +1,1364 @@
+{
+  "stage": "F3/F4",
+  "provenance": "live",
+  "frozen_config": {
+    "schema_version": 1,
+    "dataset_id": "f2-v1",
+    "case_ids": [
+      "order",
+      "labels",
+      "independent",
+      "mean",
+      "score",
+      "initials",
+      "rotation",
+      "packet"
+    ],
+    "split": "all",
+    "provenance": "live",
+    "started_at_utc": "2026-10-03T12:18:04.503102+00:00",
+    "python": "3.13.9",
+    "prompt_version": "b3-v5",
+    "software_sha256": {
+      "prompts.py": "c2d882bb1125cdf254c0046315f5d892f4f0ff4fc47609a92dff25d62e484eb0",
+      "agent.py": "ab3aeae78feb5651318c2d60ed0f2eb4d449f4122e06a87dcfa44d26e1cb3e84",
+      "generation.py": "6a4ca9a02ad98cd6fa1cb7b64b032fd7f796865ba07a1aec64e55f90775f8979",
+      "llm_client.py": "62c0579c80ce5f4613e76b5bd3ea8928d1efc723c956a23b6c1a7e04946c907f",
+      "models.py": "fc2300b003f047689c58e54c2ec1fc9a3d470347ac2eac63169d7eab3ccdc97a",
+      "experiment.py": "bedd5ecb99d6e34c3cc6b0554e7a838525503b57614febb4d8e4547b65449bd7",
+      "benchmark.py": "0c914022f17f48328ac86f205387a38cd8b84498e26c246e869ad77f3c75bea7"
+    },
+    "adapter_config": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "base_url": "https://api.deepseek.com",
+      "request_timeout_seconds": 60,
+      "max_tokens": 6144,
+      "max_transient_retries": 1,
+      "max_format_repairs": 1,
+      "max_http_attempts": 3
+    },
+    "budgets": {
+      "baseline_rounds": 1,
+      "feedback_rounds": 3,
+      "execution_timeout_seconds": 30
+    },
+    "cost_policy": "One physical initial generation; both arms credit its attempts/usage/time for comparison. Feedback replay is not a new HTTP request.",
+    "generation_inputs": "Only frozen reference source/specification and formal host observations; no private annotations, oracles or variants."
+  },
+  "cases": [
+    {
+      "case_id": "order",
+      "split": "development",
+      "modes": {
+        "baseline": {
+          "status": "completed",
+          "stop_reason": "coverage_target_met",
+          "selected_round": 1,
+          "candidate_rounds": 1,
+          "executed_rounds": 1,
+          "runnable": true,
+          "all_passed": true,
+          "collected": 11,
+          "passed": 11,
+          "execution_kind": "passed",
+          "coverage_status": "available",
+          "line_percent": 100.0,
+          "branch_percent": 100.0,
+          "branch_not_applicable": false,
+          "credited_http_attempts": 1,
+          "token_usage": {
+            "prompt_tokens": 5193,
+            "completion_tokens": 3530,
+            "total_tokens": 8723
+          },
+          "seconds_including_shared_generation": 15.890214100014418,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "automatic_structure_only; see manual relation review for behavior assertions",
+            "annotated_edges": [
+              [
+                "order_total",
+                "subtotal"
+              ],
+              [
+                "order_total",
+                "validate_quantity"
+              ]
+            ],
+            "reported_confirmed_edges": [
+              [
+                "order_total",
+                "subtotal"
+              ],
+              [
+                "order_total",
+                "validate_quantity"
+              ]
+            ],
+            "missing_confirmed_edges": [],
+            "unsupported_confirmed_edges": [],
+            "reasonable_entries_selected": true,
+            "collaboration_scenarios": 3,
+            "collaboration_entry_targets": [
+              "order_total"
+            ],
+            "independent_control_respected": true,
+            "unresolved_source_calls": 0,
+            "planned_scenarios": 11
+          }
+        },
+        "feedback": {
+          "status": "completed",
+          "stop_reason": "coverage_target_met",
+          "selected_round": 1,
+          "candidate_rounds": 1,
+          "executed_rounds": 1,
+          "runnable": true,
+          "all_passed": true,
+          "collected": 11,
+          "passed": 11,
+          "execution_kind": "passed",
+          "coverage_status": "available",
+          "line_percent": 100.0,
+          "branch_percent": 100.0,
+          "branch_not_applicable": false,
+          "credited_http_attempts": 1,
+          "token_usage": {
+            "prompt_tokens": 5193,
+            "completion_tokens": 3530,
+            "total_tokens": 8723
+          },
+          "seconds_including_shared_generation": 15.792601299937814,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "automatic_structure_only; see manual relation review for behavior assertions",
+            "annotated_edges": [
+              [
+                "order_total",
+                "subtotal"
+              ],
+              [
+                "order_total",
+                "validate_quantity"
+              ]
+            ],
+            "reported_confirmed_edges": [
+              [
+                "order_total",
+                "subtotal"
+              ],
+              [
+                "order_total",
+                "validate_quantity"
+              ]
+            ],
+            "missing_confirmed_edges": [],
+            "unsupported_confirmed_edges": [],
+            "reasonable_entries_selected": true,
+            "collaboration_scenarios": 3,
+            "collaboration_entry_targets": [
+              "order_total"
+            ],
+            "independent_control_respected": true,
+            "unresolved_source_calls": 0,
+            "planned_scenarios": 11
+          }
+        }
+      },
+      "variants": {
+        "baseline": [
+          {
+            "variant_id": "quantity_accepts_zero",
+            "affected_function": "validate_quantity",
+            "status": "detected",
+            "reason": null,
+            "attributed_failures": [
+              {
+                "nodeid": "rounds/01/test_subject.py::test_validate_quantity_nonpositive_valueerror",
+                "exception_type": "Failed",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\.venv\\Lib\\site-packages\\_pytest\\outcomes.py",
+                "line": 162,
+                "scenario_ids": [
+                  "validate-quantity-nonpositive-valueerror"
+                ],
+                "affected_function": "validate_quantity",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              },
+              {
+                "nodeid": "rounds/01/test_subject.py::test_order_total_valueerror_propagation",
+                "exception_type": "Failed",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\.venv\\Lib\\site-packages\\_pytest\\outcomes.py",
+                "line": 162,
+                "scenario_ids": [
+                  "order-total-valueerror-propagation"
+                ],
+                "affected_function": "validate_quantity",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              }
+            ],
+            "test_sha256": "fcd9bc2ebddcc785887dbe1111c53ae161762af0a705dffb10f73f1010e231c4",
+            "execution_kind": "assertion_failed",
+            "collected": 11,
+            "failed": 2,
+            "errors": 0,
+            "unchanged_tests": true,
+            "paired_reference_all_passed": true
+          },
+          {
+            "variant_id": "order_quantity_increment",
+            "affected_function": "order_total",
+            "status": "detected",
+            "reason": null,
+            "attributed_failures": [
+              {
+                "nodeid": "rounds/01/test_subject.py::test_order_total_normal",
+                "exception_type": "AssertionError",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\order\\variants\\baseline\\order_quantity_increment\\rounds\\01\\test_subject.py",
+                "line": 43,
+                "scenario_ids": [
+                  "order-total-normal"
+                ],
+                "affected_function": "order_total",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              }
+            ],
+            "test_sha256": "fcd9bc2ebddcc785887dbe1111c53ae161762af0a705dffb10f73f1010e231c4",
+            "execution_kind": "assertion_failed",
+            "collected": 11,
+            "failed": 1,
+            "errors": 0,
+            "unchanged_tests": true,
+            "paired_reference_all_passed": true
+          }
+        ],
+        "feedback": [
+          {
+            "variant_id": "quantity_accepts_zero",
+            "affected_function": "validate_quantity",
+            "status": "detected",
+            "reason": null,
+            "attributed_failures": [
+              {
+                "nodeid": "rounds/01/test_subject.py::test_validate_quantity_nonpositive_valueerror",
+                "exception_type": "Failed",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\.venv\\Lib\\site-packages\\_pytest\\outcomes.py",
+                "line": 162,
+                "scenario_ids": [
+                  "validate-quantity-nonpositive-valueerror"
+                ],
+                "affected_function": "validate_quantity",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              },
+              {
+                "nodeid": "rounds/01/test_subject.py::test_order_total_valueerror_propagation",
+                "exception_type": "Failed",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\.venv\\Lib\\site-packages\\_pytest\\outcomes.py",
+                "line": 162,
+                "scenario_ids": [
+                  "order-total-valueerror-propagation"
+                ],
+                "affected_function": "validate_quantity",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              }
+            ],
+            "test_sha256": "fcd9bc2ebddcc785887dbe1111c53ae161762af0a705dffb10f73f1010e231c4",
+            "execution_kind": "assertion_failed",
+            "collected": 11,
+            "failed": 2,
+            "errors": 0,
+            "unchanged_tests": true,
+            "paired_reference_all_passed": true
+          },
+          {
+            "variant_id": "order_quantity_increment",
+            "affected_function": "order_total",
+            "status": "detected",
+            "reason": null,
+            "attributed_failures": [
+              {
+                "nodeid": "rounds/01/test_subject.py::test_order_total_normal",
+                "exception_type": "AssertionError",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\order\\variants\\feedback\\order_quantity_increment\\rounds\\01\\test_subject.py",
+                "line": 43,
+                "scenario_ids": [
+                  "order-total-normal"
+                ],
+                "affected_function": "order_total",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              }
+            ],
+            "test_sha256": "fcd9bc2ebddcc785887dbe1111c53ae161762af0a705dffb10f73f1010e231c4",
+            "execution_kind": "assertion_failed",
+            "collected": 11,
+            "failed": 1,
+            "errors": 0,
+            "unchanged_tests": true,
+            "paired_reference_all_passed": true
+          }
+        ]
+      },
+      "shared_first_candidate_identical": true,
+      "change": {
+        "line_percent": 0.0,
+        "branch_percent": 0.0,
+        "collected": 0,
+        "passed": 0,
+        "status_before": "completed",
+        "status_after": "completed",
+        "description": "no_coverage_change"
+      }
+    },
+    {
+      "case_id": "labels",
+      "split": "development",
+      "modes": {
+        "baseline": {
+          "status": "completed",
+          "stop_reason": "coverage_target_met",
+          "selected_round": 1,
+          "candidate_rounds": 1,
+          "executed_rounds": 1,
+          "runnable": true,
+          "all_passed": true,
+          "collected": 8,
+          "passed": 8,
+          "execution_kind": "passed",
+          "coverage_status": "available",
+          "line_percent": 100.0,
+          "branch_percent": 100.0,
+          "branch_not_applicable": false,
+          "credited_http_attempts": 1,
+          "token_usage": {
+            "prompt_tokens": 5030,
+            "completion_tokens": 2532,
+            "total_tokens": 7562
+          },
+          "seconds_including_shared_generation": 13.155646900064312,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "automatic_structure_only; see manual relation review for behavior assertions",
+            "annotated_edges": [
+              [
+                "format_labels",
+                "normalize_labels"
+              ]
+            ],
+            "reported_confirmed_edges": [
+              [
+                "format_labels",
+                "normalize_labels"
+              ]
+            ],
+            "missing_confirmed_edges": [],
+            "unsupported_confirmed_edges": [],
+            "reasonable_entries_selected": true,
+            "collaboration_scenarios": 1,
+            "collaboration_entry_targets": [
+              "format_labels"
+            ],
+            "independent_control_respected": true,
+            "unresolved_source_calls": 3,
+            "planned_scenarios": 8
+          }
+        },
+        "feedback": {
+          "status": "completed",
+          "stop_reason": "coverage_target_met",
+          "selected_round": 1,
+          "candidate_rounds": 1,
+          "executed_rounds": 1,
+          "runnable": true,
+          "all_passed": true,
+          "collected": 8,
+          "passed": 8,
+          "execution_kind": "passed",
+          "coverage_status": "available",
+          "line_percent": 100.0,
+          "branch_percent": 100.0,
+          "branch_not_applicable": false,
+          "credited_http_attempts": 1,
+          "token_usage": {
+            "prompt_tokens": 5030,
+            "completion_tokens": 2532,
+            "total_tokens": 7562
+          },
+          "seconds_including_shared_generation": 13.253686800017022,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "automatic_structure_only; see manual relation review for behavior assertions",
+            "annotated_edges": [
+              [
+                "format_labels",
+                "normalize_labels"
+              ]
+            ],
+            "reported_confirmed_edges": [
+              [
+                "format_labels",
+                "normalize_labels"
+              ]
+            ],
+            "missing_confirmed_edges": [],
+            "unsupported_confirmed_edges": [],
+            "reasonable_entries_selected": true,
+            "collaboration_scenarios": 1,
+            "collaboration_entry_targets": [
+              "format_labels"
+            ],
+            "independent_control_respected": true,
+            "unresolved_source_calls": 3,
+            "planned_scenarios": 8
+          }
+        }
+      },
+      "variants": {
+        "baseline": [
+          {
+            "variant_id": "labels_keep_case",
+            "affected_function": "normalize_labels",
+            "status": "detected",
+            "reason": null,
+            "attributed_failures": [
+              {
+                "nodeid": "rounds/01/test_subject.py::test_unit_normalize_mixed",
+                "exception_type": "AssertionError",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\labels\\variants\\baseline\\labels_keep_case\\rounds\\01\\test_subject.py",
+                "line": 6,
+                "scenario_ids": [
+                  "unit-normalize-mixed"
+                ],
+                "affected_function": "normalize_labels",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              },
+              {
+                "nodeid": "rounds/01/test_subject.py::test_unit_normalize_cjk",
+                "exception_type": "AssertionError",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\labels\\variants\\baseline\\labels_keep_case\\rounds\\01\\test_subject.py",
+                "line": 18,
+                "scenario_ids": [
+                  "unit-normalize-cjk"
+                ],
+                "affected_function": "normalize_labels",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              },
+              {
+                "nodeid": "rounds/01/test_subject.py::test_unit_format_normal",
+                "exception_type": "AssertionError",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\labels\\variants\\baseline\\labels_keep_case\\rounds\\01\\test_subject.py",
+                "line": 22,
+                "scenario_ids": [
+                  "unit-format-normal"
+                ],
+                "affected_function": "normalize_labels",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              },
+              {
+                "nodeid": "rounds/01/test_subject.py::test_collab_format_through_normalize",
+                "exception_type": "AssertionError",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\labels\\variants\\baseline\\labels_keep_case\\rounds\\01\\test_subject.py",
+                "line": 34,
+                "scenario_ids": [
+                  "collab-format-through-normalize"
+                ],
+                "affected_function": "normalize_labels",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              }
+            ],
+            "test_sha256": "b3b1106dad5a7befc2bc00219a5c4a074e2933552d7e40be1d0e7ed6e534d285",
+            "execution_kind": "assertion_failed",
+            "collected": 8,
+            "failed": 4,
+            "errors": 0,
+            "unchanged_tests": true,
+            "paired_reference_all_passed": true
+          }
+        ],
+        "feedback": [
+          {
+            "variant_id": "labels_keep_case",
+            "affected_function": "normalize_labels",
+            "status": "detected",
+            "reason": null,
+            "attributed_failures": [
+              {
+                "nodeid": "rounds/01/test_subject.py::test_unit_normalize_mixed",
+                "exception_type": "AssertionError",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\labels\\variants\\feedback\\labels_keep_case\\rounds\\01\\test_subject.py",
+                "line": 6,
+                "scenario_ids": [
+                  "unit-normalize-mixed"
+                ],
+                "affected_function": "normalize_labels",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              },
+              {
+                "nodeid": "rounds/01/test_subject.py::test_unit_normalize_cjk",
+                "exception_type": "AssertionError",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\labels\\variants\\feedback\\labels_keep_case\\rounds\\01\\test_subject.py",
+                "line": 18,
+                "scenario_ids": [
+                  "unit-normalize-cjk"
+                ],
+                "affected_function": "normalize_labels",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              },
+              {
+                "nodeid": "rounds/01/test_subject.py::test_unit_format_normal",
+                "exception_type": "AssertionError",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\labels\\variants\\feedback\\labels_keep_case\\rounds\\01\\test_subject.py",
+                "line": 22,
+                "scenario_ids": [
+                  "unit-format-normal"
+                ],
+                "affected_function": "normalize_labels",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              },
+              {
+                "nodeid": "rounds/01/test_subject.py::test_collab_format_through_normalize",
+                "exception_type": "AssertionError",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\labels\\variants\\feedback\\labels_keep_case\\rounds\\01\\test_subject.py",
+                "line": 34,
+                "scenario_ids": [
+                  "collab-format-through-normalize"
+                ],
+                "affected_function": "normalize_labels",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              }
+            ],
+            "test_sha256": "b3b1106dad5a7befc2bc00219a5c4a074e2933552d7e40be1d0e7ed6e534d285",
+            "execution_kind": "assertion_failed",
+            "collected": 8,
+            "failed": 4,
+            "errors": 0,
+            "unchanged_tests": true,
+            "paired_reference_all_passed": true
+          }
+        ]
+      },
+      "shared_first_candidate_identical": true,
+      "change": {
+        "line_percent": 0.0,
+        "branch_percent": 0.0,
+        "collected": 0,
+        "passed": 0,
+        "status_before": "completed",
+        "status_after": "completed",
+        "description": "no_coverage_change"
+      }
+    },
+    {
+      "case_id": "independent",
+      "split": "development",
+      "modes": {
+        "baseline": {
+          "status": "failed",
+          "stop_reason": "unrecoverable_error",
+          "selected_round": null,
+          "candidate_rounds": 0,
+          "executed_rounds": 0,
+          "runnable": false,
+          "all_passed": false,
+          "collected": null,
+          "passed": null,
+          "execution_kind": null,
+          "coverage_status": "unavailable",
+          "line_percent": null,
+          "branch_percent": null,
+          "branch_not_applicable": false,
+          "credited_http_attempts": 2,
+          "token_usage": null,
+          "seconds_including_shared_generation": 13.837044800049625,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "unavailable"
+          }
+        },
+        "feedback": {
+          "status": "failed",
+          "stop_reason": "unrecoverable_error",
+          "selected_round": null,
+          "candidate_rounds": 0,
+          "executed_rounds": 0,
+          "runnable": false,
+          "all_passed": false,
+          "collected": null,
+          "passed": null,
+          "execution_kind": null,
+          "coverage_status": "unavailable",
+          "line_percent": null,
+          "branch_percent": null,
+          "branch_not_applicable": false,
+          "credited_http_attempts": 2,
+          "token_usage": null,
+          "seconds_including_shared_generation": 13.830675500095822,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "unavailable"
+          }
+        }
+      },
+      "variants": {
+        "baseline": [],
+        "feedback": []
+      },
+      "shared_first_candidate_identical": true,
+      "change": {
+        "line_percent": null,
+        "branch_percent": null,
+        "collected": null,
+        "passed": null,
+        "status_before": "failed",
+        "status_after": "failed",
+        "description": "no_coverage_change"
+      }
+    },
+    {
+      "case_id": "mean",
+      "split": "development",
+      "modes": {
+        "baseline": {
+          "status": "completed",
+          "stop_reason": "coverage_target_met",
+          "selected_round": 1,
+          "candidate_rounds": 1,
+          "executed_rounds": 1,
+          "runnable": true,
+          "all_passed": true,
+          "collected": 9,
+          "passed": 9,
+          "execution_kind": "passed",
+          "coverage_status": "available",
+          "line_percent": 100.0,
+          "branch_percent": 100.0,
+          "branch_not_applicable": false,
+          "credited_http_attempts": 2,
+          "token_usage": {
+            "prompt_tokens": 10667,
+            "completion_tokens": 3839,
+            "total_tokens": 14506
+          },
+          "seconds_including_shared_generation": 17.995372400037013,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "automatic_structure_only; see manual relation review for behavior assertions",
+            "annotated_edges": [],
+            "reported_confirmed_edges": [],
+            "missing_confirmed_edges": [],
+            "unsupported_confirmed_edges": [],
+            "reasonable_entries_selected": true,
+            "collaboration_scenarios": 0,
+            "collaboration_entry_targets": [],
+            "independent_control_respected": true,
+            "unresolved_source_calls": 0,
+            "planned_scenarios": 9
+          }
+        },
+        "feedback": {
+          "status": "completed",
+          "stop_reason": "coverage_target_met",
+          "selected_round": 1,
+          "candidate_rounds": 1,
+          "executed_rounds": 1,
+          "runnable": true,
+          "all_passed": true,
+          "collected": 9,
+          "passed": 9,
+          "execution_kind": "passed",
+          "coverage_status": "available",
+          "line_percent": 100.0,
+          "branch_percent": 100.0,
+          "branch_not_applicable": false,
+          "credited_http_attempts": 2,
+          "token_usage": {
+            "prompt_tokens": 10667,
+            "completion_tokens": 3839,
+            "total_tokens": 14506
+          },
+          "seconds_including_shared_generation": 18.0010652000783,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "automatic_structure_only; see manual relation review for behavior assertions",
+            "annotated_edges": [],
+            "reported_confirmed_edges": [],
+            "missing_confirmed_edges": [],
+            "unsupported_confirmed_edges": [],
+            "reasonable_entries_selected": true,
+            "collaboration_scenarios": 0,
+            "collaboration_entry_targets": [],
+            "independent_control_respected": true,
+            "unresolved_source_calls": 0,
+            "planned_scenarios": 9
+          }
+        }
+      },
+      "variants": {
+        "baseline": [
+          {
+            "variant_id": "mean_empty_division",
+            "affected_function": "safe_mean",
+            "status": "not_evaluable",
+            "reason": "paired reference, unchanged bytes, or framework/collection gate failed",
+            "attributed_failures": [],
+            "test_sha256": "3e9f8f47b2435900f7811d91a78cdaebaf9f6675008970662b09055e851be527",
+            "execution_kind": "internal_error",
+            "collected": 9,
+            "failed": 0,
+            "errors": 2,
+            "unchanged_tests": true,
+            "paired_reference_all_passed": true
+          }
+        ],
+        "feedback": [
+          {
+            "variant_id": "mean_empty_division",
+            "affected_function": "safe_mean",
+            "status": "detected",
+            "reason": null,
+            "attributed_failures": [
+              {
+                "nodeid": "rounds/01/test_subject.py::test_boundary_empty_list",
+                "exception_type": "ZeroDivisionError",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\mean\\variants\\feedback\\mean_empty_division\\subject.py",
+                "line": 5,
+                "scenario_ids": [
+                  "boundary-empty-list"
+                ],
+                "affected_function": "safe_mean",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              },
+              {
+                "nodeid": "rounds/01/test_subject.py::test_branch_empty_falsy_taken",
+                "exception_type": "ZeroDivisionError",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\mean\\variants\\feedback\\mean_empty_division\\subject.py",
+                "line": 5,
+                "scenario_ids": [
+                  "branch-empty-falsy-taken"
+                ],
+                "affected_function": "safe_mean",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              }
+            ],
+            "test_sha256": "3e9f8f47b2435900f7811d91a78cdaebaf9f6675008970662b09055e851be527",
+            "execution_kind": "execution_error",
+            "collected": 9,
+            "failed": 0,
+            "errors": 2,
+            "unchanged_tests": true,
+            "paired_reference_all_passed": true
+          }
+        ]
+      },
+      "shared_first_candidate_identical": true,
+      "change": {
+        "line_percent": 0.0,
+        "branch_percent": 0.0,
+        "collected": 0,
+        "passed": 0,
+        "status_before": "completed",
+        "status_after": "completed",
+        "description": "no_coverage_change"
+      }
+    },
+    {
+      "case_id": "score",
+      "split": "holdout",
+      "modes": {
+        "baseline": {
+          "status": "completed",
+          "stop_reason": "coverage_target_met",
+          "selected_round": 1,
+          "candidate_rounds": 1,
+          "executed_rounds": 1,
+          "runnable": true,
+          "all_passed": true,
+          "collected": 12,
+          "passed": 12,
+          "execution_kind": "passed",
+          "coverage_status": "available",
+          "line_percent": 100.0,
+          "branch_percent": 100.0,
+          "branch_not_applicable": false,
+          "credited_http_attempts": 1,
+          "token_usage": {
+            "prompt_tokens": 4413,
+            "completion_tokens": 1904,
+            "total_tokens": 6317
+          },
+          "seconds_including_shared_generation": 11.288578400039114,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "automatic_structure_only; see manual relation review for behavior assertions",
+            "annotated_edges": [],
+            "reported_confirmed_edges": [],
+            "missing_confirmed_edges": [],
+            "unsupported_confirmed_edges": [],
+            "reasonable_entries_selected": true,
+            "collaboration_scenarios": 0,
+            "collaboration_entry_targets": [],
+            "independent_control_respected": true,
+            "unresolved_source_calls": 0,
+            "planned_scenarios": 12
+          }
+        },
+        "feedback": {
+          "status": "completed",
+          "stop_reason": "coverage_target_met",
+          "selected_round": 1,
+          "candidate_rounds": 1,
+          "executed_rounds": 1,
+          "runnable": true,
+          "all_passed": true,
+          "collected": 12,
+          "passed": 12,
+          "execution_kind": "passed",
+          "coverage_status": "available",
+          "line_percent": 100.0,
+          "branch_percent": 100.0,
+          "branch_not_applicable": false,
+          "credited_http_attempts": 1,
+          "token_usage": {
+            "prompt_tokens": 4413,
+            "completion_tokens": 1904,
+            "total_tokens": 6317
+          },
+          "seconds_including_shared_generation": 12.045283900108188,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "automatic_structure_only; see manual relation review for behavior assertions",
+            "annotated_edges": [],
+            "reported_confirmed_edges": [],
+            "missing_confirmed_edges": [],
+            "unsupported_confirmed_edges": [],
+            "reasonable_entries_selected": true,
+            "collaboration_scenarios": 0,
+            "collaboration_entry_targets": [],
+            "independent_control_respected": true,
+            "unresolved_source_calls": 0,
+            "planned_scenarios": 12
+          }
+        }
+      },
+      "variants": {
+        "baseline": [
+          {
+            "variant_id": "score_excludes_80",
+            "affected_function": "score_band",
+            "status": "detected",
+            "reason": null,
+            "attributed_failures": [
+              {
+                "nodeid": "rounds/01/test_subject.py::test_boundary_high_edges[80-high]",
+                "exception_type": "AssertionError",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\score\\variants\\baseline\\score_excludes_80\\rounds\\01\\test_subject.py",
+                "line": 30,
+                "scenario_ids": [
+                  "boundary-80-high",
+                  "boundary-100-high"
+                ],
+                "affected_function": "score_band",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              }
+            ],
+            "test_sha256": "8bca40967cac1b9a34b7a0b116a63418e54c01a39c3c24bbfffd26ea4e4819a8",
+            "execution_kind": "assertion_failed",
+            "collected": 12,
+            "failed": 1,
+            "errors": 0,
+            "unchanged_tests": true,
+            "paired_reference_all_passed": true
+          }
+        ],
+        "feedback": [
+          {
+            "variant_id": "score_excludes_80",
+            "affected_function": "score_band",
+            "status": "detected",
+            "reason": null,
+            "attributed_failures": [
+              {
+                "nodeid": "rounds/01/test_subject.py::test_boundary_high_edges[80-high]",
+                "exception_type": "AssertionError",
+                "path": "E:\\File-Document\\SE\\hw1\\AgentDev\\outputs\\f3_f4\\8dfefb37aea64c428024193de6ecb96b\\cases\\score\\variants\\feedback\\score_excludes_80\\rounds\\01\\test_subject.py",
+                "line": 30,
+                "scenario_ids": [
+                  "boundary-80-high",
+                  "boundary-100-high"
+                ],
+                "affected_function": "score_band",
+                "basis": "same tests pass paired reference; only this function differs; confirmed mapped call path"
+              }
+            ],
+            "test_sha256": "8bca40967cac1b9a34b7a0b116a63418e54c01a39c3c24bbfffd26ea4e4819a8",
+            "execution_kind": "assertion_failed",
+            "collected": 12,
+            "failed": 1,
+            "errors": 0,
+            "unchanged_tests": true,
+            "paired_reference_all_passed": true
+          }
+        ]
+      },
+      "shared_first_candidate_identical": true,
+      "change": {
+        "line_percent": 0.0,
+        "branch_percent": 0.0,
+        "collected": 0,
+        "passed": 0,
+        "status_before": "completed",
+        "status_after": "completed",
+        "description": "no_coverage_change"
+      }
+    },
+    {
+      "case_id": "initials",
+      "split": "holdout",
+      "modes": {
+        "baseline": {
+          "status": "needs_review",
+          "stop_reason": "ambiguous_specification",
+          "selected_round": 1,
+          "candidate_rounds": 1,
+          "executed_rounds": 1,
+          "runnable": true,
+          "all_passed": false,
+          "collected": 7,
+          "passed": 6,
+          "execution_kind": "assertion_failed",
+          "coverage_status": "available",
+          "line_percent": 100.0,
+          "branch_percent": null,
+          "branch_not_applicable": true,
+          "credited_http_attempts": 1,
+          "token_usage": {
+            "prompt_tokens": 4553,
+            "completion_tokens": 1347,
+            "total_tokens": 5900
+          },
+          "seconds_including_shared_generation": 10.159476400003769,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "automatic_structure_only; see manual relation review for behavior assertions",
+            "annotated_edges": [],
+            "reported_confirmed_edges": [],
+            "missing_confirmed_edges": [],
+            "unsupported_confirmed_edges": [],
+            "reasonable_entries_selected": true,
+            "collaboration_scenarios": 0,
+            "collaboration_entry_targets": [],
+            "independent_control_respected": true,
+            "unresolved_source_calls": 2,
+            "planned_scenarios": 7
+          }
+        },
+        "feedback": {
+          "status": "needs_review",
+          "stop_reason": "ambiguous_specification",
+          "selected_round": 1,
+          "candidate_rounds": 1,
+          "executed_rounds": 1,
+          "runnable": true,
+          "all_passed": false,
+          "collected": 7,
+          "passed": 6,
+          "execution_kind": "assertion_failed",
+          "coverage_status": "available",
+          "line_percent": 100.0,
+          "branch_percent": null,
+          "branch_not_applicable": true,
+          "credited_http_attempts": 1,
+          "token_usage": {
+            "prompt_tokens": 4553,
+            "completion_tokens": 1347,
+            "total_tokens": 5900
+          },
+          "seconds_including_shared_generation": 10.236217599944212,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "automatic_structure_only; see manual relation review for behavior assertions",
+            "annotated_edges": [],
+            "reported_confirmed_edges": [],
+            "missing_confirmed_edges": [],
+            "unsupported_confirmed_edges": [],
+            "reasonable_entries_selected": true,
+            "collaboration_scenarios": 0,
+            "collaboration_entry_targets": [],
+            "independent_control_respected": true,
+            "unresolved_source_calls": 2,
+            "planned_scenarios": 7
+          }
+        }
+      },
+      "variants": {
+        "baseline": [],
+        "feedback": []
+      },
+      "shared_first_candidate_identical": true,
+      "change": {
+        "line_percent": 0.0,
+        "branch_percent": null,
+        "collected": 0,
+        "passed": 0,
+        "status_before": "needs_review",
+        "status_after": "needs_review",
+        "description": "no_coverage_change"
+      }
+    },
+    {
+      "case_id": "rotation",
+      "split": "holdout",
+      "modes": {
+        "baseline": {
+          "status": "failed",
+          "stop_reason": "unrecoverable_error",
+          "selected_round": null,
+          "candidate_rounds": 0,
+          "executed_rounds": 0,
+          "runnable": false,
+          "all_passed": false,
+          "collected": null,
+          "passed": null,
+          "execution_kind": null,
+          "coverage_status": "unavailable",
+          "line_percent": null,
+          "branch_percent": null,
+          "branch_not_applicable": false,
+          "credited_http_attempts": 2,
+          "token_usage": null,
+          "seconds_including_shared_generation": 13.04244899994228,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "unavailable"
+          }
+        },
+        "feedback": {
+          "status": "failed",
+          "stop_reason": "unrecoverable_error",
+          "selected_round": null,
+          "candidate_rounds": 0,
+          "executed_rounds": 0,
+          "runnable": false,
+          "all_passed": false,
+          "collected": null,
+          "passed": null,
+          "execution_kind": null,
+          "coverage_status": "unavailable",
+          "line_percent": null,
+          "branch_percent": null,
+          "branch_not_applicable": false,
+          "credited_http_attempts": 2,
+          "token_usage": null,
+          "seconds_including_shared_generation": 13.04094510001596,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "unavailable"
+          }
+        }
+      },
+      "variants": {
+        "baseline": [
+          {
+            "variant_id": "rotation_wrong_direction",
+            "affected_function": "rotate_left",
+            "status": "not_evaluable",
+            "reason": "generated tests did not pass the correct paired reference",
+            "attributed_failures": []
+          }
+        ],
+        "feedback": [
+          {
+            "variant_id": "rotation_wrong_direction",
+            "affected_function": "rotate_left",
+            "status": "not_evaluable",
+            "reason": "generated tests did not pass the correct paired reference",
+            "attributed_failures": []
+          }
+        ]
+      },
+      "shared_first_candidate_identical": true,
+      "change": {
+        "line_percent": null,
+        "branch_percent": null,
+        "collected": null,
+        "passed": null,
+        "status_before": "failed",
+        "status_after": "failed",
+        "description": "no_coverage_change"
+      }
+    },
+    {
+      "case_id": "packet",
+      "split": "holdout",
+      "modes": {
+        "baseline": {
+          "status": "completed",
+          "stop_reason": "coverage_target_met",
+          "selected_round": 1,
+          "candidate_rounds": 1,
+          "executed_rounds": 1,
+          "runnable": true,
+          "all_passed": true,
+          "collected": 11,
+          "passed": 11,
+          "execution_kind": "passed",
+          "coverage_status": "available",
+          "line_percent": 100.0,
+          "branch_percent": 100.0,
+          "branch_not_applicable": false,
+          "credited_http_attempts": 1,
+          "token_usage": {
+            "prompt_tokens": 5206,
+            "completion_tokens": 1994,
+            "total_tokens": 7200
+          },
+          "seconds_including_shared_generation": 11.421945800073445,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "automatic_structure_only; see manual relation review for behavior assertions",
+            "annotated_edges": [],
+            "reported_confirmed_edges": [],
+            "missing_confirmed_edges": [],
+            "unsupported_confirmed_edges": [],
+            "reasonable_entries_selected": true,
+            "collaboration_scenarios": 0,
+            "collaboration_entry_targets": [],
+            "independent_control_respected": true,
+            "unresolved_source_calls": 2,
+            "planned_scenarios": 11
+          }
+        },
+        "feedback": {
+          "status": "completed",
+          "stop_reason": "coverage_target_met",
+          "selected_round": 1,
+          "candidate_rounds": 1,
+          "executed_rounds": 1,
+          "runnable": true,
+          "all_passed": true,
+          "collected": 11,
+          "passed": 11,
+          "execution_kind": "passed",
+          "coverage_status": "available",
+          "line_percent": 100.0,
+          "branch_percent": 100.0,
+          "branch_not_applicable": false,
+          "credited_http_attempts": 1,
+          "token_usage": {
+            "prompt_tokens": 5206,
+            "completion_tokens": 1994,
+            "total_tokens": 7200
+          },
+          "seconds_including_shared_generation": 11.403546799905598,
+          "new_actual_http_attempts": 0,
+          "relations": {
+            "assessment": "automatic_structure_only; see manual relation review for behavior assertions",
+            "annotated_edges": [],
+            "reported_confirmed_edges": [],
+            "missing_confirmed_edges": [],
+            "unsupported_confirmed_edges": [],
+            "reasonable_entries_selected": true,
+            "collaboration_scenarios": 0,
+            "collaboration_entry_targets": [],
+            "independent_control_respected": true,
+            "unresolved_source_calls": 2,
+            "planned_scenarios": 11
+          }
+        }
+      },
+      "variants": {
+        "baseline": [],
+        "feedback": []
+      },
+      "shared_first_candidate_identical": true,
+      "change": {
+        "line_percent": 0.0,
+        "branch_percent": 0.0,
+        "collected": 0,
+        "passed": 0,
+        "status_before": "completed",
+        "status_after": "completed",
+        "description": "no_coverage_change"
+      }
+    }
+  ],
+  "aggregate": {
+    "baseline": {
+      "tasks": 8,
+      "runnable_tasks": 6,
+      "all_passed_tasks": 5,
+      "completed_tasks": 5,
+      "credited_http_attempts": 11,
+      "token_usage": null,
+      "seconds": 106.79072780022398,
+      "known_variants": 6,
+      "evaluable_variants": 4,
+      "detected_variants": 4,
+      "unattributed_failures": 0,
+      "mean_line_percent": 100.0,
+      "line_percent_available_tasks": 6,
+      "mean_branch_percent": 100.0,
+      "branch_percent_available_tasks": 5,
+      "coverage_unavailable_tasks": 2,
+      "branch_not_applicable_tasks": 1,
+      "runnable_rate": 0.75,
+      "all_passed_rate": 0.625,
+      "detection_rate": 1.0
+    },
+    "feedback": {
+      "tasks": 8,
+      "runnable_tasks": 6,
+      "all_passed_tasks": 5,
+      "completed_tasks": 5,
+      "credited_http_attempts": 11,
+      "token_usage": null,
+      "seconds": 107.60402220010292,
+      "known_variants": 6,
+      "evaluable_variants": 5,
+      "detected_variants": 5,
+      "unattributed_failures": 0,
+      "mean_line_percent": 100.0,
+      "line_percent_available_tasks": 6,
+      "mean_branch_percent": 100.0,
+      "branch_percent_available_tasks": 5,
+      "coverage_unavailable_tasks": 2,
+      "branch_not_applicable_tasks": 1,
+      "runnable_rate": 0.75,
+      "all_passed_rate": 0.625,
+      "detection_rate": 1.0
+    }
+  },
+  "aggregate_by_split": {
+    "development": {
+      "baseline": {
+        "tasks": 4,
+        "runnable_tasks": 3,
+        "all_passed_tasks": 3,
+        "completed_tasks": 3,
+        "credited_http_attempts": 6,
+        "token_usage": null,
+        "seconds": 60.87827820016537,
+        "known_variants": 4,
+        "evaluable_variants": 3,
+        "detected_variants": 3,
+        "unattributed_failures": 0,
+        "mean_line_percent": 100.0,
+        "line_percent_available_tasks": 3,
+        "mean_branch_percent": 100.0,
+        "branch_percent_available_tasks": 3,
+        "coverage_unavailable_tasks": 1,
+        "branch_not_applicable_tasks": 0,
+        "runnable_rate": 0.75,
+        "all_passed_rate": 0.75,
+        "detection_rate": 1.0
+      },
+      "feedback": {
+        "tasks": 4,
+        "runnable_tasks": 3,
+        "all_passed_tasks": 3,
+        "completed_tasks": 3,
+        "credited_http_attempts": 6,
+        "token_usage": null,
+        "seconds": 60.87802880012896,
+        "known_variants": 4,
+        "evaluable_variants": 4,
+        "detected_variants": 4,
+        "unattributed_failures": 0,
+        "mean_line_percent": 100.0,
+        "line_percent_available_tasks": 3,
+        "mean_branch_percent": 100.0,
+        "branch_percent_available_tasks": 3,
+        "coverage_unavailable_tasks": 1,
+        "branch_not_applicable_tasks": 0,
+        "runnable_rate": 0.75,
+        "all_passed_rate": 0.75,
+        "detection_rate": 1.0
+      }
+    },
+    "holdout": {
+      "baseline": {
+        "tasks": 4,
+        "runnable_tasks": 3,
+        "all_passed_tasks": 2,
+        "completed_tasks": 2,
+        "credited_http_attempts": 5,
+        "token_usage": null,
+        "seconds": 45.91244960005861,
+        "known_variants": 2,
+        "evaluable_variants": 1,
+        "detected_variants": 1,
+        "unattributed_failures": 0,
+        "mean_line_percent": 100.0,
+        "line_percent_available_tasks": 3,
+        "mean_branch_percent": 100.0,
+        "branch_percent_available_tasks": 2,
+        "coverage_unavailable_tasks": 1,
+        "branch_not_applicable_tasks": 1,
+        "runnable_rate": 0.75,
+        "all_passed_rate": 0.5,
+        "detection_rate": 1.0
+      },
+      "feedback": {
+        "tasks": 4,
+        "runnable_tasks": 3,
+        "all_passed_tasks": 2,
+        "completed_tasks": 2,
+        "credited_http_attempts": 5,
+        "token_usage": null,
+        "seconds": 46.72599339997396,
+        "known_variants": 2,
+        "evaluable_variants": 1,
+        "detected_variants": 1,
+        "unattributed_failures": 0,
+        "mean_line_percent": 100.0,
+        "line_percent_available_tasks": 3,
+        "mean_branch_percent": 100.0,
+        "branch_percent_available_tasks": 2,
+        "coverage_unavailable_tasks": 1,
+        "branch_not_applicable_tasks": 1,
+        "runnable_rate": 0.75,
+        "all_passed_rate": 0.5,
+        "detection_rate": 1.0
+      }
+    }
+  },
+  "physical_cost": {
+    "http_attempts": 11,
+    "actual_network_http_attempts": 11,
+    "token_usage": null,
+    "known_token_subtotal": {
+      "prompt_tokens": 35062,
+      "completion_tokens": 15146,
+      "total_tokens": 50208
+    },
+    "http_attempts_with_unknown_usage": 4
+  },
+  "paired_comparable_variants": {
+    "evaluable_variants": 4,
+    "baseline_detected": 4,
+    "feedback_detected": 4,
+    "variants": [
+      {
+        "variant_id": "quantity_accepts_zero",
+        "baseline_status": "detected",
+        "feedback_status": "detected"
+      },
+      {
+        "variant_id": "order_quantity_increment",
+        "baseline_status": "detected",
+        "feedback_status": "detected"
+      },
+      {
+        "variant_id": "labels_keep_case",
+        "baseline_status": "detected",
+        "feedback_status": "detected"
+      },
+      {
+        "variant_id": "score_excludes_80",
+        "baseline_status": "detected",
+        "feedback_status": "detected"
+      }
+    ]
+  },
+  "fairness_all_shared_first_candidates_identical": true,
+  "limitations": "Eight small tasks; one stochastic sample each. Coverage is not correctness. Credited mode costs share one physical seed. This is a small known-defect experiment, not a complete mutation system."
+}

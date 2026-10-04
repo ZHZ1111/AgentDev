@@ -150,7 +150,7 @@ def choose_action(state: AgentState) -> ActionDecision:
     if any(issue.kind == "environment_error" for issue in issues):
         return decision(AgentAction.FINISH, "环境缺少依赖，报告不支持或环境问题；不安装模型提出的依赖。", StopReason.UNRECOVERABLE_ERROR)
     if any(issue.kind == "suspected_source_defect" for issue in issues):
-        return decision(AgentAction.REQUEST_REVIEW, "失败断言有明确规格表格支持，报告疑似源码缺陷并保留用例。", StopReason.SUSPECTED_SOURCE_DEFECT)
+        return decision(AgentAction.REQUEST_REVIEW, "失败断言有明确规格证据支持，报告疑似源码缺陷并保留用例。", StopReason.SUSPECTED_SOURCE_DEFECT)
     if any(issue.requires_review for issue in issues):
         return decision(AgentAction.REQUEST_REVIEW, "真实失败的预期或责任依据不足，保留测试并请求人工确认。", StopReason.AMBIGUOUS_SPECIFICATION)
     if repeated_without_progress(state) and not (execution.all_passed and candidate.coverage is not None and candidate.coverage.meets_target):

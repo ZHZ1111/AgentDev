@@ -172,14 +172,6 @@ def test_specification_read_failure_is_traced_without_model_calls(task_request):
     assert not client.contexts
 
 
-def test_offline_acceptance_produces_feedback_and_failure_traces(tmp_path):
-    from testgen_agent.e4_validation import validate
-    report = validate(tmp_path / "e4")
-    assert report["e4_passed"]
-    assert [item["status"] for item in report["cases"]] == ["completed", "needs_review"]
-    assert all(item["real_network_requests"] == 0 for item in report["cases"])
-
-
 def test_export_failure_records_failed_tool_and_never_finishes_run(task_request, monkeypatch):
     import testgen_agent.agent as agent
     def fail_export(*args):

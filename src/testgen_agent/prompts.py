@@ -16,7 +16,7 @@ from .tools.code_analyzer import (
 from .tools.coverage_mapper import build_coverage_source_hints
 
 
-PROMPT_VERSION = "b3-v5"
+PROMPT_VERSION = "b3-v6"
 TASK_DATA_START = "TASK_DATA_JSON_START"
 TASK_DATA_END = "TASK_DATA_JSON_END"
 MAX_TOOL_LOG_CHARS = 12_000
@@ -132,10 +132,12 @@ SUPPORTED TASK
 - Do not turn every call edge into a collaboration test. Add one only when it verifies behavior beyond focused unit cases; otherwise select not_selected and explain why.
 - For an entry function that calls dependencies, invoke the real entry and its real same-file dependencies. For an explicitly supported data pipeline without one entry, use ordered steps and step_result references; do not invent workflows from names or compatible types.
 - Every scenario and every assertion needs a concrete expected_basis: specification, docstring, or implementation_assumption. A characterization oracle describes current behavior and does not prove correctness.
+- For a specification or docstring expected_basis, detail must be the shortest exact supporting quote copied verbatim from that oracle, not a paraphrase. This lets the host connect a failed assertion to user-provided evidence.
 - Prefer specific input/output assertions, pytest.raises for specified exceptions, and focused parametrization. A mere function call, `assert True`, or an assertion unrelated to the stated expectation is invalid.
 
 AMBIGUITY AND ORACLES
-- A behavior specification and docstring are both evidence. If they conflict, report the exact conflict in questions and do not silently select one.
+- In specification mode, the supplied behavior_specification is the authoritative oracle. A mismatch between that specification and the current implementation is a candidate source defect, not ambiguity: generate the specification-backed assertion, leave questions empty, and let the host execute it.
+- When no supplied behavior_specification defines a behavior, a docstring may provide its oracle. Ask a blocking question only when the highest-priority available oracle is itself missing, contradictory, or genuinely unclear; do not ask merely because implementation code would fail an explicit specification.
 - Do not assert a return value or exception type for an input whose expected behavior is undefined.
 - questions is a blocking review channel: any nonempty question stops automatic execution. An explicitly excluded input domain or inapplicable test category is a scope boundary, not an unresolved question. Record such omissions in assumptions, keep supported tests, and leave questions empty when their expectations are unambiguous. Never invent an oracle for omitted inputs.
 - If uncertainty blocks all sound assertions, return code as null, mappings as an empty list, and at least one precise question. Otherwise omit only the uncertain scenario, keep sound tests, and list the unresolved question.
@@ -156,7 +158,7 @@ OUTPUT
 _INITIAL_RULES = """
 
 INITIAL GENERATION
-- Use the requested oracle_mode exactly. In specification mode, ground expectations in the supplied behavior specification or docstrings and surface conflicts. In characterization mode, label every expected basis as implementation_assumption.
+- Use the requested oracle_mode exactly. In specification mode, ground expectations in the supplied behavior specification first and otherwise in supported docstrings. Treat implementation disagreement as a test target, not a blocking question. In characterization mode, label every expected basis as implementation_assumption.
 - Inspect the listed source branches, call sites, confirmed direct calls, and unresolved calls. Decide candidate entries and unit/collaboration coverage without duplicating equivalent cases.
 - RelationshipAnalysis combines tool facts with your explanation. A confirmed direct_call must cite matching call_site_ids from direct_calls; candidate data_flow relationships need source/specification evidence; unknown relationships retain a precise unresolved question. Nested calls such as b(a(x)) and a simple assignment passed to a later call may support data-flow analysis; do not infer complex alias, container, or state flow.
 - Keep dynamic unresolved calls and shared mutable state uncertain unless explicit source plus specification evidence supports a bounded relationship. Do not turn this task into whole-program state or points-to analysis.
@@ -168,7 +170,7 @@ _FEEDBACK_RULES = """
 
 FEEDBACK REVISION
 - Revise the previous relationship analysis, strategy, plan, and complete candidate using only the supplied source, behavioral evidence, and real host-tool observations.
-- Preserve evidence-backed assertions. A specification-backed assertion failure can indicate a source defect; keep the assertion and expose the conflict in questions instead of changing the expected value to match the implementation.
+- Preserve evidence-backed assertions. A specification-backed assertion failure can indicate a source defect; keep the assertion and leave questions empty when the specification already defines the expected behavior. Never change the expected value to match the implementation.
 - Repair candidate syntax, import, collection, or execution errors when the evidence identifies a test defect. Add focused scenarios for missing lines or branch arcs when their expected behavior is supportable. Decide whether the gap belongs to an entry workflow, an internal function boundary, or neither; preserve prior relationship IDs when the evidence has not changed.
 - Do not guess when coverage is unavailable, logs are truncated, or failure attribution is ambiguous. Record the remaining question.
 - Respect the supplied requested_round and remaining budget. Return one complete replacement GeneratedTests object, not a patch or diff.

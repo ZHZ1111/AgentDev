@@ -1,0 +1,367 @@
+{
+  "provenance": "Post-run manual inspection of saved source/plan/tests and actual failures; never supplied to the model",
+  "cases": [
+    {
+      "case_id": "order",
+      "assessment": "confirmed: real entry assertions cover price times validated quantity and propagation of TypeError/ValueError",
+      "assertion_tests": [
+        "test_order_total_normal",
+        "test_order_total_typeerror_propagation",
+        "test_order_total_valueerror_propagation"
+      ],
+      "limitations": "passing normal components alone is insufficient; entry numeric assertion also fails order_quantity_increment",
+      "modes": {
+        "baseline": {
+          "selected_round": 1,
+          "test_sha256": "fcd9bc2ebddcc785887dbe1111c53ae161762af0a705dffb10f73f1010e231c4",
+          "proof": [
+            {
+              "test_function": "test_order_total_normal",
+              "line": 42,
+              "end_line": 43,
+              "code": "def test_order_total_normal():\n    assert order_total(4, 6) == 24"
+            },
+            {
+              "test_function": "test_order_total_typeerror_propagation",
+              "line": 46,
+              "end_line": 48,
+              "code": "def test_order_total_typeerror_propagation():\n    with pytest.raises(TypeError):\n        order_total(4, 2.5)"
+            },
+            {
+              "test_function": "test_order_total_valueerror_propagation",
+              "line": 51,
+              "end_line": 53,
+              "code": "def test_order_total_valueerror_propagation():\n    with pytest.raises(ValueError):\n        order_total(4, 0)"
+            }
+          ],
+          "confirmed_relationships": [
+            {
+              "relation_id": "rel-order_total-validate_quantity",
+              "kind": "direct_call",
+              "involved_functions": [
+                "order_total",
+                "validate_quantity"
+              ],
+              "evidence": [
+                {
+                  "kind": "source",
+                  "detail": "order_total directly calls validate_quantity at line 17",
+                  "line": 17,
+                  "call_site_ids": [
+                    "call:order_total:17:14:17:41"
+                  ]
+                }
+              ],
+              "confidence": "confirmed",
+              "unresolved_questions": []
+            },
+            {
+              "relation_id": "rel-order_total-subtotal",
+              "kind": "direct_call",
+              "involved_functions": [
+                "order_total",
+                "subtotal"
+              ],
+              "evidence": [
+                {
+                  "kind": "source",
+                  "detail": "order_total directly calls subtotal at line 18",
+                  "line": 18,
+                  "call_site_ids": [
+                    "call:order_total:18:11:18:40"
+                  ]
+                }
+              ],
+              "confidence": "confirmed",
+              "unresolved_questions": []
+            },
+            {
+              "relation_id": "rel-validated-quantity-flow",
+              "kind": "data_flow",
+              "involved_functions": [
+                "order_total",
+                "validate_quantity",
+                "subtotal"
+              ],
+              "evidence": [
+                {
+                  "kind": "source",
+                  "detail": "checked = validate_quantity(quantity) then subtotal(unit_price, checked) passes the validated value to subtotal",
+                  "line": 18,
+                  "call_site_ids": [
+                    "call:order_total:17:14:17:41",
+                    "call:order_total:18:11:18:40"
+                  ]
+                },
+                {
+                  "kind": "specification",
+                  "detail": "order_total uses validate_quantity's returned quantity to call subtotal",
+                  "line": null,
+                  "call_site_ids": []
+                }
+              ],
+              "confidence": "confirmed",
+              "unresolved_questions": []
+            }
+          ],
+          "collaboration_scenarios": [
+            "order-total-normal",
+            "order-total-typeerror-propagation",
+            "order-total-valueerror-propagation"
+          ]
+        },
+        "feedback": {
+          "selected_round": 1,
+          "test_sha256": "fcd9bc2ebddcc785887dbe1111c53ae161762af0a705dffb10f73f1010e231c4",
+          "proof": [
+            {
+              "test_function": "test_order_total_normal",
+              "line": 42,
+              "end_line": 43,
+              "code": "def test_order_total_normal():\n    assert order_total(4, 6) == 24"
+            },
+            {
+              "test_function": "test_order_total_typeerror_propagation",
+              "line": 46,
+              "end_line": 48,
+              "code": "def test_order_total_typeerror_propagation():\n    with pytest.raises(TypeError):\n        order_total(4, 2.5)"
+            },
+            {
+              "test_function": "test_order_total_valueerror_propagation",
+              "line": 51,
+              "end_line": 53,
+              "code": "def test_order_total_valueerror_propagation():\n    with pytest.raises(ValueError):\n        order_total(4, 0)"
+            }
+          ],
+          "confirmed_relationships": [
+            {
+              "relation_id": "rel-order_total-validate_quantity",
+              "kind": "direct_call",
+              "involved_functions": [
+                "order_total",
+                "validate_quantity"
+              ],
+              "evidence": [
+                {
+                  "kind": "source",
+                  "detail": "order_total directly calls validate_quantity at line 17",
+                  "line": 17,
+                  "call_site_ids": [
+                    "call:order_total:17:14:17:41"
+                  ]
+                }
+              ],
+              "confidence": "confirmed",
+              "unresolved_questions": []
+            },
+            {
+              "relation_id": "rel-order_total-subtotal",
+              "kind": "direct_call",
+              "involved_functions": [
+                "order_total",
+                "subtotal"
+              ],
+              "evidence": [
+                {
+                  "kind": "source",
+                  "detail": "order_total directly calls subtotal at line 18",
+                  "line": 18,
+                  "call_site_ids": [
+                    "call:order_total:18:11:18:40"
+                  ]
+                }
+              ],
+              "confidence": "confirmed",
+              "unresolved_questions": []
+            },
+            {
+              "relation_id": "rel-validated-quantity-flow",
+              "kind": "data_flow",
+              "involved_functions": [
+                "order_total",
+                "validate_quantity",
+                "subtotal"
+              ],
+              "evidence": [
+                {
+                  "kind": "source",
+                  "detail": "checked = validate_quantity(quantity) then subtotal(unit_price, checked) passes the validated value to subtotal",
+                  "line": 18,
+                  "call_site_ids": [
+                    "call:order_total:17:14:17:41",
+                    "call:order_total:18:11:18:40"
+                  ]
+                },
+                {
+                  "kind": "specification",
+                  "detail": "order_total uses validate_quantity's returned quantity to call subtotal",
+                  "line": null,
+                  "call_site_ids": []
+                }
+              ],
+              "confidence": "confirmed",
+              "unresolved_questions": []
+            }
+          ],
+          "collaboration_scenarios": [
+            "order-total-normal",
+            "order-total-typeerror-propagation",
+            "order-total-valueerror-propagation"
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "labels",
+      "assessment": "confirmed: real formatting entry consumes normalization, preserves order and duplicates, drops empty labels and formats empty/Unicode cases",
+      "assertion_tests": [
+        "test_unit_format_normal",
+        "test_unit_format_empty",
+        "test_unit_format_all_empty_input",
+        "test_collab_format_through_normalize"
+      ],
+      "limitations": "three dynamic attribute calls stay unresolved; they are not claimed as confirmed edges",
+      "modes": {
+        "baseline": {
+          "selected_round": 1,
+          "test_sha256": "b3b1106dad5a7befc2bc00219a5c4a074e2933552d7e40be1d0e7ed6e534d285",
+          "proof": [
+            {
+              "test_function": "test_unit_format_normal",
+              "line": 21,
+              "end_line": 22,
+              "code": "def test_unit_format_normal():\n    assert format_labels([\" B \", \"A\", \"a\"]) == \"b, a, a\""
+            },
+            {
+              "test_function": "test_unit_format_empty",
+              "line": 25,
+              "end_line": 26,
+              "code": "def test_unit_format_empty():\n    assert format_labels([]) == \"\""
+            },
+            {
+              "test_function": "test_unit_format_all_empty_input",
+              "line": 29,
+              "end_line": 30,
+              "code": "def test_unit_format_all_empty_input():\n    assert format_labels([\"\", \"  \"]) == \"\""
+            },
+            {
+              "test_function": "test_collab_format_through_normalize",
+              "line": 33,
+              "end_line": 34,
+              "code": "def test_collab_format_through_normalize():\n    assert format_labels([\" \\u4e2d\\u6587 \", \"X\", \"x\"]) == \"\\u4e2d\\u6587, x, x\""
+            }
+          ],
+          "confirmed_relationships": [
+            {
+              "relation_id": "rel-format-normalize",
+              "kind": "direct_call",
+              "involved_functions": [
+                "format_labels",
+                "normalize_labels"
+              ],
+              "evidence": [
+                {
+                  "kind": "source",
+                  "detail": "format_labels directly calls normalize_labels on the input labels",
+                  "line": 14,
+                  "call_site_ids": [
+                    "call:format_labels:14:21:14:45"
+                  ]
+                },
+                {
+                  "kind": "specification",
+                  "detail": "The specification states format_labels calls the real normalize_labels and joins its result with \", \".",
+                  "line": null,
+                  "call_site_ids": []
+                }
+              ],
+              "confidence": "confirmed",
+              "unresolved_questions": []
+            }
+          ],
+          "collaboration_scenarios": [
+            "collab-format-through-normalize"
+          ]
+        },
+        "feedback": {
+          "selected_round": 1,
+          "test_sha256": "b3b1106dad5a7befc2bc00219a5c4a074e2933552d7e40be1d0e7ed6e534d285",
+          "proof": [
+            {
+              "test_function": "test_unit_format_normal",
+              "line": 21,
+              "end_line": 22,
+              "code": "def test_unit_format_normal():\n    assert format_labels([\" B \", \"A\", \"a\"]) == \"b, a, a\""
+            },
+            {
+              "test_function": "test_unit_format_empty",
+              "line": 25,
+              "end_line": 26,
+              "code": "def test_unit_format_empty():\n    assert format_labels([]) == \"\""
+            },
+            {
+              "test_function": "test_unit_format_all_empty_input",
+              "line": 29,
+              "end_line": 30,
+              "code": "def test_unit_format_all_empty_input():\n    assert format_labels([\"\", \"  \"]) == \"\""
+            },
+            {
+              "test_function": "test_collab_format_through_normalize",
+              "line": 33,
+              "end_line": 34,
+              "code": "def test_collab_format_through_normalize():\n    assert format_labels([\" \\u4e2d\\u6587 \", \"X\", \"x\"]) == \"\\u4e2d\\u6587, x, x\""
+            }
+          ],
+          "confirmed_relationships": [
+            {
+              "relation_id": "rel-format-normalize",
+              "kind": "direct_call",
+              "involved_functions": [
+                "format_labels",
+                "normalize_labels"
+              ],
+              "evidence": [
+                {
+                  "kind": "source",
+                  "detail": "format_labels directly calls normalize_labels on the input labels",
+                  "line": 14,
+                  "call_site_ids": [
+                    "call:format_labels:14:21:14:45"
+                  ]
+                },
+                {
+                  "kind": "specification",
+                  "detail": "The specification states format_labels calls the real normalize_labels and joins its result with \", \".",
+                  "line": null,
+                  "call_site_ids": []
+                }
+              ],
+              "confidence": "confirmed",
+              "unresolved_questions": []
+            }
+          ],
+          "collaboration_scenarios": [
+            "collab-format-through-normalize"
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "independent",
+      "assessment": "unavailable: GeneratedTests structure validation failed after one format repair; no accepted plan or executed tests",
+      "assertion_tests": [],
+      "limitations": "cannot conclude independent strategy respected; this failure stays in both task denominators",
+      "modes": {
+        "baseline": {
+          "selected_round": null,
+          "assessment": "unavailable"
+        },
+        "feedback": {
+          "selected_round": null,
+          "assessment": "unavailable"
+        }
+      }
+    }
+  ],
+  "unknown_relations_are_not_confirmed": true
+}

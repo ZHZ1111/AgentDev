@@ -1,0 +1,16 @@
+{
+  "stage": "final-web-validation",
+  "tested_at": "2026-10-04",
+  "model": "deepseek-flash",
+  "run_id": "b652cf78a90a",
+  "status": "needs_review",
+  "stop_reason": "suspected_source_defect",
+  "generated_tests": 14,
+  "passed": 13,
+  "failed": 1,
+  "line_percent": 100.0,
+  "branch_percent": 100.0,
+  "model_requests": 2,
+  "total_tokens": 20486,
+  "conclusion": "The specification says amount 100 receives a 10% discount, while the supplied implementation applies the discount only above 100. The generated boundary assertion was preserved for review."
+}

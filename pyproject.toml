@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "testgen-agent"
 version = "0.1.0"
-description = "A small Python unit-test generation agent using DeepSeek"
+description = "A local Python test-generation agent using DeepSeek, pytest and coverage"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
 dependencies = [

@@ -1,8 +1,9 @@
 """Conservative E2 failure attribution using observed exceptions and explicit oracles.
 
-Only literal single-argument equality assertions against unambiguous two-column
-specification tables are automatically supported. General prose, exception
-oracles, workflows and uncertain provenance require review rather than guesses.
+Only literal single-argument equality assertions grounded by an unambiguous
+two-column specification table or an exact oracle quote are automatically
+supported. Exception oracles, workflows and uncertain provenance require
+review rather than guesses.
 """
 
 from __future__ import annotations
@@ -83,11 +84,20 @@ def _supported_assertion(state: AgentState, candidate: CandidateRound, failure: 
         return None
     if type(scenario.inputs.args[0]) is not type(argument) or scenario.inputs.args[0] != argument:
         return None
-    tables = _table_values(state.behavior_specification or "", argument)
-    tables += _table_values(source.functions[0].docstring or "", argument)
-    if not tables or any(type(value) is not type(expected) or value != expected for value, _ in tables):
+    specification = state.behavior_specification or ""
+    if specification.strip():
+        oracle = specification if scenario.expected_basis.kind == "specification" else ""
+    else:
+        oracle = source.functions[0].docstring or ""
+    tables = _table_values(oracle, argument)
+    if tables:
+        if any(type(value) is not type(expected) or value != expected for value, _ in tables):
+            return None
+        return scenario.scenario_id, tables[0][1]
+    quote = scenario.expected_basis.detail.strip()
+    if not quote or quote not in oracle:
         return None
-    return scenario.scenario_id, tables[0][1]
+    return scenario.scenario_id, quote
 
 
 def classify_failures(state: AgentState, candidate: CandidateRound) -> tuple[Issue, ...]:
@@ -109,7 +119,7 @@ def classify_failures(state: AgentState, candidate: CandidateRound) -> tuple[Iss
             supported = _supported_assertion(state, candidate, failure)
             if supported is not None:
                 scenario_id, quote = supported
-                issues.append(Issue(kind="suspected_source_defect", summary="真实失败断言与明确规格表格一致，疑似源码缺陷；保留预期和用例。",
+                issues.append(Issue(kind="suspected_source_defect", summary="真实失败断言与明确规格证据一致，疑似源码缺陷；保留预期和用例。",
                                     evidence=(*evidence, f"规格原文：{quote}"),
                                     round_number=candidate.number, scenario_id=scenario_id))
                 continue

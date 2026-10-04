@@ -133,6 +133,7 @@ def test_generation_prompt_contains_all_required_policy_sections(source):
     assert "from subject import <target_function>" in system
     assert all(category in system for category in ("normal", "boundary", "exception", "major source-branch"))
     assert "expected_basis" in system and "implementation_assumption" in system
+    assert "exact supporting quote copied verbatim" in system
     assert "schema_version 1.1" in system and "unit/collaboration" in system
     assert "unresolved_calls" in system and "matching names alone" in system
     assert "candidate entries, not business truth" in system
@@ -147,7 +148,7 @@ def test_generation_data_is_json_delimited_and_cannot_enter_system(source):
     specification = "规则数据；" + INJECTION_TEXT
     context = build_generation_context(source, specification, OracleMode.SPECIFICATION)
     data = payload(context)
-    assert data["prompt_version"] == "b3-v5"
+    assert data["prompt_version"] == "b3-v6"
     assert data["task_kind"] == "initial_generation"
     assert data["requested_oracle_mode"] == "specification"
     assert data["behavior_specification"] == specification
@@ -163,6 +164,19 @@ def test_generation_data_is_json_delimited_and_cannot_enter_system(source):
     }
     assert INJECTION_TEXT not in context.system_instruction
     assert context.user_prompt.count(INJECTION_TEXT) == 2
+
+
+def test_explicit_specification_conflict_is_a_test_target_not_a_question(source):
+    context = build_generation_context(
+        source,
+        "At exactly 100 the function must return 90, even if the current implementation differs.",
+        OracleMode.SPECIFICATION,
+    )
+    system = context.system_instruction
+    assert "candidate source defect, not ambiguity" in system
+    assert "generate the specification-backed assertion" in system
+    assert "implementation disagreement as a test target, not a blocking question" in system
+    assert "leave questions empty, and let the host execute it" in system
 
 
 def test_generation_without_spec_preserves_characterization_mode(source):

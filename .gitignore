@@ -28,14 +28,6 @@ outputs/
 tmp/
 *.log
 
-# F1 selected raw acceptance evidence (no coverage databases or credentials)
-!evaluation/f1/**/coverage.json
-!evaluation/f1/**/*.log
-
-# F2 handwritten fixture-validation evidence
-!evaluation/f2/**/coverage.json
-!evaluation/f2/**/*.log
-
-# F3/F4 paired model and defect experiment evidence
-!evaluation/f3_f4/**/coverage.json
-!evaluation/f3_f4/**/*.log
+# The archive is deliberately retained as read-only development history.
+!archive/
+!archive/**

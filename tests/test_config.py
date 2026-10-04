@@ -8,9 +8,11 @@ import sys
 import httpx
 import pytest
 
+import testgen_agent.cli as cli
 from testgen_agent.cli import main
 from testgen_agent.config import ConfigError, load_config
 from testgen_agent.llm_client import create_http_client
+from testgen_agent.models import StopReason, TaskStatus
 
 
 @pytest.fixture
@@ -92,6 +94,43 @@ def test_cli_success_and_config_failure_have_distinct_exit_codes(configured_envi
     assert '"max_rounds": 1' in output.out
     assert main(["--check-config", "--max-rounds", "4"]) == 2
     assert "1..3" in capsys.readouterr().err
+
+
+def test_cli_runs_agent_with_source_spec_and_fresh_output(configured_environment, tmp_path, monkeypatch, capsys):
+    for key, value in configured_environment.items():
+        monkeypatch.setenv(key, value)
+    source = tmp_path / "subject.py"
+    spec = tmp_path / "behavior.md"
+    output = tmp_path / "run"
+    source.write_text("def double(value):\n    return value * 2\n", encoding="utf-8")
+    spec.write_text("double(3) returns 6.\n", encoding="utf-8")
+    captured = {}
+
+    class FakeResult:
+        decision = type("Decision", (), {"status": TaskStatus.COMPLETED})()
+        state = type("State", (), {"stop_reason": StopReason.COVERAGE_TARGET_MET})()
+        final_test_file = output / "test_subject.py"
+        summary_file = output / "summary.json"
+
+    monkeypatch.setattr(cli, "DeepSeekClient", lambda config: object())
+
+    def fake_run(request, **kwargs):
+        captured["request"] = request
+        captured.update(kwargs)
+        return FakeResult()
+
+    monkeypatch.setattr(cli, "run_agent", fake_run)
+    assert main(["--source", str(source), "--spec", str(spec), "--output", str(output)]) == 0
+    assert captured["request"].source_path == source
+    assert captured["request"].output_dir == output
+    assert captured["behavior_specification"] == "double(3) returns 6.\n"
+    assert json.loads(capsys.readouterr().out)["status"] == "completed"
+
+
+def test_cli_requires_source_and_spec_together():
+    with pytest.raises(SystemExit) as caught:
+        main(["--source", "subject.py"])
+    assert caught.value.code == 2
 
 
 def test_mock_transport_keeps_base_path_and_uses_configured_timeout(configured_environment):

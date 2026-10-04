@@ -86,6 +86,19 @@ def test_generated_oracle_label_alone_does_not_prove_bug():
     assert choose_action(state).stop_reason == "ambiguous_specification"
 
 
+def test_exact_prose_quote_supports_suspected_defect_without_a_table():
+    spec = "At exactly 100, return 90."
+    state = discount_state(spec=spec)
+    candidate = state.history[0]
+    scenario = candidate.generated.plan.scenarios[0].updated(
+        expected_basis=m.ExpectedBasis(kind="specification", detail=spec))
+    generated = candidate.generated.updated(plan=candidate.generated.plan.updated(scenarios=(scenario,)))
+    state = state.updated(history=(candidate.updated(generated=generated),))
+    decision = choose_action(state)
+    assert decision.stop_reason == "suspected_source_defect"
+    assert decision.issues[0].evidence[-1] == f"规格原文：{spec}"
+
+
 @pytest.mark.parametrize("exception,origin,module,action,issue", [
     ("NameError", "test_subject.py", None, "repair_generated_test", "generation_error"),
     ("ImportError", "test_subject.py", None, "repair_generated_test", "generation_error"),
@@ -146,11 +159,11 @@ def test_changed_or_improved_candidate_is_not_rejected_as_repetition(source):
     assert choose_action(state).stop_reason == "coverage_target_met"
 
 
-def test_docstring_table_conflict_prevents_defect_claim():
+def test_explicit_specification_has_priority_over_conflicting_docstring():
     state = discount_state()
     function = state.source_info.functions[0].updated(docstring="| 输入 | 预期 |\n|---|---|\n|100|100|")
     state = state.updated(source_info=state.source_info.updated(functions=(function,)))
-    assert choose_action(state).stop_reason == "ambiguous_specification"
+    assert choose_action(state).stop_reason == "suspected_source_defect"
 
 
 def test_characterization_failure_never_claims_specification_bug():
