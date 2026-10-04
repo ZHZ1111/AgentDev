@@ -29,6 +29,7 @@ Copy-Item .env.example .env
 ```dotenv
 LLM_MODEL=deepseek-flash
 DEEPSEEK_API_KEY=your-real-key
+LLM_MAX_TOKENS=8192
 ```
 
 `.env` 已被 Git 忽略。程序不会把 Key 写入报告、轨迹或模型上下文。
@@ -86,14 +87,15 @@ Get-NetTCPConnection -LocalPort 8765 -ErrorAction SilentlyContinue
 | `rounds/NN/executions/` | pytest、JUnit、coverage 和日志 |
 | `test_subject.py` | 选中的最终测试 |
 | `state.json` | 完整 Agent 状态 |
-| `summary.json` | 面向展示的结果摘要 |
+| `summary.json` | 含结论、核心指标与范围的机器可读摘要 |
+| `report.md` | 面向用户的完整报告，包含最终结论、测试数据、覆盖率、场景和限制 |
 | `trace.jsonl` | 按顺序追加的执行轨迹 |
 
 生成的测试会在本机执行，因此只应提交可信的 Python 源码和规格。
 
 ## 示例与测试
 
-`examples/` 保留五组主要样例：正常计算、多分支校验、明确边界缺陷、同文件直接调用和同文件独立函数。
+`examples/` 包含正常计算、多分支校验、明确边界缺陷、同文件直接调用、同文件独立函数，以及较复杂的订单结算样例。订单样例由 `order_flow.py`、`order_flow.md` 和手写参考测试 `test_order_flow.py` 组成；参考测试可用 `python -m pytest -q examples/test_order_flow.py` 单独运行。
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q -W error

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="8" time="0.134" timestamp="2026-10-03T10:35:55.013345+08:00" hostname="LAPTOP-EBC70KOR"><testcase classname="rounds.01.test_subject" name="test_score_negative" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_score_zero" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_score_59" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_score_60" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_score_79" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_score_80" time="0.002"><failure message="AssertionError: assert 'middle' == 'high'&#10;  &#10;  - high&#10;  + middle">rounds\01\test_subject.py:55: in test_score_80
-    assert actual == 'high'
-E   AssertionError: assert 'middle' == 'high'
-E     
-E     - high
-E     + middle</failure></testcase><testcase classname="rounds.01.test_subject" name="test_score_100" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_score_above" time="0.002" /></testsuite></testsuites>

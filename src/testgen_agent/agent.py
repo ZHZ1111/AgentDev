@@ -316,6 +316,7 @@ class AgentRunResult:
     final_test_file: Path | None
     state_file: Path
     summary_file: Path
+    report_file: Path
     trace_file: Path
     metadata_file: Path
 
@@ -476,21 +477,22 @@ def run_agent(
         state = apply_decision(state, decision)
         steps.append(decision)
         record_decision(decision)
-    final_path, state_file, summary_file = tool_call(
+    final_path, state_file, summary_file, report_file = tool_call(
         "export_results", lambda: _export_results(root, state, decision, trace),
         "保存结束状态、真实停止原因与选中候选，保留历史证据。",
         number=state.current_round, action=decision.action,
         inputs={"selected_round": state.best_available_round},
         summarize=lambda paths: {"final_test_file": str(paths[0]) if paths[0] else None,
-                                 "state_file": str(paths[1]), "summary_file": str(paths[2])},
+                                 "state_file": str(paths[1]), "summary_file": str(paths[2]),
+                                 "report_file": str(paths[3])},
     )
     trace.record(state, "run_finished", decision.reason, action=decision.action,
                  result={"status": decision.status, "stop_reason": state.stop_reason, "selected_round": state.best_available_round,
                          "final_test_file": str(final_path.relative_to(root)) if final_path else None,
-                         "state_file": "state.json", "summary_file": "summary.json",
+                         "state_file": "state.json", "summary_file": "summary.json", "report_file": "report.md",
                          "api_calls": state.api_calls, "token_usage": state.token_usage.model_dump() if state.token_usage else None})
     return AgentRunResult(state=state, decision=decision, steps=tuple(steps), final_test_file=final_path,
-                          state_file=state_file, summary_file=summary_file, trace_file=trace.path,
+                          state_file=state_file, summary_file=summary_file, report_file=report_file, trace_file=trace.path,
                           metadata_file=trace.metadata_path)
 
 
@@ -512,15 +514,11 @@ def _export_results(root: Path, state: AgentState, decision: ActionDecision, tra
         selected = state.history[state.best_available_round - 1]
         final_path = root / "test_subject.py"
         final_path.write_text(selected.generated.code, encoding="utf-8")
-    state_file, summary_file = root / "state.json", root / "summary.json"
+    from .reporting import build_summary, render_markdown_report
+
+    state_file, summary_file, report_file = root / "state.json", root / "summary.json", root / "report.md"
     state_file.write_text(state.canonical_json(indent=2) + "\n", encoding="utf-8")
-    summary = {"run_id": state.run_id, "status": decision.status, "stop_reason": state.stop_reason,
-               "reason": decision.reason, "selected_round": state.best_available_round,
-               "final_test_file": str(final_path) if final_path else None,
-               "candidate_rounds": state.current_round,
-               "executed_rounds": sum(item.execution is not None for item in state.history),
-               "api_calls": state.api_calls, "token_usage": state.token_usage.model_dump() if state.token_usage else None,
-               "trace_file": str(trace.path), "metadata_file": str(trace.metadata_path),
-               "unresolved_issues": [item.model_dump(mode="json") for item in state.issues]}
+    summary = build_summary(state, decision, final_path, trace)
     summary_file.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return final_path, state_file, summary_file
+    report_file.write_text(render_markdown_report(state, decision, summary) + "\n", encoding="utf-8")
+    return final_path, state_file, summary_file, report_file

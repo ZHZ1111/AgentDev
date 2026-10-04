@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="7" time="0.125" timestamp="2026-10-03T20:21:12.265665+08:00" hostname="LAPTOP-EBC70KOR"><testcase classname="rounds.01.test_subject" name="test_initials_normal_basic" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_initials_normal_multi_whitespace" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_initials_normal_single_word" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_initials_boundary_empty" time="0.001" /><testcase classname="rounds.01.test_subject" name="test_initials_boundary_all_whitespace" time="0.002" /><testcase classname="rounds.01.test_subject" name="test_initials_branch_multichar_upper" time="0.002"><failure message="AssertionError: assert 'ST' == 'STEST'&#10;  &#10;  - STEST&#10;  + ST">rounds\01\test_subject.py:25: in test_initials_branch_multichar_upper
-    assert initials("straße test") == "STEST"
-E   AssertionError: assert 'ST' == 'STEST'
-E     
-E     - STEST
-E     + ST</failure></testcase><testcase classname="rounds.01.test_subject" name="test_initials_branch_punctuation_cjk" time="0.002" /></testsuite></testsuites>

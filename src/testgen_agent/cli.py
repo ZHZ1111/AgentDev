@@ -33,6 +33,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--base-url", help="DeepSeek 服务地址")
     parser.add_argument("--api-key-env", help="保存 API Key 的环境变量名；不接受明文 Key")
     parser.add_argument("--request-timeout", type=int, dest="request_timeout_seconds", help="模型请求超时，1..600 秒")
+    parser.add_argument("--max-tokens", type=int, help="单次模型输出上限，1024..32768；默认 8192")
     parser.add_argument("--max-rounds", type=int, help="候选执行轮数，1..3（含首轮）")
     parser.add_argument("--timeout", type=int, dest="execution_timeout_seconds", help="单轮测试执行超时，1..300 秒")
     return parser
@@ -65,7 +66,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     overrides = {
         field: getattr(args, field)
         for field in (
-            "provider", "model", "base_url", "api_key_env", "request_timeout_seconds",
+            "provider", "model", "base_url", "api_key_env", "request_timeout_seconds", "max_tokens",
             "max_rounds", "execution_timeout_seconds",
         )
     }
@@ -103,9 +104,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     summary = {
         "status": result.decision.status,
         "stop_reason": result.state.stop_reason,
+        "conclusion": json.loads(result.summary_file.read_text(encoding="utf-8"))["conclusion"],
         "output_dir": str(output.resolve()),
         "test_file": str(result.final_test_file.resolve()) if result.final_test_file else None,
         "summary_file": str(result.summary_file.resolve()),
+        "report_file": str(result.report_file.resolve()),
     }
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0 if result.decision.status in {TaskStatus.COMPLETED, TaskStatus.PARTIAL} else 1

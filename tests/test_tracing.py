@@ -124,7 +124,7 @@ def test_deepseek_mock_trace_records_config_repairs_and_usage_without_key(task_r
     trace_text = result.trace_file.read_text(encoding="utf-8")
     assert key not in metadata_text + trace_text
     assert "Authorization" not in metadata_text + trace_text
-    assert json.loads(metadata_text)["adapter_config"]["max_http_attempts"] == 2
+    assert json.loads(metadata_text)["adapter_config"]["max_http_attempts"] == 3
 
 
 def test_run_ids_are_independent_and_existing_run_trace_is_never_overwritten(task_request):

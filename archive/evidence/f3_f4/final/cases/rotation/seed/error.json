@@ -1,7 +1,0 @@
-{
-  "code": "invalid_generated_output",
-  "message": "DeepSeek 输出未通过 GeneratedTests 结构校验，且格式修复预算已用尽。",
-  "retryable": false,
-  "attempts": 2,
-  "status_code": null
-}

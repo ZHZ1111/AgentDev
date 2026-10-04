@@ -78,6 +78,15 @@ def test_three_round_real_loop_finishes_and_preserves_all_snapshots(task_request
     assert summary["stop_reason"] == "coverage_target_met"
     assert summary["executed_rounds"] == 3
     assert summary["token_usage"] is None
+    assert summary["conclusion"]["level"] == "passed"
+    assert summary["metrics"]["passed"] == 3
+    assert summary["metrics"]["line_percent"] == 100
+    assert summary["scope"]["planned_scenarios"] == 3
+    report = result.report_file.read_text(encoding="utf-8")
+    assert "最终结论：通过" in report
+    assert "## 核心数据" in report
+    assert "## 数据结论" in report
+    assert "positive" in report and "negative" in report
     assert "test_negative" in result.final_test_file.read_text(encoding="utf-8")
     assert "protected_test_functions" in client.contexts[2].user_prompt
     assert '"round": 1' in client.contexts[2].user_prompt
@@ -164,6 +173,7 @@ def test_first_llm_failure_saves_failed_summary_without_fake_candidate(task_requ
     assert result.final_test_file is None
     assert result.state.api_calls == 1
     assert result.summary_file.is_file()
+    assert "未完成" in result.report_file.read_text(encoding="utf-8")
 
 
 def test_real_defect_stops_once_and_keeps_failing_candidate(task_request):

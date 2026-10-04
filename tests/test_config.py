@@ -51,6 +51,7 @@ def test_custom_key_name_and_no_dotenv_interpolation(tmp_path, monkeypatch):
     ("AGENT_MAX_ROUNDS", "1.0"), ("AGENT_MAX_ROUNDS", ""),
     ("TEST_EXECUTION_TIMEOUT_SECONDS", "0"), ("TEST_EXECUTION_TIMEOUT_SECONDS", "301"),
     ("LLM_REQUEST_TIMEOUT_SECONDS", "0"), ("LLM_REQUEST_TIMEOUT_SECONDS", "601"),
+    ("LLM_MAX_TOKENS", "1023"), ("LLM_MAX_TOKENS", "32769"),
     ("LLM_PROVIDER", "other"), ("LLM_MODEL", "your-deepseek-model"),
     ("LLM_BASE_URL", "https://user:secret@example.com"),
     ("LLM_BASE_URL", "https://api.deepseek.com?key=test-only-secret"),
@@ -111,12 +112,18 @@ def test_cli_runs_agent_with_source_spec_and_fresh_output(configured_environment
         state = type("State", (), {"stop_reason": StopReason.COVERAGE_TARGET_MET})()
         final_test_file = output / "test_subject.py"
         summary_file = output / "summary.json"
+        report_file = output / "report.md"
 
     monkeypatch.setattr(cli, "DeepSeekClient", lambda config: object())
 
     def fake_run(request, **kwargs):
         captured["request"] = request
         captured.update(kwargs)
+        output.mkdir()
+        (output / "summary.json").write_text(
+            json.dumps({"conclusion": {"level": "passed", "title": "通过", "detail": "测试通过"}}),
+            encoding="utf-8",
+        )
         return FakeResult()
 
     monkeypatch.setattr(cli, "run_agent", fake_run)
@@ -124,7 +131,10 @@ def test_cli_runs_agent_with_source_spec_and_fresh_output(configured_environment
     assert captured["request"].source_path == source
     assert captured["request"].output_dir == output
     assert captured["behavior_specification"] == "double(3) returns 6.\n"
-    assert json.loads(capsys.readouterr().out)["status"] == "completed"
+    cli_output = json.loads(capsys.readouterr().out)
+    assert cli_output["status"] == "completed"
+    assert cli_output["conclusion"]["title"] == "通过"
+    assert cli_output["report_file"].endswith("report.md")
 
 
 def test_cli_requires_source_and_spec_together():

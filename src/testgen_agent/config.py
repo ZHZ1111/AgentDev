@@ -37,6 +37,7 @@ class AppConfig(BaseModel):
     api_key_env: str = "DEEPSEEK_API_KEY"
     api_key: SecretStr = Field(exclude=True, repr=False)
     request_timeout_seconds: int = Field(default=60, ge=1, le=600)
+    max_tokens: int = Field(default=8192, ge=1024, le=32_768)
     max_rounds: int = Field(default=3, ge=1, le=3)
     execution_timeout_seconds: int = Field(default=30, ge=1, le=300)
 
@@ -79,7 +80,7 @@ class AppConfig(BaseModel):
         return SecretStr(secret)
 
     @field_validator(
-        "request_timeout_seconds", "max_rounds", "execution_timeout_seconds", mode="before",
+        "request_timeout_seconds", "max_tokens", "max_rounds", "execution_timeout_seconds", mode="before",
     )
     @classmethod
     def validate_integer(cls, value: Any) -> int:
@@ -100,6 +101,7 @@ _ENV_FIELDS = {
     "base_url": "LLM_BASE_URL",
     "api_key_env": "LLM_API_KEY_ENV",
     "request_timeout_seconds": "LLM_REQUEST_TIMEOUT_SECONDS",
+    "max_tokens": "LLM_MAX_TOKENS",
     "max_rounds": "AGENT_MAX_ROUNDS",
     "execution_timeout_seconds": "TEST_EXECUTION_TIMEOUT_SECONDS",
 }
@@ -111,6 +113,7 @@ _ERROR_HINTS = {
     "api_key_env": "LLM_API_KEY_ENV 必须是有效环境变量名",
     "api_key": "指定的 API Key 环境变量必须已设置，且不能为空或占位符",
     "request_timeout_seconds": "LLM_REQUEST_TIMEOUT_SECONDS 必须是 1..600 的整数",
+    "max_tokens": "LLM_MAX_TOKENS 必须是 1024..32768 的整数",
     "max_rounds": "AGENT_MAX_ROUNDS 必须是 1..3 的整数",
     "execution_timeout_seconds": "TEST_EXECUTION_TIMEOUT_SECONDS 必须是 1..300 的整数",
 }

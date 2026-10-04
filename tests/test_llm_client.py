@@ -67,6 +67,7 @@ def test_valid_generation_uses_json_mode_schema_and_records_usage(config, contex
         assert request.headers["Authorization"] == "Bearer adapter-secret"
         assert body["model"] == "test-model"
         assert body["stream"] is False
+        assert body["max_tokens"] == 8192
         assert body["thinking"] == {"type": "disabled"}
         assert body["response_format"] == {"type": "json_object"}
         assert "JSON Schema" in body["messages"][0]["content"]
@@ -114,9 +115,13 @@ def test_one_format_repair_is_allowed_and_usage_is_aggregated(config, context):
     }
     assert len(requests[1]["messages"]) == 4
     assert requests[1]["messages"][-2]["content"] == '{"unexpected":true}'
+    repair = requests[1]["messages"][-1]["content"]
+    assert "VALIDATION_ERRORS" in repair
+    assert '"path":"plan"' in repair
+    assert '"true"' not in repair
 
 
-def test_second_invalid_output_fails_without_unbounded_repair(config, context):
+def test_repeated_invalid_output_fails_without_unbounded_repair(config, context):
     count = 0
 
     def handle(request):
@@ -127,8 +132,10 @@ def test_second_invalid_output_fails_without_unbounded_repair(config, context):
     with pytest.raises(LLMError) as caught:
         generate_tests(config, context, transport=httpx.MockTransport(handle), sleep=lambda _: None)
     assert caught.value.code == LLMErrorCode.INVALID_GENERATED_OUTPUT
-    assert caught.value.attempts == count == 2
+    assert caught.value.attempts == count == 3
     assert not caught.value.retryable
+    assert "校验摘要" in str(caught.value)
+    assert '"invalid"' not in str(caught.value)
 
 
 def test_transient_failures_retry_with_bounded_backoff(config, context):
@@ -219,7 +226,6 @@ def test_network_and_timeout_errors_retry_then_return_safe_error(config, context
     httpx.Response(200, text="not-json"),
     httpx.Response(200, json={"choices": []}),
     completion("", usage={"prompt_tokens": 1, "completion_tokens": 0, "total_tokens": 1}),
-    completion(json.dumps(valid_generated()), finish_reason="length"),
 ])
 def test_malformed_or_truncated_api_response_is_not_treated_as_format_repair(config, context, response):
     with pytest.raises(LLMError) as caught:
@@ -228,6 +234,46 @@ def test_malformed_or_truncated_api_response_is_not_treated_as_format_repair(con
         )
     assert caught.value.code == LLMErrorCode.INVALID_RESPONSE
     assert caught.value.attempts == 1
+
+
+def test_length_limited_response_gets_one_concise_repair(config, context):
+    requests = []
+    responses = [
+        completion('{"plan":', finish_reason="length", response_id="truncated",
+                   usage={"prompt_tokens": 100, "completion_tokens": 8192, "total_tokens": 8292}),
+        completion(json.dumps(valid_generated()), response_id="compact",
+                   usage={"prompt_tokens": 120, "completion_tokens": 50, "total_tokens": 170}),
+    ]
+
+    def handle(request):
+        requests.append(json.loads(request.content))
+        return responses.pop(0)
+
+    result = DeepSeekClient(
+        config, transport=httpx.MockTransport(handle), sleep=lambda _: None,
+    ).generate_tests(context)
+    assert result.attempts == 2 and result.format_repairs == 1
+    assert [call.finish_reason for call in result.calls] == ["length", "stop"]
+    assert result.total_usage.total_tokens == 8462
+    assert "shorter complete JSON" in requests[1]["messages"][-1]["content"]
+    assert requests[1]["max_tokens"] == 8192
+
+
+def test_second_length_limited_response_fails_with_bounded_error(config, context):
+    count = 0
+
+    def handle(request):
+        nonlocal count
+        count += 1
+        return completion('{"plan":', finish_reason="length")
+
+    with pytest.raises(LLMError) as caught:
+        DeepSeekClient(
+            config, transport=httpx.MockTransport(handle), sleep=lambda _: None,
+        ).generate_tests(context)
+    assert caught.value.code == LLMErrorCode.INVALID_RESPONSE
+    assert caught.value.attempts == count == 3
+    assert "长度上限" in str(caught.value)
 
 
 def test_missing_or_inconsistent_usage_is_unknown_not_invented(config, context):
@@ -243,11 +289,12 @@ def test_missing_or_inconsistent_usage_is_unknown_not_invented(config, context):
 
 def test_adapter_configuration_and_policy_validation_hide_key(config):
     client = DeepSeekClient(config)
-    assert client.safe_config["max_http_attempts"] == 4
+    assert client.safe_config["max_http_attempts"] == 5
+    assert client.safe_config["max_tokens"] == 8192
     assert "adapter-secret" not in json.dumps(client.safe_config)
     with pytest.raises(ValueError):
         RetryPolicy(max_transient_retries=5)
     with pytest.raises(ValueError):
-        RetryPolicy(max_format_repairs=2)
+        RetryPolicy(max_format_repairs=3)
     with pytest.raises(ValueError):
         DeepSeekClient(config, max_tokens=0)

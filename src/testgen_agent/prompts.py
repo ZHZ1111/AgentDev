@@ -130,6 +130,7 @@ SUPPORTED TASK
 - source_graph_hints is derived only from confirmed direct_calls. Treat its roots as candidate entries, not business truth; use the specification and docstrings to make the final entry choice. Cycles describe recursion groups and do not justify expanding a call chain indefinitely.
 - Distinguish scenario category from test_kind: normal/boundary/exception/branch describes behavior, while unit/collaboration describes test scope. A collaboration scenario needs evidence and names every involved function and relationship.
 - Do not turn every call edge into a collaboration test. Add one only when it verifies behavior beyond focused unit cases; otherwise select not_selected and explain why.
+- Every relationship_id used by a collaboration scenario must have a matching relationship strategy decision of collaboration_test. Never reference a not_selected relationship from a collaboration scenario.
 - For an entry function that calls dependencies, invoke the real entry and its real same-file dependencies. For an explicitly supported data pipeline without one entry, use ordered steps and step_result references; do not invent workflows from names or compatible types.
 - Every scenario and every assertion needs a concrete expected_basis: specification, docstring, or implementation_assumption. A characterization oracle describes current behavior and does not prove correctness.
 - For a specification or docstring expected_basis, detail must be the shortest exact supporting quote copied verbatim from that oracle, not a paraphrase. This lets the host connect a failed assertion to user-provided evidence.
@@ -170,6 +171,7 @@ _FEEDBACK_RULES = """
 
 FEEDBACK REVISION
 - Revise the previous relationship analysis, strategy, plan, and complete candidate using only the supplied source, behavioral evidence, and real host-tool observations.
+- Return the entire replacement plan, code, and mappings, not only additions. Preserve exactly one function strategy per target function and one relationship strategy per reported relationship. Every mapping must contain at least one scenario ID, and the mappings must cover every scenario exactly.
 - Preserve evidence-backed assertions. A specification-backed assertion failure can indicate a source defect; keep the assertion and leave questions empty when the specification already defines the expected behavior. Never change the expected value to match the implementation.
 - Repair candidate syntax, import, collection, or execution errors when the evidence identifies a test defect. Add focused scenarios for missing lines or branch arcs when their expected behavior is supportable. Decide whether the gap belongs to an entry workflow, an internal function boundary, or neither; preserve prior relationship IDs when the evidence has not changed.
 - Do not guess when coverage is unavailable, logs are truncated, or failure attribution is ambiguous. Record the remaining question.

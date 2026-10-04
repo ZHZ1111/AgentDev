@@ -424,8 +424,15 @@ class TestPlan(ContractModel):
                     for item in scenario.relationship_ids
                 ):
                     raise ValueError("collaboration scenarios must include all functions in referenced relationships")
-                if any(relationship_strategy[item] != "collaboration_test" for item in scenario.relationship_ids):
-                    raise ValueError("collaboration scenarios require matching strategy decisions")
+                mismatched = [
+                    item for item in scenario.relationship_ids
+                    if relationship_strategy[item] != "collaboration_test"
+                ]
+                if mismatched:
+                    raise ValueError(
+                        f"collaboration scenario {scenario.scenario_id!r} references relationships "
+                        f"without collaboration_test strategy decisions: {mismatched!r}"
+                    )
                 if scenario.steps:
                     if len(scenario.steps) < 2 or any(step.function not in involved for step in scenario.steps):
                         raise ValueError("collaboration steps must call involved functions in a multi-step sequence")

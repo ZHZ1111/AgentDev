@@ -19,6 +19,9 @@ from .config import AppConfig
 from .models import ContractModel, GeneratedTests, Text, TokenUsage
 
 
+MAX_REPAIR_CONTENT_CHARS = 64_000
+
+
 class LLMErrorCode(StrEnum):
     INVALID_REQUEST = "invalid_request"
     AUTHENTICATION = "authentication"
@@ -77,7 +80,7 @@ class LLMGenerationResult(ContractModel):
     requested_model: Text
     response_model: Text
     attempts: Annotated[StrictInt, Field(ge=1)]
-    format_repairs: Annotated[StrictInt, Field(ge=0, le=1)]
+    format_repairs: Annotated[StrictInt, Field(ge=0, le=2)]
     latency_seconds: Annotated[float, Field(ge=0)]
     calls: Annotated[tuple[LLMCallRecord, ...], Field(min_length=1)]
     total_usage: TokenUsage | None = None
@@ -88,15 +91,15 @@ class RetryPolicy:
     """One initial request + transient retries + format repairs, all globally bounded."""
 
     max_transient_retries: int = 2
-    max_format_repairs: int = 1
+    max_format_repairs: int = 2
     base_delay_seconds: float = 0.25
     max_delay_seconds: float = 2.0
 
     def __post_init__(self) -> None:
         if type(self.max_transient_retries) is not int or not 0 <= self.max_transient_retries <= 4:
             raise ValueError("max_transient_retries must be between 0 and 4")
-        if type(self.max_format_repairs) is not int or not 0 <= self.max_format_repairs <= 1:
-            raise ValueError("max_format_repairs must be 0 or 1")
+        if type(self.max_format_repairs) is not int or not 0 <= self.max_format_repairs <= 2:
+            raise ValueError("max_format_repairs must be between 0 and 2")
         if (
             isinstance(self.base_delay_seconds, bool) or isinstance(self.max_delay_seconds, bool)
             or not 0 <= self.base_delay_seconds <= self.max_delay_seconds <= 10
@@ -135,8 +138,9 @@ class DeepSeekClient:
         retry_policy: RetryPolicy | None = None,
         transport: httpx.BaseTransport | None = None,
         sleep: Callable[[float], None] = time.sleep,
-        max_tokens: int = 4096,
+        max_tokens: int | None = None,
     ) -> None:
+        max_tokens = config.max_tokens if max_tokens is None else max_tokens
         if not 1 <= max_tokens <= 32_768:
             raise ValueError("max_tokens must be between 1 and 32768")
         self._config = config
@@ -224,21 +228,47 @@ class DeepSeekClient:
 
                 content, record = _extract_completion(response, purpose, attempts)
                 calls.append(record)
+                if record.finish_reason == "length":
+                    if repairs >= self._retry.max_format_repairs or attempts >= self._retry.max_http_attempts:
+                        raise LLMError(
+                            LLMErrorCode.INVALID_RESPONSE,
+                            "DeepSeek 输出达到长度上限，精简重试预算已用尽。",
+                            retryable=False, attempts=attempts, status_code=200,
+                        )
+                    repairs += 1
+                    messages.append({"role": "user", "content": (
+                        "The previous response reached the output limit. Return a shorter complete JSON object "
+                        "matching the supplied schema. Keep only the smallest set of parametrized tests needed "
+                        "to cover the specified boundaries, exceptions, major branches, and selected collaborations. "
+                        "Use concise IDs, reasons, evidence details, and Python code. Do not repeat equivalent cases "
+                        "and do not add Markdown or explanations."
+                    )})
+                    continue
                 try:
                     generated = GeneratedTests.model_validate_json(content)
-                except ValidationError:
+                except ValidationError as error:
+                    diagnostics = _validation_diagnostics(error)
                     if repairs >= self._retry.max_format_repairs or attempts >= self._retry.max_http_attempts:
                         raise LLMError(
                             LLMErrorCode.INVALID_GENERATED_OUTPUT,
-                            "DeepSeek 输出未通过 GeneratedTests 结构校验，且格式修复预算已用尽。",
+                            "DeepSeek 输出未通过 GeneratedTests 结构校验，且格式修复预算已用尽。"
+                            f"校验摘要：{diagnostics}",
                             retryable=False, attempts=attempts,
                         ) from None
                     repairs += 1
                     messages.extend([
-                        {"role": "assistant", "content": content[:20_000]},
+                        {"role": "assistant", "content": content[:MAX_REPAIR_CONTENT_CHARS]},
                         {"role": "user", "content": (
                             "The previous JSON did not validate. Return a corrected complete JSON object "
-                            "matching the supplied schema. Do not add Markdown or explanations."
+                            "matching the supplied schema. Fix every validation error listed below. "
+                            "Return the entire replacement, including exactly one function strategy for every "
+                            "target_function and exactly one relationship strategy for every relationship. "
+                            "Every mapping must contain at least one scenario_id, and mappings together must cover "
+                            "every scenario exactly. Remove any empty helper mapping. "
+                            "For each collaboration scenario, every relationship_id it references must have "
+                            "a relationship strategy decision of collaboration_test. A relationship with a "
+                            "not_selected strategy must not appear in any collaboration scenario. "
+                            "Do not add Markdown or explanations.\nVALIDATION_ERRORS:\n" + diagnostics
                         )},
                     ])
                     continue
@@ -285,7 +315,7 @@ def generate_tests(
     retry_policy: RetryPolicy | None = None,
     transport: httpx.BaseTransport | None = None,
     sleep: Callable[[float], None] = time.sleep,
-    max_tokens: int = 4096,
+    max_tokens: int | None = None,
 ) -> LLMGenerationResult:
     """Convenience interface for callers that do not need to reuse an adapter."""
     return DeepSeekClient(
@@ -305,10 +335,10 @@ def _extract_completion(
         finish_reason = choice["finish_reason"]
         if not isinstance(content, str) or not content.strip():
             raise ValueError("empty completion")
-        if finish_reason != "stop":
+        if finish_reason not in {"stop", "length"}:
             raise LLMError(
                 LLMErrorCode.INVALID_RESPONSE,
-                "DeepSeek 响应未正常结束，请减小上下文或增大输出 token 上限。",
+                "DeepSeek 响应未正常结束。",
                 retryable=False, attempts=attempts, status_code=200,
             )
         usage = _parse_usage(data.get("usage"))
@@ -342,6 +372,19 @@ def _parse_usage(value: Any) -> TokenUsage | None:
         return TokenUsage(**fields)
     except ValidationError:
         return None
+
+
+def _validation_diagnostics(error: ValidationError) -> str:
+    """Render bounded, input-free schema errors suitable for repair prompts and reports."""
+    items = []
+    for detail in error.errors(include_input=False, include_context=False)[:20]:
+        location = ".".join(str(part) for part in detail.get("loc", ())) or "<root>"
+        items.append({
+            "path": location,
+            "type": detail.get("type", "validation_error"),
+            "message": detail.get("msg", "invalid value"),
+        })
+    return json.dumps(items, ensure_ascii=False, separators=(",", ":"))
 
 
 def _sum_usage(calls: list[LLMCallRecord]) -> TokenUsage | None:
