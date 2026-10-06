@@ -1,4 +1,4 @@
-"""C2 initial candidate generation, host validation, and deterministic staging."""
+"""Candidate generation, host validation and deterministic staging."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from .workspace import ROUND_DIRECTORY, SUBJECT_FILENAME, TEST_FILENAME, round_d
 
 
 class CandidateValidationError(ValueError):
-    """A generated candidate violates a host-owned C2 rule."""
+    """A generated candidate violates a host-owned validation rule."""
 
     def __init__(self, code: str, message: str, *, line: int | None = None) -> None:
         super().__init__(message)
@@ -29,7 +29,7 @@ class CandidateValidationError(ValueError):
 
 
 class GenerationClient(Protocol):
-    """The one method C2 needs from an LLM adapter."""
+    """The generation method required from an LLM adapter."""
 
     def generate_tests(self, context: GenerationContext) -> LLMGenerationResult: ...
 
@@ -273,7 +273,7 @@ def preserved_tests(history: tuple[CandidateRound, ...]) -> dict[str, tuple[ast.
 
 
 def validate_preserved_tests(generated: GeneratedTests, history: tuple[CandidateRound, ...]) -> None:
-    """E3 deliberately requires old passing functions/scenarios to stay intact.
+    """Require previously passing test functions and scenarios to stay intact.
 
     Add new test functions to extend coverage. This avoids pretending an AST
     matcher can prove arbitrary assertion rewrites or fixture changes equivalent.

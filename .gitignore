@@ -27,7 +27,3 @@ outputs/
 .work/
 tmp/
 *.log
-
-# The archive is deliberately retained as read-only development history.
-!archive/
-!archive/**

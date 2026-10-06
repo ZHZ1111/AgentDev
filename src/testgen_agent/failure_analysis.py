@@ -1,4 +1,4 @@
-"""Conservative E2 failure attribution using observed exceptions and explicit oracles.
+"""Conservative failure attribution using observed exceptions and explicit oracles.
 
 Only literal single-argument equality assertions grounded by an unambiguous
 two-column specification table or an exact oracle quote are automatically

@@ -1,7 +1,4 @@
-"""E1/E2 controller: tool observations -> attributed failure -> explicit action.
-
-Bounded revision execution and task-local historical memory are implemented in E3.
-"""
+"""Bounded agent loop: tool observations, failure attribution and explicit actions."""
 
 from __future__ import annotations
 
@@ -245,7 +242,7 @@ def run_initial_step(
     """Analyze -> generate -> validate -> optionally execute -> choose action.
 
     output_dir must be a new workspace. Typed tool failures propagate; no retry
-    loop or automatic revision is hidden here. E3 will consume this decision.
+    loop or automatic revision is hidden here. The run loop consumes this decision.
     """
     tools = tools or AgentTools()
     if behavior_specification is None and request.spec_path is not None:
@@ -327,8 +324,8 @@ def run_agent(
 ) -> AgentRunResult:
     """Run at most three candidate rounds, preserving every observed artifact.
 
-    output_dir must be a fresh workspace. E4 adds an incremental trace and run
-    metadata; G's Markdown/JSON FinalReport remains separate. Artifact-write failures are
+    output_dir must be a fresh workspace. Each completed export writes a trace,
+    metadata, state, summary and Markdown report. Artifact-write failures are
     propagated because an unwritten result cannot be reported as saved.
     """
     root = request.output_dir

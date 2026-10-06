@@ -1,4 +1,4 @@
-"""E4 append-only host events; no prompts, headers or internal model reasoning."""
+"""Append-only host events; no prompts, headers or internal model reasoning."""
 
 from __future__ import annotations
 

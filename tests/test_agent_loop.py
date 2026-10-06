@@ -10,7 +10,7 @@ from testgen_agent.agent import AgentTools, run_agent, select_best_candidate
 from testgen_agent.generation import stage_revision_candidate
 from testgen_agent.llm_client import LLMError, LLMErrorCode
 from testgen_agent.tools import analyze_source, run_tests, run_tests_with_coverage
-from test_generation import llm_result, single_function_generated
+from test_generation import llm_result, relationship_generated, single_function_generated
 from test_failure_analysis import discount_state
 
 
@@ -93,6 +93,35 @@ def test_three_round_real_loop_finishes_and_preserves_all_snapshots(task_request
     assert '"round": 2' in client.contexts[2].user_prompt
     assert '"remaining_rounds_including_requested": 1' in client.contexts[2].user_prompt
     assert "positive -> 1" in client.contexts[2].user_prompt
+
+
+def test_report_exposes_relationship_evidence_and_strategy(tmp_path):
+    source_path = Path(__file__).parents[1] / "examples" / "relationships.py"
+    source = analyze_source(source_path)
+    request = m.TaskInput(
+        source_path=source_path,
+        output_dir=tmp_path / "relationship-run",
+        max_rounds=1,
+        model=m.ModelInfo(model="offline-model", base_url="https://example.com"),
+    )
+    result = run_agent(
+        request,
+        client=SequenceClient([relationship_generated(source)]),
+        oracle_mode=m.OracleMode.SPECIFICATION,
+        behavior_specification="checkout returns calculate_total's result",
+    )
+
+    summary = json.loads(result.summary_file.read_text(encoding="utf-8"))
+    assert summary["scope"]["entry_functions"] == ["checkout"]
+    assert summary["scope"]["relationships"][0]["evidence"][0]["call_site_ids"] == [
+        source.direct_calls[0].call_site_id
+    ]
+    assert summary["scope"]["strategy"][-1]["decision"] == "collaboration_test"
+    report = result.report_file.read_text(encoding="utf-8")
+    assert "## 函数关联与测试策略" in report
+    assert "rel-checkout-total" in report
+    assert "checkout directly calls calculate_total" in report
+    assert "collaboration_test" in report
 
 
 @pytest.mark.parametrize("limit", [1, 2])

@@ -135,6 +135,9 @@ def build_summary(
         "metrics": metrics,
         "scope": {
             "target_functions": list(generated.plan.target_functions) if generated else [],
+            "entry_functions": list(generated.plan.entry_functions) if generated else [],
+            "relationships": [item.model_dump(mode="json") for item in generated.plan.relationships] if generated else [],
+            "strategy": [item.model_dump(mode="json") for item in generated.plan.strategy] if generated else [],
             "planned_scenarios": len(scenarios),
             "unit_scenarios": sum(item.test_kind == "unit" for item in scenarios),
             "collaboration_scenarios": sum(item.test_kind == "collaboration" for item in scenarios),
@@ -154,7 +157,7 @@ def build_summary(
 
 
 def render_markdown_report(state: AgentState, decision: ActionDecision, summary: dict[str, Any]) -> str:
-    """Render a self-contained report for a person reviewing one run."""
+    """Render a human-readable report for a person reviewing one run."""
     selected = _selected(state)
     generated = selected.generated if selected else None
     execution = selected.execution if selected else None
@@ -236,6 +239,41 @@ def render_markdown_report(state: AgentState, decision: ActionDecision, summary:
         if generated.questions:
             lines.extend(["", "待确认问题：", ""])
             lines.extend(f"- {_cell(item, limit=500)}" for item in generated.questions)
+
+        if plan.schema_version == "1.1":
+            lines.extend(["", "## 函数关联与测试策略", ""])
+            lines.append(
+                "候选入口函数："
+                + ("、".join(f"`{_cell(name)}`" for name in plan.entry_functions) if plan.entry_functions else "无")
+            )
+            lines.extend(["", "| 关联 ID | 类型 | 涉及函数 | 置信度 | 依据 | 待确认 |",
+                          "|---|---|---|---|---|---|"])
+            if plan.relationships:
+                for relation in plan.relationships:
+                    evidence = "；".join(
+                        f"{item.kind}：{item.detail}"
+                        + (f"（第 {item.line} 行）" if item.line else "")
+                        + (f" [调用点：{', '.join(item.call_site_ids)}]" if item.call_site_ids else "")
+                        for item in relation.evidence
+                    )
+                    lines.append(
+                        f"| {_cell(relation.relation_id)} | {_cell(relation.kind)} | "
+                        f"{_cell(', '.join(relation.involved_functions))} | {_cell(relation.confidence)} | "
+                        f"{_cell(evidence, limit=500)} | "
+                        f"{_cell('；'.join(relation.unresolved_questions) or '无', limit=300)} |"
+                    )
+            else:
+                lines.append("| 无 | — | — | — | 未发现可纳入计划的函数关联 | — |")
+            lines.extend(["", "| 对象 | 决策 | 理由 |", "|---|---|---|"])
+            for choice in plan.strategy:
+                subject = choice.function_name if choice.subject_kind == "function" else choice.relationship_id
+                lines.append(
+                    f"| {_cell(choice.subject_kind)}：{_cell(subject)} | "
+                    f"{_cell(choice.decision)} | {_cell(choice.reason, limit=500)} |"
+                )
+            if source and source.unresolved_calls:
+                lines.extend(["", f"源码中另有 {len(source.unresolved_calls)} 个无法静态确认的调用点；"
+                              "它们不能仅凭名称被认定为已证实的函数关联。"])
     else:
         lines.append("没有生成出可用的测试计划。")
 

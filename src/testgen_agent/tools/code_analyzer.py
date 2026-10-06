@@ -1,4 +1,4 @@
-"""AST-only source and relationship inspection for the bounded C1/C1a scope."""
+"""AST-only source and relationship inspection for the supported Python subset."""
 
 from __future__ import annotations
 
