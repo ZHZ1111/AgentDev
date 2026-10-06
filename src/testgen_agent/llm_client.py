@@ -84,6 +84,7 @@ class LLMGenerationResult(ContractModel):
     latency_seconds: Annotated[float, Field(ge=0)]
     calls: Annotated[tuple[LLMCallRecord, ...], Field(min_length=1)]
     total_usage: TokenUsage | None = None
+    host_normalizations: tuple[Text, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -124,6 +125,7 @@ def create_http_client(
         },
         timeout=httpx.Timeout(config.request_timeout_seconds),
         follow_redirects=False,
+        proxy=config.proxy_url,
         transport=transport,
     )
 
@@ -244,8 +246,15 @@ class DeepSeekClient:
                         "and do not add Markdown or explanations."
                     )})
                     continue
+                normalizations: tuple[str, ...] = ()
                 try:
-                    generated = GeneratedTests.model_validate_json(content)
+                    try:
+                        payload = json.loads(content)
+                    except json.JSONDecodeError:
+                        generated = GeneratedTests.model_validate_json(content)
+                    else:
+                        normalizations = _normalize_generated_payload(payload)
+                        generated = GeneratedTests.model_validate(payload)
                 except ValidationError as error:
                     diagnostics = _validation_diagnostics(error)
                     if repairs >= self._retry.max_format_repairs or attempts >= self._retry.max_http_attempts:
@@ -265,6 +274,8 @@ class DeepSeekClient:
                             "target_function and exactly one relationship strategy for every relationship. "
                             "Every mapping must contain at least one scenario_id, and mappings together must cover "
                             "every scenario exactly. Remove any empty helper mapping. "
+                            "For each collaboration scenario, involved_functions must contain its target_function "
+                            "and every function listed by every referenced relationship_id. "
                             "For each collaboration scenario, every relationship_id it references must have "
                             "a relationship strategy decision of collaboration_test. A relationship with a "
                             "not_selected strategy must not appear in any collaboration scenario. "
@@ -284,6 +295,7 @@ class DeepSeekClient:
                     latency_seconds=round(perf_counter() - start, 3),
                     calls=tuple(calls),
                     total_usage=_sum_usage(calls),
+                    host_normalizations=normalizations,
                 )
 
         raise LLMError(
@@ -385,6 +397,75 @@ def _validation_diagnostics(error: ValidationError) -> str:
             "message": detail.get("msg", "invalid value"),
         })
     return json.dumps(items, ensure_ascii=False, separators=(",", ":"))
+
+
+def _normalize_generated_payload(value: Any) -> tuple[str, ...]:
+    """Repair deterministic relationship metadata without changing tests or oracles.
+
+    Larger plans occasionally emit redundant scenario metadata inconsistently.  A
+    unit scenario with no relationship or steps can only involve its target, while
+    a collaboration scenario must include all functions named by its relationships.
+    Those facts are already authoritative elsewhere in the payload, so completing
+    or trimming the redundant list is safe and avoids a probabilistic repair call.
+    All semantic, source-evidence and code checks still run afterwards.
+    """
+    if not isinstance(value, dict):
+        return ()
+    plan = value.get("plan")
+    if not isinstance(plan, dict) or plan.get("schema_version") != "1.1":
+        return ()
+    target_functions = plan.get("target_functions")
+    relationships = plan.get("relationships")
+    scenarios = plan.get("scenarios")
+    if not isinstance(target_functions, list) or not isinstance(relationships, list) or not isinstance(scenarios, list):
+        return ()
+    target_order = [item for item in target_functions if isinstance(item, str)]
+    relationship_functions: dict[str, list[str]] = {}
+    for relationship in relationships:
+        if not isinstance(relationship, dict):
+            continue
+        relation_id = relationship.get("relation_id")
+        involved = relationship.get("involved_functions")
+        if isinstance(relation_id, str) and isinstance(involved, list) and all(isinstance(item, str) for item in involved):
+            relationship_functions[relation_id] = involved
+
+    changes: list[str] = []
+    for index, scenario in enumerate(scenarios):
+        if not isinstance(scenario, dict):
+            continue
+        involved = scenario.get("involved_functions")
+        relation_ids = scenario.get("relationship_ids")
+        steps = scenario.get("steps")
+        target = scenario.get("target_function")
+        if (
+            not isinstance(involved, list)
+            or not isinstance(relation_ids, list)
+            or not isinstance(steps, list)
+            or not isinstance(target, str)
+        ):
+            continue
+        if not all(isinstance(item, str) for item in involved + relation_ids):
+            continue
+        scenario_id = scenario.get("scenario_id")
+        label = scenario_id if isinstance(scenario_id, str) else str(index)
+        if scenario.get("test_kind") == "unit" and not relation_ids and not steps:
+            normalized = [target]
+            if normalized != involved:
+                scenario["involved_functions"] = normalized
+                changes.append(f"trimmed involved_functions for unit scenario {label}")
+            continue
+        if scenario.get("test_kind") != "collaboration":
+            continue
+        required = set(involved)
+        required.add(target)
+        for relation_id in relation_ids:
+            required.update(relationship_functions.get(relation_id, ()))
+        normalized = list(dict.fromkeys(involved))
+        normalized.extend(name for name in target_order if name in required and name not in normalized)
+        if normalized != involved:
+            scenario["involved_functions"] = normalized
+            changes.append(f"completed involved_functions for collaboration scenario {label}")
+    return tuple(changes)
 
 
 def _sum_usage(calls: list[LLMCallRecord]) -> TokenUsage | None:

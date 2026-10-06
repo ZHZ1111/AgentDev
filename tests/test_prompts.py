@@ -135,6 +135,9 @@ def test_generation_prompt_contains_all_required_policy_sections(source):
     assert "expected_basis" in system and "implementation_assumption" in system
     assert "exact supporting quote copied verbatim" in system
     assert "schema_version 1.1" in system and "unit/collaboration" in system
+    assert "complete union" in system
+    assert "exactly [target_function]" in system
+    assert "exception-precedence" in system
     assert "unresolved_calls" in system and "matching names alone" in system
     assert "candidate entries, not business truth" in system
     assert "simple assignment" in system and "shared mutable state" in system
@@ -148,7 +151,7 @@ def test_generation_data_is_json_delimited_and_cannot_enter_system(source):
     specification = "规则数据；" + INJECTION_TEXT
     context = build_generation_context(source, specification, OracleMode.SPECIFICATION)
     data = payload(context)
-    assert data["prompt_version"] == "b3-v6"
+    assert data["prompt_version"] == "b3-v9"
     assert data["task_kind"] == "initial_generation"
     assert data["requested_oracle_mode"] == "specification"
     assert data["behavior_specification"] == specification

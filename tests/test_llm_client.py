@@ -47,6 +47,63 @@ def valid_generated() -> dict:
     }
 
 
+def generated_with_incomplete_collaboration_metadata() -> dict:
+    value = valid_generated()
+    value["plan"] = {
+        "schema_version": "1.1",
+        "target_functions": ["calculate_total", "checkout"],
+        "oracle_mode": "specification",
+        "entry_functions": ["checkout"],
+        "relationships": [{
+            "relation_id": "rel-checkout-total",
+            "kind": "direct_call",
+            "involved_functions": ["checkout", "calculate_total"],
+            "evidence": [{
+                "kind": "source", "detail": "checkout calls calculate_total", "line": 2,
+                "call_site_ids": ["call-checkout-total"],
+            }],
+            "confidence": "confirmed",
+            "unresolved_questions": [],
+        }],
+        "strategy": [
+            {"subject_kind": "function", "function_name": "calculate_total", "relationship_id": None,
+             "decision": "unit_test", "reason": "independent arithmetic"},
+            {"subject_kind": "function", "function_name": "checkout", "relationship_id": None,
+             "decision": "unit_test", "reason": "public entry"},
+            {"subject_kind": "relationship", "function_name": None, "relationship_id": "rel-checkout-total",
+             "decision": "collaboration_test", "reason": "entry uses the calculation"},
+        ],
+        "scenarios": [{
+            "scenario_id": "collaboration-checkout",
+            "target_function": "checkout",
+            "category": "normal",
+            "inputs": {"args": [12, 3], "kwargs": {}},
+            "expected_behavior": "returns 36",
+            "expected_basis": {"kind": "specification", "detail": "checkout returns the total"},
+            "test_kind": "collaboration",
+            # The model redundantly omitted calculate_total here even though
+            # the referenced relationship already names it.
+            "involved_functions": ["checkout"],
+            "relationship_ids": ["rel-checkout-total"],
+            "steps": [],
+        }],
+    }
+    value["code"] = "from subject import checkout\n\ndef test_checkout():\n    assert checkout(12, 3) == 36\n"
+    value["mappings"] = [{"test_function": "test_checkout", "scenario_ids": ["collaboration-checkout"]}]
+    return value
+
+
+def generated_with_extra_unit_metadata() -> dict:
+    value = generated_with_incomplete_collaboration_metadata()
+    scenario = value["plan"]["scenarios"][0]
+    scenario["scenario_id"] = "unit-checkout"
+    scenario["test_kind"] = "unit"
+    scenario["involved_functions"] = ["checkout", "calculate_total"]
+    scenario["relationship_ids"] = []
+    value["mappings"][0]["scenario_ids"] = ["unit-checkout"]
+    return value
+
+
 def completion(content, *, usage=None, finish_reason="stop", model="test-model", response_id="response-1"):
     body = {
         "id": response_id,
@@ -119,6 +176,46 @@ def test_one_format_repair_is_allowed_and_usage_is_aggregated(config, context):
     assert "VALIDATION_ERRORS" in repair
     assert '"path":"plan"' in repair
     assert '"true"' not in repair
+
+
+def test_deterministic_collaboration_metadata_omission_is_normalized_without_retry(config, context):
+    requests = []
+
+    def handle(request):
+        requests.append(request)
+        return completion(json.dumps(generated_with_incomplete_collaboration_metadata()))
+
+    result = DeepSeekClient(
+        config, transport=httpx.MockTransport(handle), sleep=lambda _: None,
+    ).generate_tests(context)
+
+    scenario = result.generated.plan.scenarios[0]
+    assert scenario.involved_functions == ("checkout", "calculate_total")
+    assert result.attempts == len(requests) == 1
+    assert result.format_repairs == 0
+    assert result.host_normalizations == (
+        "completed involved_functions for collaboration scenario collaboration-checkout",
+    )
+
+
+def test_redundant_unit_involved_functions_are_trimmed_without_retry(config, context):
+    requests = []
+
+    def handle(request):
+        requests.append(request)
+        return completion(json.dumps(generated_with_extra_unit_metadata()))
+
+    result = DeepSeekClient(
+        config, transport=httpx.MockTransport(handle), sleep=lambda _: None,
+    ).generate_tests(context)
+
+    scenario = result.generated.plan.scenarios[0]
+    assert scenario.involved_functions == ("checkout",)
+    assert result.attempts == len(requests) == 1
+    assert result.format_repairs == 0
+    assert result.host_normalizations == (
+        "trimmed involved_functions for unit scenario unit-checkout",
+    )
 
 
 def test_repeated_invalid_output_fails_without_unbounded_repair(config, context):

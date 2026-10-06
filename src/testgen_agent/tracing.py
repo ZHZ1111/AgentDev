@@ -109,6 +109,7 @@ class ObservedGenerationClient:
                           round_number=self.round_number, tool="llm.generate_tests", action=self.action,
                           result={"requested_model": result.requested_model, "response_model": result.response_model,
                                   "attempts": result.attempts, "attempt_count_source": "adapter_reported", "format_repairs": result.format_repairs,
+                                  "host_normalizations": list(result.host_normalizations),
                                   "latency_seconds": result.latency_seconds, "cumulative_http_attempts": self.api_calls,
                                   "token_usage": result.total_usage.model_dump() if result.total_usage else None,
                                   "calls": [{"purpose": item.purpose, "response_model": item.response_model,

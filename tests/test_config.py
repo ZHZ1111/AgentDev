@@ -86,6 +86,46 @@ def test_summary_serialization_and_repr_hide_key(configured_environment):
     assert config.safe_summary()["api_key_configured"] is True
 
 
+def test_explicit_proxy_is_validated_and_hidden_from_public_summary(configured_environment):
+    configured_environment["LLM_PROXY_URL"] = "http://127.0.0.1:7890/"
+    config = load_config(environ=configured_environment)
+
+    assert config.proxy_url == "http://127.0.0.1:7890"
+    assert config.safe_summary()["proxy_configured"] is True
+    assert "127.0.0.1:7890" not in json.dumps(config.safe_summary())
+    assert "127.0.0.1:7890" not in config.model_dump_json()
+
+
+@pytest.mark.parametrize("proxy", [
+    "socks5://127.0.0.1:7890",
+    "http://user:password@127.0.0.1:7890",
+    "http://127.0.0.1:invalid",
+    "http://127.0.0.1:7890?secret=value",
+])
+def test_invalid_proxy_is_rejected_without_exposing_value(configured_environment, proxy):
+    configured_environment["LLM_PROXY_URL"] = proxy
+    with pytest.raises(ConfigError) as caught:
+        load_config(environ=configured_environment)
+    assert proxy not in str(caught.value)
+
+
+def test_explicit_proxy_is_passed_to_http_client(configured_environment, monkeypatch):
+    config = load_config(environ={
+        **configured_environment,
+        "LLM_PROXY_URL": "http://127.0.0.1:7890",
+    })
+    captured = {}
+
+    class FakeClient:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+    monkeypatch.setattr("testgen_agent.llm_client.httpx.Client", FakeClient)
+    create_http_client(config)
+
+    assert captured["proxy"] == "http://127.0.0.1:7890"
+
+
 def test_cli_success_and_config_failure_have_distinct_exit_codes(configured_environment, monkeypatch, capsys):
     for key, value in configured_environment.items():
         monkeypatch.setenv(key, value)

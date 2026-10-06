@@ -16,7 +16,7 @@ from .tools.code_analyzer import (
 from .tools.coverage_mapper import build_coverage_source_hints
 
 
-PROMPT_VERSION = "b3-v6"
+PROMPT_VERSION = "b3-v9"
 TASK_DATA_START = "TASK_DATA_JSON_START"
 TASK_DATA_END = "TASK_DATA_JSON_END"
 MAX_TOOL_LOG_CHARS = 12_000
@@ -130,10 +130,12 @@ SUPPORTED TASK
 - source_graph_hints is derived only from confirmed direct_calls. Treat its roots as candidate entries, not business truth; use the specification and docstrings to make the final entry choice. Cycles describe recursion groups and do not justify expanding a call chain indefinitely.
 - Distinguish scenario category from test_kind: normal/boundary/exception/branch describes behavior, while unit/collaboration describes test scope. A collaboration scenario needs evidence and names every involved function and relationship.
 - Do not turn every call edge into a collaboration test. Add one only when it verifies behavior beyond focused unit cases; otherwise select not_selected and explain why.
-- Every relationship_id used by a collaboration scenario must have a matching relationship strategy decision of collaboration_test. Never reference a not_selected relationship from a collaboration scenario.
+- A unit scenario must set involved_functions to exactly [target_function], with empty relationship_ids and empty steps. If a scenario references a relationship or uses ordered steps, label it collaboration instead of unit.
+- Every relationship_id used by a collaboration scenario must have a matching relationship strategy decision of collaboration_test. Never reference a not_selected relationship from a collaboration scenario. Set involved_functions to include the scenario target plus every function named by every referenced relationship; for a multi-edge entry workflow, use their complete union.
 - For an entry function that calls dependencies, invoke the real entry and its real same-file dependencies. For an explicitly supported data pipeline without one entry, use ordered steps and step_result references; do not invent workflows from names or compatible types.
 - Every scenario and every assertion needs a concrete expected_basis: specification, docstring, or implementation_assumption. A characterization oracle describes current behavior and does not prove correctness.
 - For a specification or docstring expected_basis, detail must be the shortest exact supporting quote copied verbatim from that oracle, not a paraphrase. This lets the host connect a failed assertion to user-provided evidence.
+- Make every scenario input actually satisfy the condition described by its expected behavior. In particular, an exception-precedence case must make both competing validations fail; never expect a type exception from a correctly typed value that merely violates a numeric range.
 - Prefer specific input/output assertions, pytest.raises for specified exceptions, and focused parametrization. A mere function call, `assert True`, or an assertion unrelated to the stated expectation is invalid.
 
 AMBIGUITY AND ORACLES

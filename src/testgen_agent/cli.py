@@ -31,6 +31,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--provider", help="LLM 服务商，当前支持 deepseek")
     parser.add_argument("--model", help="DeepSeek 模型标识")
     parser.add_argument("--base-url", help="DeepSeek 服务地址")
+    parser.add_argument("--proxy-url", help="可选 HTTP(S) 代理地址；建议通过 .env 配置")
     parser.add_argument("--api-key-env", help="保存 API Key 的环境变量名；不接受明文 Key")
     parser.add_argument("--request-timeout", type=int, dest="request_timeout_seconds", help="模型请求超时，1..600 秒")
     parser.add_argument("--max-tokens", type=int, help="单次模型输出上限，1024..32768；默认 8192")
@@ -66,7 +67,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     overrides = {
         field: getattr(args, field)
         for field in (
-            "provider", "model", "base_url", "api_key_env", "request_timeout_seconds", "max_tokens",
+            "provider", "model", "base_url", "proxy_url", "api_key_env", "request_timeout_seconds", "max_tokens",
             "max_rounds", "execution_timeout_seconds",
         )
     }

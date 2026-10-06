@@ -34,6 +34,7 @@ class AppConfig(BaseModel):
     provider: Literal["deepseek"] = "deepseek"
     model: str
     base_url: str = "https://api.deepseek.com"
+    proxy_url: str | None = Field(default=None, exclude=True, repr=False)
     api_key_env: str = "DEEPSEEK_API_KEY"
     api_key: SecretStr = Field(exclude=True, repr=False)
     request_timeout_seconds: int = Field(default=60, ge=1, le=600)
@@ -61,6 +62,22 @@ class AppConfig(BaseModel):
         ):
             raise ValueError("a service URL without credentials, query or fragment is required")
         # Accessing port also rejects a malformed/non-numeric port.
+        _ = parsed.port
+        return value
+
+    @field_validator("proxy_url")
+    @classmethod
+    def validate_proxy_url(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+        value = value.strip().rstrip("/")
+        parsed = urlsplit(value)
+        if (
+            parsed.scheme not in {"http", "https"} or not parsed.hostname
+            or parsed.username is not None or parsed.password is not None
+            or parsed.query or parsed.fragment or any(char.isspace() for char in value)
+        ):
+            raise ValueError("an HTTP(S) proxy URL without credentials, query or fragment is required")
         _ = parsed.port
         return value
 
@@ -92,13 +109,18 @@ class AppConfig(BaseModel):
 
     def safe_summary(self) -> dict[str, Any]:
         """No secret or partial key is included in the public representation."""
-        return {**self.model_dump(mode="json"), "api_key_configured": True}
+        return {
+            **self.model_dump(mode="json"),
+            "api_key_configured": True,
+            "proxy_configured": self.proxy_url is not None,
+        }
 
 
 _ENV_FIELDS = {
     "provider": "LLM_PROVIDER",
     "model": "LLM_MODEL",
     "base_url": "LLM_BASE_URL",
+    "proxy_url": "LLM_PROXY_URL",
     "api_key_env": "LLM_API_KEY_ENV",
     "request_timeout_seconds": "LLM_REQUEST_TIMEOUT_SECONDS",
     "max_tokens": "LLM_MAX_TOKENS",
@@ -110,6 +132,7 @@ _ERROR_HINTS = {
     "provider": "LLM_PROVIDER 当前只支持 deepseek",
     "model": "LLM_MODEL 必须填写实际模型标识，不能使用占位符",
     "base_url": "LLM_BASE_URL 必须是有效 HTTP(S) 服务地址，不能包含认证信息、查询或片段",
+    "proxy_url": "LLM_PROXY_URL 必须是有效 HTTP(S) 代理地址，不能包含认证信息、查询或片段",
     "api_key_env": "LLM_API_KEY_ENV 必须是有效环境变量名",
     "api_key": "指定的 API Key 环境变量必须已设置，且不能为空或占位符",
     "request_timeout_seconds": "LLM_REQUEST_TIMEOUT_SECONDS 必须是 1..600 的整数",
