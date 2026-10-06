@@ -5,6 +5,7 @@ const state = {
   running: false,
   pollTimer: null,
   lastTraceSize: 0,
+  reportMarkdown: null,
 };
 
 const labels = {
@@ -85,6 +86,9 @@ function resetResult() {
   $("#result-content").classList.add("hidden");
   setStatus("idle", "待运行");
   state.lastTraceSize = 0;
+  state.reportMarkdown = null;
+  $("#report-section").classList.add("hidden");
+  closeReport();
 }
 
 function setStatus(kind, text) {
@@ -115,13 +119,21 @@ function renderMetrics(data) {
   const summary = data.summary;
   const candidate = latestCandidate(runState);
   const coverage = candidate?.coverage;
+  const summaryMetrics = summary?.metrics;
+  const coverageStatus = coverage?.status || summaryMetrics?.coverage_status;
+  const coveredLines = coverage?.covered_lines ?? summaryMetrics?.covered_lines;
+  const totalLines = coverage?.total_lines ?? summaryMetrics?.total_lines;
+  const coveredBranches = coverage?.covered_branches ?? summaryMetrics?.covered_branches;
+  const totalBranches = coverage?.total_branches ?? summaryMetrics?.total_branches;
+  const linePercent = coverage?.line_percent ?? summaryMetrics?.line_percent;
+  const branchPercent = coverage?.branch_percent ?? summaryMetrics?.branch_percent;
   const decisionStatus = summary?.status || (data.status === "failed" ? "failed" : null);
   $("#metric-status").textContent = labels[decisionStatus] || (data.status === "running" ? "执行中" : "准备中");
   $("#metric-reason").textContent = labels[summary?.stop_reason] || summary?.reason || "Agent 正在处理";
-  $("#metric-line").textContent = percent(coverage?.line_percent);
-  $("#metric-line-detail").textContent = coverage?.status === "available" ? `${coverage.covered_lines} / ${coverage.total_lines} 行` : "等待覆盖率数据";
-  $("#metric-branch").textContent = coverage?.total_branches === 0 ? "N/A" : percent(coverage?.branch_percent);
-  $("#metric-branch-detail").textContent = coverage?.status === "available" ? (coverage.total_branches ? `${coverage.covered_branches} / ${coverage.total_branches} 分支` : "当前函数没有分支") : "等待覆盖率数据";
+  $("#metric-line").textContent = percent(linePercent);
+  $("#metric-line-detail").textContent = coverageStatus === "available" ? `${coveredLines} / ${totalLines} 行` : "等待覆盖率数据";
+  $("#metric-branch").textContent = totalBranches === 0 ? "N/A" : percent(branchPercent);
+  $("#metric-branch-detail").textContent = coverageStatus === "available" ? (totalBranches ? `${coveredBranches} / ${totalBranches} 分支` : "当前函数没有分支") : "等待覆盖率数据";
   $("#metric-rounds").textContent = runState ? `${runState.current_round} / ${runState.request.max_rounds}` : "—";
   $("#metric-api").textContent = runState ? `${runState.api_calls} 次模型请求` : "正在初始化";
 }
@@ -183,9 +195,27 @@ function renderRun(data) {
   const testSection = $("#test-section");
   testSection.classList.toggle("hidden", !data.testCode);
   $("#test-code").textContent = data.testCode || "";
+  state.reportMarkdown = data.reportMarkdown || null;
+  $("#report-section").classList.toggle("hidden", !state.reportMarkdown);
   if (data.status === "completed") setStatus("completed", labels[data.summary?.status] || "已完成");
   else if (data.status === "failed") setStatus("failed", "运行失败");
   else setStatus("running", data.status === "preparing" ? "准备中" : "运行中");
+}
+
+function openReport() {
+  if (!state.reportMarkdown) {
+    showToast("报告仍在生成，请稍候");
+    return;
+  }
+  $("#report-content").textContent = state.reportMarkdown;
+  $("#report-modal").classList.remove("hidden");
+  document.body.classList.add("modal-open");
+  $("#close-report-button").focus();
+}
+
+function closeReport() {
+  $("#report-modal").classList.add("hidden");
+  document.body.classList.remove("modal-open");
 }
 
 async function pollRun(jobId) {
@@ -194,7 +224,7 @@ async function pollRun(jobId) {
     renderRun(data);
     if (["completed", "failed"].includes(data.status)) {
       setRunning(false);
-      if (data.status === "failed") showToast(data.error || "运行失败");
+      if (data.status === "failed") showToast(data.error || data.summary?.reason || "运行失败");
       else showToast("运行完成，结果已保存到 outputs/web");
       return;
     }
@@ -259,6 +289,14 @@ async function bootstrap() {
     } catch {
       showToast("复制失败，请手动选择代码");
     }
+  });
+  $("#view-report-button").addEventListener("click", openReport);
+  $("#close-report-button").addEventListener("click", closeReport);
+  $("#report-modal").addEventListener("click", (event) => {
+    if (event.target === $("#report-modal")) closeReport();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !$("#report-modal").classList.contains("hidden")) closeReport();
   });
 
   try {

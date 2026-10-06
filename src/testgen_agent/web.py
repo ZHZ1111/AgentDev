@@ -142,6 +142,7 @@ def _job_snapshot(job: WebJob) -> dict[str, Any]:
         "state": None,
         "summary": None,
         "testCode": None,
+        "reportMarkdown": None,
     }
     if output is None:
         return payload
@@ -152,6 +153,12 @@ def _job_snapshot(job: WebJob) -> dict[str, Any]:
     if test_file.is_file():
         try:
             payload["testCode"] = test_file.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            pass
+    report_file = output / "report.md"
+    if report_file.is_file():
+        try:
+            payload["reportMarkdown"] = report_file.read_text(encoding="utf-8")
         except (OSError, UnicodeError):
             pass
     return payload
@@ -180,7 +187,7 @@ def _run_job(store: JobStore, job_id: str, payload: dict[str, Any]) -> None:
             model=ModelInfo.from_config(config),
         )
         store.update(job_id, status="running")
-        run_agent(
+        result = run_agent(
             request,
             client=DeepSeekClient(config),
             oracle_mode=OracleMode.SPECIFICATION,
@@ -189,7 +196,10 @@ def _run_job(store: JobStore, job_id: str, payload: dict[str, Any]) -> None:
     except Exception as error:  # The background boundary must always settle the job.
         store.update(job_id, status="failed", error=_safe_error(error))
         return
-    store.update(job_id, status="completed")
+    if result.decision.status is not None and result.decision.status.value == "failed":
+        store.update(job_id, status="failed", error=result.decision.reason)
+    else:
+        store.update(job_id, status="completed")
 
 
 class WebHandler(BaseHTTPRequestHandler):

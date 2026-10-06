@@ -86,6 +86,15 @@
             <div class="metric-card"><span>轮次 / 请求</span><strong id="metric-rounds">—</strong><small id="metric-api">尚未调用</small></div>
           </div>
 
+          <div id="report-section" class="result-section report-cta hidden">
+            <div>
+              <span class="report-kicker">FINAL REPORT</span>
+              <h3>运行报告已生成</h3>
+              <p>查看最终结论、测试数据、覆盖率、场景明细和适用范围。</p>
+            </div>
+            <button id="view-report-button" class="report-button" type="button">查看完整报告</button>
+          </div>
+
           <div class="result-section trace-section">
             <div class="result-section-title"><h3>执行轨迹</h3><span id="trace-count">0 个事件</span></div>
             <ol id="trace-list" class="trace-list"></ol>
@@ -103,6 +112,19 @@
         </div>
       </aside>
     </main>
+
+    <div id="report-modal" class="report-modal hidden" role="dialog" aria-modal="true" aria-labelledby="report-modal-title">
+      <div class="report-dialog">
+        <div class="report-dialog-header">
+          <div>
+            <span class="eyebrow">RUN REPORT</span>
+            <h2 id="report-modal-title">自动测试生成报告</h2>
+          </div>
+          <button id="close-report-button" class="report-close" type="button" aria-label="关闭报告">关闭</button>
+        </div>
+        <pre id="report-content" class="report-content" tabindex="0"></pre>
+      </div>
+    </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="/app.js" defer></script>
