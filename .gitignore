@@ -27,3 +27,6 @@ outputs/
 .work/
 tmp/
 *.log
+
+# Personal planning notes; keep them only in the local workspace.
+TASK_CHECKLIST.md
